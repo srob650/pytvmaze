@@ -5,15 +5,15 @@ import pytvmaze
 
 show = pytvmaze.get_show('dexter')
 print show
-```>>> <pytvmaze.Show instance at 0x107abefc8>```
+>>> <pytvmaze.Show instance at 0x107abefc8>
 print show.name, show.status, show.maze_id
-```>>> Dexter Ended 161```
+>>> Dexter Ended 161
 
 ep = show.get_episode(1,8)
 print ep
-```>>> <pytvmaze.Episode instance at 0x107b060e0>```
+>>> <pytvmaze.Episode instance at 0x107b060e0>
 print ep.name
-```>>> Shrink Wrap```
+>>> Shrink Wrap
 
 ```
 
