@@ -1,7 +1,11 @@
 Basic single-show usage
 
 ```python
-show = get_show('dexter')
+import pytvmaze
+
+show = pytvmaze.get_show('dexter')
+print show
+>>> <pytvmaze.Show instance at 0x107abefc8>
 print show.name, show.status, show.maze_id
 >>> Dexter Ended 161
 
