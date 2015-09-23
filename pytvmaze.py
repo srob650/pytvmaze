@@ -48,7 +48,7 @@ class Show():
 class Episode():
   def __init__(self, data):
     self.data = data
-    self.name = self.data['name']
+    self.title = self.data['name']
     self.airdate = self.data['airdate']
     self.url = self.data['url']
     self.season_number = self.data['season']
