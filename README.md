@@ -10,3 +10,4 @@ print show.get_episode(1,8).name
 
 ```
 
+See pytvmaze.py for all available properties of the Show() and Episode() classes (there are many).
