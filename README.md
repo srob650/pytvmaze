@@ -12,7 +12,7 @@ print show.name, show.status, show.maze_id
 ep = show.get_episode(1,8)
 print ep
 >>> <pytvmaze.Episode instance at 0x107b060e0>
-print ep.name
+print ep.title
 >>> Shrink Wrap
 
 ```
