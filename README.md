@@ -18,3 +18,12 @@ print ep.title
 ```
 
 See pytvmaze.py for all available properties of the Show() and Episode() classes (there are many).
+
+Aside from these classes, you can also utilize all of the TV Maze endpoints via their respective functions.  There are many endpoints, see pytvmaze.py for all of them, here are a few examples:
+
+```python
+show_search(show) # returns a list of fuzzy-matched shows given a show name (string)
+show_single_search(show) # returns the best-matched show
+show_single_searh(show, embed=[option]) # see http://www.tvmaze.com/api#embedding for embedding other information in your results
+lookup_tvdb(tvdb_id) # get tvmaze show data from a tvdb show id
+```
