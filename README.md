@@ -9,7 +9,10 @@ print show
 print show.name, show.status, show.maze_id
 >>> Dexter Ended 161
 
-print show.get_episode(1,8).name
+ep = show.get_episode(1,8)
+print ep
+>>> <pytvmaze.Episode instance at 0x107b060e0>
+print ep.name
 >>> Shrink Wrap
 
 ```
