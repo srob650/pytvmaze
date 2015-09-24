@@ -9,6 +9,13 @@ print show
 print show.name, show.status, show.maze_id
 >>> Dexter Ended 161
 
+for episode in show.episodes:
+  print episode.title
+>>> Dexter
+>>> Crocodile
+>>> Popping Cherry
+>>> etc...
+
 ep = show.get_episode(1,8)
 print ep
 >>> <pytvmaze.Episode instance at 0x107b060e0>
