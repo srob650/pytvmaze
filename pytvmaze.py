@@ -7,30 +7,31 @@ from datetime import datetime
 class Show():
   def __init__(self, data):
     self.data = data
-    self.status = self.data['status']
-    self.rating = self.data['rating']
-    self.genres = self.data['genres']
-    self.weight = self.data['weight']
-    self.updated = self.data['updated']
-    self.name = self.data['name']
-    self.language = self.data['language']
-    self.schedule = self.data['schedule']
-    self.url = self.data['url']
-    self.image = self.data['image']
-    self.tvdb_id = self.data['externals']['thetvdb']
-    self.tvrage_id = self.data['externals']['tvrage']
-    self.premiered = self.data['premiered']
-    self.summary = self.data['summary']
-    self.previous_episode = self.data['_links']['previousepisode']
-    self.web_channel = self.data['webChannel']
-    self.runtime = self.data['runtime']
-    self.type = self.data['type']
-    self.maze_id = self.data['id']
-    self.network_timezone = self.data['network']['country']['timezone']
-    self.network_country = self.data['network']['country']['name']
-    self.network_country_code = self.data['network']['country']['code']
-    self.network_id = self.data['network']['id']
-    self.network_name = self.data['network']['name']
+    self.status = self.data.get('status')
+    self.rating = self.data.get('rating')
+    self.genres = self.data.get('genres')
+    self.weight = self.data.get('weight')
+    self.updated = self.data.get('updated')
+    self.name = self.data.get('name')
+    self.language = self.data.get('language')
+    self.schedule = self.data.get('schedule')
+    self.url = self.data.get('url')
+    self.image = self.data.get('image')
+    self.tvdb_id = self.data.get('externals').get('thetvdb')
+    self.tvrage_id = self.data.get('externals').get('tvrage')
+    self.premiered = self.data.get('premiered')
+    self.summary = self.data.get('summary')
+    self.previous_episode = self.data.get('_links').get('previousepisode')
+    self.next_episode = self.data.get('_links').get('nextepisode')
+    self.web_channel = self.data.get('webChannel')
+    self.runtime = self.data.get('runtime')
+    self.type = self.data.get('type')
+    self.maze_id = self.data.get('id')
+    self.network_timezone = self.data.get("network").get("country").get("timezone")
+    self.network_country = self.data.get('network').get('country').get('name')
+    self.network_country_code = self.data.get('network').get('country').get('code')
+    self.network_id = self.data.get('network').get('id')
+    self.network_name = self.data.get('network').get('name')
     self.episodes = self.get_episode_list(self.maze_id)
 
   def get_episode_list(self, maze_id):
@@ -48,15 +49,15 @@ class Show():
 class Episode():
   def __init__(self, data):
     self.data = data
-    self.title = self.data['name']
-    self.airdate = self.data['airdate']
-    self.url = self.data['url']
-    self.season_number = self.data['season']
-    self.episode_number = self.data['number']
-    self.image = self.data['image']
-    self.airstamp = self.data['airstamp']
-    self.runtime = self.data['runtime']
-    self.maze_id = self.data['id']
+    self.title = self.data.get('name')
+    self.airdate = self.data.get('airdate')
+    self.url = self.data.get('url')
+    self.season_number = self.data.get('season')
+    self.episode_number = self.data.get('number')
+    self.image = self.data.get('image')
+    self.airstamp = self.data.get('airstamp')
+    self.runtime = self.data.get('runtime')
+    self.maze_id = self.data.get('id')
 
 # Query TV Maze endpoints
 def query(url):
