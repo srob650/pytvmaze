@@ -18,7 +18,7 @@ for episode in show.episodes:
 >>> Popping Cherry
 >>> etc...
 
-# Get a specific episode
+# Get a specific episode with: get_episode(season, episode)
 ep = show.get_episode(1,8)
 print ep
 >>> <pytvmaze.Episode instance at 0x107b060e0>
