@@ -7,31 +7,8 @@ from datetime import datetime
 class Show():
   def __init__(self, data):
     self.data = data
-    self.status = self.data.get('status')
-    self.rating = self.data.get('rating')
-    self.genres = self.data.get('genres')
-    self.weight = self.data.get('weight')
-    self.updated = self.data.get('updated')
-    self.name = self.data.get('name')
-    self.language = self.data.get('language')
-    self.schedule = self.data.get('schedule')
-    self.url = self.data.get('url')
-    self.image = self.data.get('image')
-    self.tvdb_id = self.data.get('externals').get('thetvdb')
-    self.tvrage_id = self.data.get('externals').get('tvrage')
-    self.premiered = self.data.get('premiered')
-    self.summary = self.data.get('summary')
-    self.previous_episode = self.data.get('_links').get('previousepisode')
-    self.next_episode = self.data.get('_links').get('nextepisode')
-    self.web_channel = self.data.get('webChannel')
-    self.runtime = self.data.get('runtime')
-    self.type = self.data.get('type')
+    self.__dict__.update(data)
     self.maze_id = self.data.get('id')
-    self.network_timezone = self.data.get("network").get("country").get("timezone")
-    self.network_country = self.data.get('network').get('country').get('name')
-    self.network_country_code = self.data.get('network').get('country').get('code')
-    self.network_id = self.data.get('network').get('id')
-    self.network_name = self.data.get('network').get('name')
     self.episodes = self.get_episode_list(self.maze_id)
 
   def get_episode_list(self, maze_id):
