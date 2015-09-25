@@ -71,20 +71,20 @@ episode.maze_id
 Aside from these classes, you can also utilize all of the TV Maze endpoints directly, without creating an insance of the Show class, via their respective functions.  The results of these functions are JSON:
 
 ```python
-show_search(show) # returns a list of fuzzy-matched shows given a show name (string)
-show_single_search(show) # returns the best-matched show
-show_single_search(show, embed=[option]) # see http://www.tvmaze.com/api#embedding for embedding other information in your results
-lookup_tvrage(tvrage_id) # get tvmaze show data from a tvrage show id
-lookup_tvdb(tvdb_id) # get tvmaze show data from a tvdb show id
-get_schedule(country='US')
-get_full_schedule() # ALL future known episodes.  Several MB large, cached for 24 hours
-show_main_info(maze_id)
-episode_list(maze_id)
-show_cast(maze_id)
-show_index(page=1)
-people_search(person)
-person_main_info(person_id)
-person_cast_credits(person_id)
-person_crew_credits(person_id)
-show_updates()
+pytvmaze.show_search(show) # returns a list of fuzzy-matched shows given a show name (string)
+pytvmaze.show_single_search(show) # returns the best-matched show
+pytvmaze.show_single_search(show, embed=[option]) # see http://www.tvmaze.com/api#embedding for embedding other information in your results
+pytvmaze.lookup_tvrage(tvrage_id) # get tvmaze show data from a tvrage show id
+pytvmaze.lookup_tvdb(tvdb_id) # get tvmaze show data from a tvdb show id
+pytvmaze.get_schedule(country='US')
+pytvmaze.get_full_schedule() # ALL future known episodes.  Several MB large, cached for 24 hours
+pytvmaze.show_main_info(maze_id)
+pytvmaze.episode_list(maze_id)
+pytvmaze.show_cast(maze_id)
+pytvmaze.show_index(page=1)
+pytvmaze.people_search(person)
+pytvmaze.person_main_info(person_id)
+pytvmaze.person_cast_credits(person_id)
+pytvmaze.person_crew_credits(person_id)
+pytvmaze.show_updates()
 ```
