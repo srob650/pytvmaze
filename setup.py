@@ -4,7 +4,7 @@ setup(
     name = 'pytvmaze',
     version = '1.0.2',
     description = 'Python interface to the TV Maze API (www.tvmaze.com)',
-    url = 'https://github.com/guitar486/pytvmaze',
+    url = 'https://github.com/srob650/pytvmaze',
     author = 'Spencer Roberts',
     license='MIT',
 
