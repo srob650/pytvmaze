@@ -1,0 +1,16 @@
+Metadata-Version: 1.1
+Name: pytvmaze
+Version: 1.0.2
+Summary: Python interface to the TV Maze API (www.tvmaze.com)
+Home-page: https://github.com/guitar486/pytvmaze
+Author: Spencer Roberts
+Author-email: UNKNOWN
+License: MIT
+Description: UNKNOWN
+Keywords: python tv television tvmaze
+Platform: UNKNOWN
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 2.6
+Classifier: Programming Language :: Python :: 2.7

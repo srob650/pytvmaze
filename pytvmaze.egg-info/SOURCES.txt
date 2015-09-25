@@ -1,0 +1,7 @@
+setup.cfg
+setup.py
+pytvmaze/__init__.py
+pytvmaze.egg-info/PKG-INFO
+pytvmaze.egg-info/SOURCES.txt
+pytvmaze.egg-info/dependency_links.txt
+pytvmaze.egg-info/top_level.txt
