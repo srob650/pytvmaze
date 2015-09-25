@@ -1,3 +1,7 @@
+To install:
+`pip install pytvmaze`
+or download the pytvmaze.py file and place it in your site-packages folder.
+
 Basic single-show usage
 
 ```python
