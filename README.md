@@ -80,6 +80,8 @@ pytvmaze.get_schedule(country='US')
 pytvmaze.get_full_schedule() # ALL future known episodes.  Several MB large, cached for 24 hours
 pytvmaze.show_main_info(maze_id)
 pytvmaze.episode_list(maze_id)
+pytvmaze.episode_by_number(maze_id, season_number, episode_number)
+pytvmaze.episodes_by_date(maze_id, airdate) # returns a list of all episodes that show aired on that day, airdate must be ISO 8601 formatted
 pytvmaze.show_cast(maze_id)
 pytvmaze.show_index(page=1)
 pytvmaze.people_search(person)
