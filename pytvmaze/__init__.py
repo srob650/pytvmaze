@@ -7,11 +7,11 @@ class Show():
     self.data = data
     self.__dict__.update(data)
     self.maze_id = self.data.get('id')
-    self.episodes = self.get_episode_list(self.maze_id)
+    self.episodes = self.get_episode_list()
 
-  def get_episode_list(self, maze_id):
+  def get_episode_list(self):
     eps = []
-    episodes = episode_list(maze_id)
+    episodes = self.data.get('_embedded').get('episodes')
     for episode in episodes:
       eps.append(Episode(episode))
     return eps
@@ -57,7 +57,7 @@ def query(url):
 
 # Create Show object
 def get_show(show):
-  return Show(show_single_search(show))
+  return Show(show_single_search(show, embed='episodes'))
 
 # TV Maze Endpoints
 def show_search(show):
