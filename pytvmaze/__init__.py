@@ -1,4 +1,4 @@
-import urllib2
+import urllib.request
 import json
 from datetime import datetime
 
@@ -40,9 +40,10 @@ def query(url):
   url = url.replace(' ', '+')
 
   try:
-    data = urllib2.urlopen(url).read()
+    with urllib.request.urlopen(url) as response:
+      data = response.read()
   except:
-    print 'Show not found'
+    print('Show not found')
     return None
 
   try:
