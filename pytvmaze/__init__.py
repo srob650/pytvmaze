@@ -64,7 +64,9 @@ def query(url):
 
 # Create Show object
 def get_show(show):
-    return Show(show_single_search(show, embed='episodes'))
+    s = show_single_search(show, embed='episodes')
+    if s:
+        return Show(s)
 
 # TV Maze Endpoints
 def show_search(show):
