@@ -1,6 +1,11 @@
 #!/usr/bin/python
 
-import urllib2
+try:
+    # Python 3 and later
+    from urllib.request import urlopen
+except ImportError:
+    # Python 2
+    from urllib2 import urlopen
 import json
 from datetime import datetime
 
@@ -42,9 +47,9 @@ def query(url):
     url = url.replace(' ', '+')
 
     try:
-        data = urllib2.urlopen(url).read()
+        data = urlopen(url).read()
     except:
-        print 'Show not found'
+        print('Show not found')
         return None
 
     try:
