@@ -109,7 +109,8 @@ def episode_by_number(maze_id, season_number, episode_number):
   return query(url)
 
 def episodes_by_date(maze_id, airdate):
-  url = 'http://api.tvmaze.com/shows/1/episodesbydate?date={0}'.format(airdate)
+  url = ('http://api.tvmaze.com/shows/{0}/episodesbydate'
+         '?date={1}'.format(maze_id, airdate))
   return query(url)
 
 def show_cast(maze_id):
