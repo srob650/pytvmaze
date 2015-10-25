@@ -167,3 +167,7 @@ def person_crew_credits(person_id, embed=False):
 def show_updates():
     url = 'http://api.tvmaze.com/updates/shows'
     return query(url)
+
+def show_akas(maze_id):
+    url = 'http://api.tvmaze.com/shows/{0}/akas'.format(maze_id)
+    return query(url)
