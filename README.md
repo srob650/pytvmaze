@@ -5,7 +5,7 @@ To install:
 Basic single-show usage
 
 ```python
-import pytvmaze
+>>> import pytvmaze
 
 # Get show object
 >>> show = pytvmaze.get_show('dexter')
