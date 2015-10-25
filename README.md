@@ -89,4 +89,5 @@ pytvmaze.person_main_info(person_id)
 pytvmaze.person_cast_credits(person_id)
 pytvmaze.person_crew_credits(person_id)
 pytvmaze.show_updates()
+pytvmaze.show_akas(maze_id)
 ```
