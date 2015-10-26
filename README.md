@@ -1,6 +1,6 @@
 To install:
 
-```pip install pytvmaze```
+```$ pip install pytvmaze```
 
 Basic single-show usage
 
