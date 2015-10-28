@@ -11,7 +11,7 @@ def parse_user_text(user_text):
         words = user_text.strip().split(' ')
         qualifiers = []
         # Pop last word until we get results from tvmaze
-        for i in xrange(len(words)):
+        for i in range(len(words)):
             s = tvmaze.show_search(' '.join(words))
             if s:
                 break
