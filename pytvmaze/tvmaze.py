@@ -1,6 +1,8 @@
 #!/usr/bin/python
 
 from __future__ import print_function
+import fuzzymatch
+import endpoints
 
 try:
     # Python 3 and later
@@ -65,8 +67,11 @@ def query(url):
 
 # Create Show object
 def get_show(show):
-    s = show_single_search(show, embed='episodes')
-    return Show(s) if s else None
+    search_text = fuzzymatch.parse_user_text(show)
+    results = show_search(search_text['showname'])
+    s = fuzzymatch.fuzzy_search(search_text['qualifiers'], results)
+    if s:
+        return Show(show_main_info(s, embed='episodes'))
 
 # TV Maze Endpoints
 def show_search(show):
@@ -99,8 +104,7 @@ def get_schedule(country='US', date=str(datetime.today().date())):
     q = query(url)
     return q if q else print('Schedule for country', country, 'not found')
 
-# ALL known future episodes
-# Several MB large, cached for 24 hours
+# ALL known future episodes, several MB large, cached for 24 hours
 def get_full_schedule():
     url = 'http://api.tvmaze.com/schedule/full'
     q = query(url)
