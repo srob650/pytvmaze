@@ -28,6 +28,22 @@ To install:
     >>> print ep.title
     Shrink Wrap
 
+**Search with qualifiers**
+
+You can add qualifiers to your search separated by spaces.  These qualifiers will be matched against the following show attributes: premier year, country, network name, and language.  If there are still multiple matches after qualifiers are evaluated, the show with the most recent premier date will be chosen.
+
+    >>> show = pytvmaze.get_show('utopia 2014 au abc')
+    utopia 2014 au abc not found
+    Performing fuzzy search...
+    utopia 2014 au not found
+    Performing fuzzy search...
+    utopia 2014 not found
+    Performing fuzzy search...
+    >>> show.premiered
+    2014-08-13
+    >>> show.network['name']
+    ABC
+
 There are many possible attributes of the Show class, but since TV Maze is full of user contributions and always being updated, shows will have different available attributes.  Possible attributes are:
 
     show.status
