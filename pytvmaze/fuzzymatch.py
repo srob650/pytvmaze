@@ -81,10 +81,10 @@ def fuzzy_search(qualifiers, results):
                 matches[match_score[0]]['fuzzy_score'] == \
                 matches[match_score[1]]['fuzzy_score']):
 
-                print('\nMultiple shows matched this search,',
-                      'try providing more information\nin your search such as',
-                      'premier year, country code(us, au, gb, etc.), network,',
-                      '\nor language.  Otherwise the show with the most',
+                print('\nMultiple shows matched this search, '
+                      'try providing more information\nin your search such as '
+                      'premier year, country code(us, au, gb, etc.), network, '
+                      '\nor language. Otherwise the show with the most '
                       'recent premier date will be chosen\n')
                 if (datetime.strptime(matches[match_score[0]]['premiered'],
                                       '%Y-%m-%d').date() >
@@ -102,10 +102,10 @@ def fuzzy_search(qualifiers, results):
                 maze_score[0][0] == maze_score[1][0] and
                 not qualifiers):
 
-                print('\nMultiple shows matched this search,',
-                      'try providing more information\nin your search such as',
-                      'premier year, country code(us, au, gb, etc.), network,',
-                      '\nor language.  Otherwise the show with the most',
+                print('\nMultiple shows matched this search, '
+                      'try providing more information\nin your search such as '
+                      'premier year, country code(us, au, gb, etc.), network, '
+                      '\nor language. Otherwise the show with the most '
                       'recent premier date will be chosen\n')
 
                 newest = sorted(results,
