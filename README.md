@@ -44,6 +44,8 @@ You can add qualifiers to your search separated by spaces.  These qualifiers wil
     >>> show.network['name']
     ABC
 
+**Show() and Episode() class attributes**
+
 There are many possible attributes of the Show class, but since TV Maze is full of user contributions and always being updated, shows will have different available attributes.  Possible attributes are:
 
     show.status
@@ -78,6 +80,8 @@ There are many possible attributes of the Show class, but since TV Maze is full 
     episode.airstamp
     episode.runtime
     episode.maze_id
+
+**Direct api.tvmaze.com endpoint access**
 
 Aside from these classes, you can also utilize all of the TV Maze endpoints directly, without creating an insance of the Show class, via their respective functions.  The results of these functions are JSON:
 
