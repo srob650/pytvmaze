@@ -8,6 +8,12 @@ import logging
 logging.basicConfig(level=LOG_LEVEL)
 logger = logging.getLogger(__name__)
 
+USER_WARNING = ('\nMultiple shows matched this search, '
+                'try providing more information\nin your search such as '
+                'premier year, country code(us, au, gb, etc.), network, '
+                '\nor language. Otherwise the show with the most '
+                'recent premier date will be chosen\n')
+
 # Check if user has added extra classifiers such as year, country, etc.
 def parse_user_text(user_text):
     # Check if there is more than one word
@@ -29,21 +35,36 @@ def parse_user_text(user_text):
         # If there is only one word, return the text unchanged
         return {'showname':user_text, 'qualifiers':None}
 
-def fuzzy_search(qualifiers, results):
+def fuzzy_search(search_text, results):
 
+    showname = search_text['showname'].lower()
+    qualifiers = search_text['qualifiers']
+
+    # List sorted by tvmaze score
     maze_score = sorted([(show['score'],
                          show['show']['id'])
                          for show in results],
                         reverse=True)
-    if len(maze_score) > 1 and maze_score[0][0] > maze_score[1][0]:
+
+    # If there is only one result with a matching showname, return it
+    if (len(maze_score) > 1 and
+        maze_score[0][0] > maze_score[1][0] and
+        results[0]['show']['name'] != results[1]['show']['name']
+    ):
         return maze_score[0][1]
 
     else:
         matches = {}
+
+        # List of only results with same name as search_text
+        filtered_results = [
+            show for show in results
+            if show['show']['name'].lower() == showname
+        ]
+
         # If we found qualifiers
-        if qualifiers:
-            for show in results:
-                # matches[show.get('show').get('id')] = 0
+        if qualifiers and len(filtered_results) > 0:
+            for show in filtered_results:
                 try:
                     premiered = show['show']['premiered'].lower()
                 except:
@@ -79,39 +100,35 @@ def fuzzy_search(qualifiers, results):
             # In case of tie prefer the show with the most recent premeier date
             if (len(match_score) > 1 and
                 matches[match_score[0]]['fuzzy_score'] == \
-                matches[match_score[1]]['fuzzy_score']):
+                matches[match_score[1]]['fuzzy_score']
+            ):
 
-                print('\nMultiple shows matched this search, '
-                      'try providing more information\nin your search such as '
-                      'premier year, country code(us, au, gb, etc.), network, '
-                      '\nor language. Otherwise the show with the most '
-                      'recent premier date will be chosen\n')
+                print(USER_WARNING)
+
+                # Choose most recent show
                 if (datetime.strptime(matches[match_score[0]]['premiered'],
-                                      '%Y-%m-%d').date() >
+                                      '%Y-%m-%d').date() > # greater than
                     datetime.strptime(matches[match_score[1]]['premiered'],
                                       '%Y-%m-%d').date()
-                   ):
+                ):
                     return match_score[0]
                 else:
                     return match_score[1]
-
-            return max(matches, key=lambda key: matches[key])
+            else:
+                # Return show with most matched qualifiers
+                return max(matches, key=lambda key: matches[key])
         else:
-            # If no qualifiers return show with the most recent premier date
-            if (len(maze_score) > 1 and
-                maze_score[0][0] == maze_score[1][0] and
-                not qualifiers):
+            if len(filtered_results) > 0:
 
-                print('\nMultiple shows matched this search, '
-                      'try providing more information\nin your search such as '
-                      'premier year, country code(us, au, gb, etc.), network, '
-                      '\nor language. Otherwise the show with the most '
-                      'recent premier date will be chosen\n')
+                print(USER_WARNING)
 
-                newest = sorted(results,
+                # Sort results by premier date
+                newest = sorted(filtered_results,
                                 key=lambda k: k['show']['premiered'],
                                 reverse=True)
-                return newest[0]['show']['id']
 
-            # If no qualifiers
-            return results[0]['show']['id']
+                # Return show with latest premier date and matching showname
+                return newest[0]['show']['id']
+            else:
+                # If no matching showname, return show with latest premier date
+                return results[0]['show']['id']
