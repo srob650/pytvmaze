@@ -77,7 +77,7 @@ def query(url):
 def get_show(show):
     search_text = fuzzymatch.parse_user_text(show)
     results = show_search(search_text['showname'])
-    s = fuzzymatch.fuzzy_search(search_text['qualifiers'], results)
+    s = fuzzymatch.fuzzy_search(search_text, results)
     if s:
         return Show(show_main_info(s, embed='episodes'))
 

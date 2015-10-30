@@ -29,13 +29,20 @@ def parse_user_text(user_text):
         # If there is only one word, return the text unchanged
         return {'showname':user_text, 'qualifiers':None}
 
-def fuzzy_search(qualifiers, results):
+def fuzzy_search(search_text, results):
+
+    showname = search_text['showname']
+    qualifiers = search_text['qualifiers']
 
     maze_score = sorted([(show['score'],
                          show['show']['id'])
                          for show in results],
                         reverse=True)
-    if len(maze_score) > 1 and maze_score[0][0] > maze_score[1][0]:
+
+    if (len(maze_score) > 1 and
+        maze_score[0][0] > maze_score[1][0] and
+        results[0]['show']['name'] != results[1]['show']['name']
+    ):
         return maze_score[0][1]
 
     else:
@@ -97,21 +104,23 @@ def fuzzy_search(qualifiers, results):
 
             return max(matches, key=lambda key: matches[key])
         else:
-            # If no qualifiers return show with the most recent premier date
-            if (len(maze_score) > 1 and
-                maze_score[0][0] == maze_score[1][0] and
-                not qualifiers):
 
-                print('\nMultiple shows matched this search, '
-                      'try providing more information\nin your search such as '
-                      'premier year, country code(us, au, gb, etc.), network, '
-                      '\nor language. Otherwise the show with the most '
-                      'recent premier date will be chosen\n')
+            print('\nMultiple shows matched this search, '
+                  'try providing more information\nin your search such as '
+                  'premier year, country code(us, au, gb, etc.), network, '
+                  '\nor language. Otherwise the show with the most '
+                  'recent premier date will be chosen\n')
 
-                newest = sorted(results,
-                                key=lambda k: k['show']['premiered'],
-                                reverse=True)
-                return newest[0]['show']['id']
+            # Sort results by premier date
+            newest = sorted(results,
+                            key=lambda k: k['show']['premiered'],
+                            reverse=True)
 
-            # If no qualifiers
-            return results[0]['show']['id']
+            # Return show with latest premier date and matching showname
+            for show in newest:
+                if show['show']['name'].lower() == showname.lower():
+                    return show['show']['id']
+                    break
+
+            # If no matching showname, return show with latest premier date
+            return newest[0]['show']['id']
