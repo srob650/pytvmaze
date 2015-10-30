@@ -34,11 +34,13 @@ def fuzzy_search(search_text, results):
     showname = search_text['showname']
     qualifiers = search_text['qualifiers']
 
+    # List sorted by tvmaze score
     maze_score = sorted([(show['score'],
                          show['show']['id'])
                          for show in results],
                         reverse=True)
 
+    # If there is only one result with a matching showname, return it
     if (len(maze_score) > 1 and
         maze_score[0][0] > maze_score[1][0] and
         results[0]['show']['name'] != results[1]['show']['name']
@@ -86,23 +88,27 @@ def fuzzy_search(search_text, results):
             # In case of tie prefer the show with the most recent premeier date
             if (len(match_score) > 1 and
                 matches[match_score[0]]['fuzzy_score'] == \
-                matches[match_score[1]]['fuzzy_score']):
+                matches[match_score[1]]['fuzzy_score']
+            ):
 
                 print('\nMultiple shows matched this search, '
                       'try providing more information\nin your search such as '
                       'premier year, country code(us, au, gb, etc.), network, '
                       '\nor language. Otherwise the show with the most '
                       'recent premier date will be chosen\n')
+
+                # Choose most recent show
                 if (datetime.strptime(matches[match_score[0]]['premiered'],
-                                      '%Y-%m-%d').date() >
+                                      '%Y-%m-%d').date() > # greater than
                     datetime.strptime(matches[match_score[1]]['premiered'],
                                       '%Y-%m-%d').date()
-                   ):
+                ):
                     return match_score[0]
                 else:
                     return match_score[1]
-
-            return max(matches, key=lambda key: matches[key])
+            else:
+                # Return show with most matched qualifiers
+                return max(matches, key=lambda key: matches[key])
         else:
 
             print('\nMultiple shows matched this search, '
