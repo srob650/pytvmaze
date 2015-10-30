@@ -8,6 +8,12 @@ import logging
 logging.basicConfig(level=LOG_LEVEL)
 logger = logging.getLogger(__name__)
 
+USER_WARNING = ('\nMultiple shows matched this search, '
+                'try providing more information\nin your search such as '
+                'premier year, country code(us, au, gb, etc.), network, '
+                '\nor language. Otherwise the show with the most '
+                'recent premier date will be chosen\n')
+
 # Check if user has added extra classifiers such as year, country, etc.
 def parse_user_text(user_text):
     # Check if there is more than one word
@@ -59,7 +65,6 @@ def fuzzy_search(search_text, results):
         # If we found qualifiers
         if qualifiers and len(filtered_results) > 0:
             for show in filtered_results:
-                # matches[show.get('show').get('id')] = 0
                 try:
                     premiered = show['show']['premiered'].lower()
                 except:
@@ -98,11 +103,7 @@ def fuzzy_search(search_text, results):
                 matches[match_score[1]]['fuzzy_score']
             ):
 
-                print('\nMultiple shows matched this search, '
-                      'try providing more information\nin your search such as '
-                      'premier year, country code(us, au, gb, etc.), network, '
-                      '\nor language. Otherwise the show with the most '
-                      'recent premier date will be chosen\n')
+                print(USER_WARNING)
 
                 # Choose most recent show
                 if (datetime.strptime(matches[match_score[0]]['premiered'],
@@ -119,11 +120,7 @@ def fuzzy_search(search_text, results):
         else:
             if len(filtered_results) > 0:
 
-                print('\nMultiple shows matched this search, '
-                      'try providing more information\nin your search such as '
-                      'premier year, country code(us, au, gb, etc.), network, '
-                      '\nor language. Otherwise the show with the most '
-                      'recent premier date will be chosen\n')
+                print(USER_WARNING)
 
                 # Sort results by premier date
                 newest = sorted(filtered_results,
