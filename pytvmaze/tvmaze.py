@@ -3,19 +3,13 @@
 from __future__ import print_function
 import endpoints
 import fuzzymatch
-from __init__ import LOG_LEVEL
-import logging
-logging.basicConfig(level=LOG_LEVEL)
-logger = logging.getLogger(__name__)
 
 try:
     # Python 3 and later
     from urllib.request import urlopen
-    logger.debug('Python 3 -- using urllib.request')
 except ImportError:
     # Python 2
     from urllib2 import urlopen
-    logger.debug('Python 2 -- using urllib2')
 import json
 from datetime import datetime
 
@@ -59,7 +53,6 @@ def query(url):
     try:
         data = urlopen(url).read()
     except:
-        logger.debug('No data from url: {0}'.format(url))
         return None
 
     try:
@@ -70,7 +63,6 @@ def query(url):
     if results:
         return results
     else:
-        logger.debug('No results from url: {0}'.format(url))
         return None
 
 # Create Show object

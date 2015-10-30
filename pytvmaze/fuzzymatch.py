@@ -3,10 +3,6 @@
 from __future__ import print_function
 from datetime import datetime
 import tvmaze
-from __init__ import LOG_LEVEL
-import logging
-logging.basicConfig(level=LOG_LEVEL)
-logger = logging.getLogger(__name__)
 
 USER_WARNING = ('\nMultiple shows matched this search, '
                 'try providing more information\nin your search such as '
@@ -69,22 +65,18 @@ def fuzzy_search(search_text, results):
                     premiered = show['show']['premiered'].lower()
                 except:
                     year = ''
-                    logger.debug('\"Year\" data not found for maze_id: {0}'.format(show['show']['id']))
                 try:
                     country = show['show']['network']['country']['code'].lower()
                 except:
                     country = ''
-                    logger.debug('\"Country\" data not found for maze_id: {0}'.format(show['show']['id']))
                 try:
                     network = show['show']['network']['name'].lower()
                 except:
                     network = ''
-                    logger.debug('\"Network\" data not found for maze_id: {0}'.format(show['show']['id']))
                 try:
                     language = show['show']['language'].lower()
                 except:
                     language = ''
-                    logger.debug('\"Language\" data not found for maze_id: {0}'.format(show['show']['id']))
                 attributes = [premiered[0:4], country, network, language]
 
                 # Store the number of matched qualifiers in the matches dict
