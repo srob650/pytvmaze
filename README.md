@@ -52,10 +52,11 @@ You can add qualifiers to your search separated by spaces.  These qualifiers wil
     >>> show.network['name']
     ABC
 
-**Show() and Episode() class attributes**
+**Show() Season() and Episode() class attributes**
 
 There are many possible attributes of the Show class, but since TV Maze is full of user contributions and always being updated, shows will have different available attributes.  Possible attributes are:
 
+    ## Show object attributes ##
     show.status
     show.rating
     show.genres
@@ -77,6 +78,11 @@ There are many possible attributes of the Show class, but since TV Maze is full 
     show.maze_id # same as show.id
     show.network # dict of network properties
     show.episodes # list of Episode objects
+
+    ## Season object attributes ##
+    season.show # the parent show object
+    season.number
+    season.episodes # list of episodes within this season
 
     ## Episode object attributes ##
     episode.title
