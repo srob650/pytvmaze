@@ -19,6 +19,7 @@ class Show():
         self.__dict__.update(data)
         self.maze_id = self.data.get('id')
         self.episodes = self.get_episode_list()
+        self.seasons = self.get_seasons_list()
 
     def get_episode_list(self):
         eps = []
@@ -27,11 +28,32 @@ class Show():
             eps.append(Episode(episode))
         return eps
 
+    def get_seasons_list(self):
+        seasons = [
+            Season(self, season + 1)
+            for season in range(self.episodes[-1].season_number)
+        ]
+        return seasons
+
     def get_episode(self, season_number, episode_number):
         for episode in self.episodes:
             if (episode.season_number == season_number and
                 episode.episode_number == episode_number):
                 return episode
+
+    def get_season(self, season_number):
+        for season in self.seasons:
+            if season.season_number == season_number:
+                return season
+
+class Season():
+    def __init__(self, show, season_number):
+        self.show = show
+        self.season_number = season_number
+        self.episodes = [
+            episode for episode in self.show.episodes
+            if episode.season_number == self.season_number
+        ]
 
 class Episode():
     def __init__(self, data):
