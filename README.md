@@ -21,6 +21,14 @@ To install:
     Popping Cherry
     etc...
 
+    # Iterate over specific season (season 2 for example)
+    >>> for episode in show.get_season(2).episodes:
+    ...     print(episode.title)
+    It's Alive!
+    Waiting to Exhale
+    An Inconvenient Lie
+    etc...
+
     # Get a specific episode with: get_episode(season, episode)
     >>> ep = show.get_episode(1,8)
     >>> print ep
