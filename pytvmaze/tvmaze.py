@@ -22,10 +22,10 @@ class Show():
         self.seasons = self.get_seasons_list()
 
     def get_episode_list(self):
-        eps = []
-        episodes = self.data.get('_embedded').get('episodes')
-        for episode in episodes:
-            eps.append(Episode(episode))
+        eps = [
+            Episode(episode)
+            for episode in self.data.get('_embedded').get('episodes')
+        ]
         return eps
 
     def get_seasons_list(self):
