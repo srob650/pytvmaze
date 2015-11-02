@@ -4,7 +4,7 @@ from __future__ import print_function
 from datetime import datetime
 import tvmaze
 
-USER_WARNING = ('\nMultiple shows matched this search, '
+WARN_MULTIPLE_RESULTS = ('\nMultiple shows matched this search, '
                 'try providing more information\nin your search such as '
                 'premier year, country code(us, au, gb, etc.), network, '
                 '\nor language. Otherwise the show with the most '
@@ -37,9 +37,11 @@ def fuzzy_search(search_text, results):
     qualifiers = search_text['qualifiers']
 
     # List sorted by tvmaze score
-    maze_score = sorted([(show['score'],
-                         show['show']['id'])
-                         for show in results],
+    maze_score = sorted(
+                        [
+                            (show['score'], show['show']['id'])
+                            for show in results
+                        ],
                         reverse=True)
 
     # If there is only one result with a matching showname, return it
@@ -82,7 +84,8 @@ def fuzzy_search(search_text, results):
                 # Store the number of matched qualifiers in the matches dict
                 matches[show['show']['id']] = {
                     'fuzzy_score':len(list(set(qualifiers) & set(attributes))),
-                    'premiered':premiered}
+                    'premiered':premiered
+                }
 
             # Sort the matches by number of matched qualifiers
             match_score = sorted(matches,
@@ -95,7 +98,7 @@ def fuzzy_search(search_text, results):
                 matches[match_score[1]]['fuzzy_score']
             ):
 
-                print(USER_WARNING)
+                print(WARN_MULTIPLE_RESULTS)
 
                 # Choose most recent show
                 if (datetime.strptime(matches[match_score[0]]['premiered'],
@@ -112,7 +115,7 @@ def fuzzy_search(search_text, results):
         else:
             if len(filtered_results) > 0:
 
-                print(USER_WARNING)
+                print(WARN_MULTIPLE_RESULTS)
 
                 # Sort results by premier date
                 newest = sorted(filtered_results,
