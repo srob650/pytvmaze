@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name = 'pytvmaze',
-    version = '1.1.6',
+    version = '1.2.0',
     description = 'Python interface to the TV Maze API (www.tvmaze.com)',
     url = 'https://github.com/srob650/pytvmaze',
     author = 'Spencer Roberts',
