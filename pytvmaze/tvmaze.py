@@ -21,6 +21,12 @@ class Show():
         self.episodes = self.get_episode_list()
         self.seasons = self.get_seasons_list()
 
+    def __iter__(self):
+        return iter(self.seasons)
+
+    def __len__(self):
+        return len(self.seasons)
+
     def get_episode_list(self):
         eps = [
             Episode(episode)
@@ -54,6 +60,12 @@ class Season():
             episode for episode in self.show.episodes
             if episode.season_number == self.season_number
         ]
+
+    def __iter__(self):
+        return iter(self.episodes)
+
+    def __len__(self):
+        return len(self.episodes)
 
 class Episode():
     def __init__(self, data):
