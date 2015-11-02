@@ -13,7 +13,7 @@ To install:
     >>> print(show.name, show.status, show.maze_id)
     Dexter Ended 161
 
-    # Iterate over episodes
+    # Iterate over all episodes (full episode list available at Show() level)
     >>> for episode in show.episodes:
     ...     print(episode.title)
     Dexter
@@ -21,16 +21,21 @@ To install:
     Popping Cherry
     etc...
 
+    # You can also use:
+    >>> for season in show:
+    ...     for episode in season:
+    ...         ...
+
     # Iterate over specific season (season 2 for example)
-    >>> for episode in show.get_season(2).episodes:
+    >>> for episode in show[2]:
     ...     print(episode.title)
     It's Alive!
     Waiting to Exhale
     An Inconvenient Lie
     etc...
 
-    # Get a specific episode with: get_episode(season, episode)
-    >>> ep = show.get_episode(1,8)
+    # Get a specific episode with: show[season][episode]
+    >>> ep = show[1][8]
     >>> print(ep)
     <pytvmaze.Episode instance at 0x107b060e0>
     >>> print(ep.title)

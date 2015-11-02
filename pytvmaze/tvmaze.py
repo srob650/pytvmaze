@@ -18,42 +18,42 @@ class Show():
         self.data = data
         self.__dict__.update(data)
         self.maze_id = self.data.get('id')
-        self.episodes = self.get_episode_list()
-        self.seasons = self.get_seasons_list()
+        self.episodes = list()
+        self.seasons = dict()
+        self.populate()
 
-    def get_episode_list(self):
-        eps = [
-            Episode(episode)
-            for episode in self.data.get('_embedded').get('episodes')
-        ]
-        return eps
+    def __iter__(self):
+        return iter(self.seasons.values())
 
-    def get_seasons_list(self):
-        seasons = [
-            Season(self, season + 1)
-            for season in range(self.episodes[-1].season_number)
-        ]
-        return seasons
+    def __len__(self):
+        return len(self.seasons)
 
-    def get_episode(self, season_number, episode_number):
+    def __getitem__(self, item):
+        return self.seasons[item]
+
+    def populate(self):
+        for episode in self.data.get('_embedded').get('episodes'):
+            self.episodes.append(Episode(episode))
         for episode in self.episodes:
-            if (episode.season_number == season_number and
-                episode.episode_number == episode_number):
-                return episode
-
-    def get_season(self, season_number):
-        for season in self.seasons:
-            if season.season_number == season_number:
-                return season
+            season_num = int(episode.season_number)
+            if season_num not in self.seasons:
+                self.seasons[season_num] = Season(self, season_num)
+            self.seasons[season_num].episodes[episode.episode_number] = episode
 
 class Season():
     def __init__(self, show, season_number):
         self.show = show
         self.season_number = season_number
-        self.episodes = [
-            episode for episode in self.show.episodes
-            if episode.season_number == self.season_number
-        ]
+        self.episodes = dict()
+
+    def __iter__(self):
+        return iter(self.episodes.values())
+
+    def __len__(self):
+        return len(self.episodes)
+
+    def __getitem__(self, item):
+        return self.episodes[item]
 
 class Episode():
     def __init__(self, data):
