@@ -83,11 +83,12 @@ There are many possible attributes of the Show class, but since TV Maze is full 
     show.maze_id # same as show.id
     show.network # dict of network properties
     show.episodes # list of Episode objects
+    show.seasons # dict of Season objects
 
     ## Season object attributes ##
     season.show # the parent show object
     season.number
-    season.episodes # list of episodes within this season
+    season.episodes # dict of episodes within this season
 
     ## Episode object attributes ##
     episode.title
