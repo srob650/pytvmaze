@@ -113,7 +113,7 @@ def fuzzy_search(search_text, results):
                 # Return show with most matched qualifiers
                 return max(matches, key=lambda key: matches[key])
         else:
-            if len(filtered_results) > 0:
+            if len(filtered_results) > 1:
 
                 print(WARN_MULTIPLE_RESULTS)
 
@@ -124,6 +124,9 @@ def fuzzy_search(search_text, results):
 
                 # Return show with latest premier date and matching showname
                 return newest[0]['show']['id']
+            elif len(filtered_results) == 1:
+                # Return only result with matching name
+                return filtered_results[0]['show']['id']
             else:
                 # If no matching showname, return show with latest premier date
                 return results[0]['show']['id']
