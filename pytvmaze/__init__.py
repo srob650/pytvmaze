@@ -1,3 +1,3 @@
 #!/usr/bin/python
 
-from tvmaze import *
+from pytvmaze.tvmaze import *

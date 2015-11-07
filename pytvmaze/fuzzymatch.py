@@ -2,7 +2,7 @@
 
 from __future__ import print_function
 from datetime import datetime
-import tvmaze
+from pytvmaze import tvmaze
 
 WARN_MULTIPLE_RESULTS = ('\nMultiple shows matched this search, '
                 'try providing more information\nin your search such as '
