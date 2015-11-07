@@ -112,7 +112,9 @@ def fuzzy_search(search_text, results):
                     return match_score[1]
             else:
                 # Return show with most matched qualifiers
-                return max(matches, key=lambda key: matches[key])
+                return sorted(matches.items(),
+                              key=lambda k: k[1]['fuzzy_score'],
+                              reverse=True)[0][0]
         else:
             if len(filtered_results) > 1:
 
