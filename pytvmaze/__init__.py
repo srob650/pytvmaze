@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import urllib.request
 import json
 from datetime import datetime
@@ -149,3 +150,8 @@ def person_crew_credits(person_id, embed=False):
 def show_updates():
   url = 'http://api.tvmaze.com/updates/shows'
   return query(url)
+=======
+#!/usr/bin/python
+
+from pytvmaze.tvmaze import *
+>>>>>>> upstream/master
