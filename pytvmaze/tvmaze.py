@@ -21,6 +21,9 @@ class Show():
         self.seasons = dict()
         self.populate()
 
+    def __repr__(self):
+        return self.name
+
     def __iter__(self):
         return iter(self.seasons.values())
 
@@ -45,6 +48,9 @@ class Season():
         self.season_number = season_number
         self.episodes = dict()
 
+    def __repr__(self):
+        return self.show.name + ' S' + str(self.season_number).zfill(2)
+
     def __iter__(self):
         return iter(self.episodes.values())
 
@@ -66,6 +72,11 @@ class Episode():
         self.airstamp = self.data.get('airstamp')
         self.runtime = self.data.get('runtime')
         self.maze_id = self.data.get('id')
+
+    def __repr__(self):
+        season = 'S' + str(self.season_number).zfill(2)
+        episode = 'E' + str(self.episode_number).zfill(2)
+        return season + episode + ' ' + self.title
 
 # Query TV Maze endpoints
 def query(url):
