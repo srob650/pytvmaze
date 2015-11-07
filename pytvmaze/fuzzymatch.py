@@ -2,7 +2,6 @@
 
 from __future__ import print_function
 from datetime import datetime
-from pytvmaze import tvmaze
 
 WARN_MULTIPLE_RESULTS = ('\nMultiple shows matched this search, '
                 'try providing more information\nin your search such as '
@@ -12,6 +11,8 @@ WARN_MULTIPLE_RESULTS = ('\nMultiple shows matched this search, '
 
 # Check if user has added extra classifiers such as year, country, etc.
 def parse_user_text(user_text):
+    # Import locally to avoid circular import
+    from pytvmaze import tvmaze
     # Check if there is more than one word
     if ' ' in user_text.strip():
         words = user_text.strip().split(' ')
