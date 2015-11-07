@@ -9,7 +9,7 @@ To install:
     # Get show object
     >>> show = pytvmaze.get_show('dexter')
     >>> print(show)
-    <pytvmaze.Show instance at 0x107abefc8>
+    Dexter
     >>> print(show.name, show.status, show.maze_id)
     Dexter Ended 161
 
@@ -37,7 +37,7 @@ To install:
     # Get a specific episode with: show[season][episode]
     >>> ep = show[1][8]
     >>> print(ep)
-    <pytvmaze.Episode instance at 0x107b060e0>
+    S01E08 Shrink Wrap
     >>> print(ep.title)
     Shrink Wrap
 
@@ -87,7 +87,7 @@ There are many possible attributes of the Show class, but since TV Maze is full 
 
     ## Season object attributes ##
     season.show # the parent show object
-    season.number
+    season.season_number
     season.episodes # dict of episodes within this season
 
     ## Episode object attributes ##
