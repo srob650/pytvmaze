@@ -1,8 +1,7 @@
 #!/usr/bin/python
 
 from __future__ import print_function
-from pytvmaze import endpoints
-from pytvmaze import fuzzymatch
+from pytvmaze import endpoints, fuzzymatch
 
 try:
     # Python 3 and later
