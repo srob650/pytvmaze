@@ -6,7 +6,16 @@ To install:
 
     >>> import pytvmaze
 
-    # Get show object
+    # Return list of Show objects from the TVMaze "Show Search" endpoint
+    >>> shows = pytvmaze.get_show_list('stargate')
+    >>> print(shows)
+    [Stargate Atlantis,
+     Stargate Universe,
+     Stargate: Infinity,
+     Stargate SG-1,
+     Starcade]
+
+    # Get the best match as a show object
     >>> show = pytvmaze.get_show('dexter')
     >>> print(show)
     Dexter
