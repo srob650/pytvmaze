@@ -234,3 +234,6 @@ def show_akas(maze_id):
     url = endpoints.show_akas.format(maze_id)
     q = query(url)
     return q if q else print('Couldn\'t find AKA\'s for TVMaze ID:', maze_id)
+
+def get_show_by_id(maze_id):
+    return Show(show_main_info(maze_id))
