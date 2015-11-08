@@ -131,5 +131,5 @@ def fuzzy_search(search_text, results):
                 # Return only result with matching name
                 return filtered_results[0]['show']['id']
             else:
-                # If no matching showname, return show with latest premier date
+                # If no matching showname, return show with highest score
                 return results[0]['show']['id']
