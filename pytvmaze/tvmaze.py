@@ -105,6 +105,15 @@ def get_show(show):
     if s:
         return Show(show_main_info(s, embed='episodes'))
 
+# Return list of Show objects from the TVMaze "Show Search" endpoint
+def get_show_list(name):
+    shows = show_search(name)
+    if shows:
+        return [
+            Show(show_main_info(show['show']['id'], embed='episodes'))
+            for show in shows
+        ]
+
 # TV Maze Endpoints
 def show_search(show):
     url = endpoints.show_search.format(show)
