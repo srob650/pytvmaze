@@ -97,13 +97,16 @@ def query(url):
     else:
         return None
 
-# Create Show object
+# Create Show object using a string name or int maze_id
 def get_show(show):
-    search_text = fuzzymatch.parse_user_text(show)
-    results = show_search(search_text['showname'])
-    s = fuzzymatch.fuzzy_search(search_text, results)
-    if s:
-        return Show(show_main_info(s, embed='episodes'))
+    if type(show) == int:
+        return Show(show_main_info(show, embed='episodes'))
+    else:
+        search_text = fuzzymatch.parse_user_text(show)
+        results = show_search(search_text['showname'])
+        s = fuzzymatch.fuzzy_search(search_text, results)
+        if s:
+            return Show(show_main_info(s, embed='episodes'))
 
 # Return list of Show objects from the TVMaze "Show Search" endpoint
 def get_show_list(name):
