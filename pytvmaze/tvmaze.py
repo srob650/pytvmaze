@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
-from __future__ import print_function
 from pytvmaze import endpoints, fuzzymatch
+from exceptions import *
 
 try:
     # Python 3 and later
@@ -11,6 +11,7 @@ except ImportError:
     from urllib2 import urlopen
 import json
 from datetime import datetime
+
 
 class Show():
     def __init__(self, data):
@@ -42,6 +43,7 @@ class Show():
                 self.seasons[season_num] = Season(self, season_num)
             self.seasons[season_num].episodes[episode.episode_number] = episode
 
+
 class Season():
     def __init__(self, show, season_number):
         self.show = show
@@ -60,6 +62,7 @@ class Season():
     def __getitem__(self, item):
         return self.episodes[item]
 
+
 class Episode():
     def __init__(self, data):
         self.data = data
@@ -77,6 +80,7 @@ class Episode():
         season = 'S' + str(self.season_number).zfill(2)
         episode = 'E' + str(self.episode_number).zfill(2)
         return season + episode + ' ' + self.title
+
 
 # Query TV Maze endpoints
 def query(url):
@@ -97,6 +101,7 @@ def query(url):
     else:
         return None
 
+
 # Create Show object
 def get_show(show):
     search_text = fuzzymatch.parse_user_text(show)
@@ -105,11 +110,16 @@ def get_show(show):
     if s:
         return Show(show_main_info(s, embed='episodes'))
 
+
 # TV Maze Endpoints
 def show_search(show):
     url = endpoints.show_search.format(show)
     q = query(url)
-    return q if q else print(show, 'not found')
+    if q:
+        return q
+    else:
+        raise ShowNotFound(show + ' not found')
+
 
 def show_single_search(show, embed=False):
     if embed:
@@ -117,29 +127,48 @@ def show_single_search(show, embed=False):
     else:
         url = endpoints.show_single_search.format(show)
     q = query(url)
-    return q if q else print(show, 'not found')
+    if q:
+        return q
+    else:
+        raise ShowNotFound(show + ' not found')
+
 
 def lookup_tvrage(tvrage_id):
     url = endpoints.lookup_tvrage.format(tvrage_id)
     q = query(url)
-    return q if q else print('TVRage id', tvrage_id, 'not found')
+    if q:
+        return q
+    else:
+        raise IDNotFound('TVRage id ' + tvrage_id + ' not found')
+
 
 def lookup_tvdb(tvdb_id):
     url = endpoints.lookup_tvdb.format(tvdb_id)
     q = query(url)
-    return q if q else print('TVDB id', tvdb_id, 'not found')
+    if q:
+        return q
+    else:
+        raise IDNotFound('TVdb id ' + tvdb_id + ' not found')
+
 
 def get_schedule(country='US', date=str(datetime.today().date())):
     url = endpoints.get_schedule.format(country, date)
     q = query(url)
-    return q if q else print('Schedule for country', country, 'not found')
+    if q:
+        return q
+    else:
+        raise ScheduleNotFound('Schedule for country ' + country + ' not found')
+
 
 # ALL known future episodes, several MB large, cached for 24 hours
 def get_full_schedule():
     url = endpoints.get_full_schedule
     q = query(url)
-    return q if q else print('Something went wrong,',
-                             'www.tvmaze.com may be down')
+    if q:
+        return q
+    else:
+        raise GeneralError('Something went wrong, www.tvmaze.com may be down')
+
 
 def show_main_info(maze_id, embed=False):
     if embed:
@@ -147,7 +176,11 @@ def show_main_info(maze_id, embed=False):
     else:
         url = endpoints.show_main_info.format(maze_id)
     q = query(url)
-    return q if q else print('TVMaze ID', maze_id, 'not found')
+    if q:
+        return q
+    else:
+        raise IDNotFound('Maze id ' + maze_id + ' not found')
+
 
 def episode_list(maze_id, specials=False):
     if specials:
@@ -155,39 +188,59 @@ def episode_list(maze_id, specials=False):
     else:
         url = endpoints.episode_list.format(maze_id)
     q = query(url)
-    return q if q else print('TVMaze ID', maze_id, 'not found')
+    if q:
+        return q
+    else:
+        raise IDNotFound('Maze id ' + maze_id + ' not found')
+
 
 def episode_by_number(maze_id, season_number, episode_number):
     url = endpoints.episode_by_number.format(maze_id,
                                              season_number,
                                              episode_number)
     q = query(url)
-    return q if q else print('Couldn\'t find season', season_number,
-                             'episode', episode_number, 'for TVMaze ID',
-                             maze_id)
+    if q:
+        return q
+    else:
+        raise EpisodeNotFound(
+            'Couldn\'t find season ' + season_number + ' episode ' + episode_number + ' for TVMaze ID ' + maze_id)
+
 
 def episodes_by_date(maze_id, airdate):
     url = endpoints.episodes_by_date.format(maze_id, airdate)
     q = query(url)
-    return q if q else print('Couldn\'t find an episode airing', airdate,
-                             'for TVMaze ID', maze_id)
+    if q:
+        return q
+    else:
+        raise NoEpisodesForAirdate('Couldn\'t find an episode airing ' + airdate + ' for TVMaze ID' + maze_id)
+
 
 def show_cast(maze_id):
     url = endpoints.show_cast.format(maze_id)
     q = query(url)
-    return q if q else print('Couldn\'nt find show cast for TVMaze ID',
-                             maze_id)
+    if q:
+        return q
+    else:
+        raise CastNotFound('Couldn\'nt find show cast for TVMaze ID' + maze_id)
+
 
 def show_index(page=1):
     url = endpoints.show_index.format(page)
     q = query(url)
-    return q if q else print('Error getting show_index,',
-                             'www.tvmaze.com may be down')
+    if q:
+        return q
+    else:
+        raise ShowIndexError('Error getting show_index, www.tvmaze.com may be down')
+
 
 def people_search(person):
     url = endpoints.people_search.format(person)
     q = query(url)
-    return q if q else print('Couldn\'t find person:', person)
+    if q:
+        return q
+    else:
+        raise PersonNotFound('Couldn\'t find person: ' + person)
+
 
 def person_main_info(person_id, embed=False):
     if embed:
@@ -195,7 +248,11 @@ def person_main_info(person_id, embed=False):
     else:
         url = endpoints.person_main_info.format(person_id)
     q = query(url)
-    return q if q else print('Couldn\'t find person ID:', person_id)
+    if q:
+        return q
+    else:
+        raise PersonNotFound('Couldn\'t find person: ' + person_id)
+
 
 def person_cast_credits(person_id, embed=False):
     if embed:
@@ -203,8 +260,11 @@ def person_cast_credits(person_id, embed=False):
     else:
         url = endpoints.person_cast_credits.format(person_id)
     q = query(url)
-    return q if q else print('Couldn\'t find cast credits for person ID:',
-                             person_id)
+    if q:
+        return q
+    else:
+        raise CreditsNotFound('Couldn\'t find cast credits for person ID: ' + person_id)
+
 
 def person_crew_credits(person_id, embed=False):
     if embed:
@@ -212,16 +272,25 @@ def person_crew_credits(person_id, embed=False):
     else:
         url = endpoints.person_crew_credits.format(person_id)
     q = query(url)
-    return q if q else print('Couldn\'t find crew credits for person ID:',
-                             person_id)
+    if q:
+        return q
+    else:
+        raise CreditsNotFound('Couldn\'t find crew credits for person ID: ' + person_id)
+
 
 def show_updates():
     url = endpoints.show_updates
     q = query(url)
-    return q if q else print('Error getting show_index,',
-                             'www.tvmaze.com may be down')
+    if q:
+        return q
+    else:
+        raise ShowIndexError('Error getting show_index, www.tvmaze.com may be down')
+
 
 def show_akas(maze_id):
     url = endpoints.show_akas.format(maze_id)
     q = query(url)
-    return q if q else print('Couldn\'t find AKA\'s for TVMaze ID:', maze_id)
+    if q:
+        return q
+    else:
+        raise AKASNotFound('Couldn\'t find AKA\'s for TVMaze ID: ' + maze_id)
