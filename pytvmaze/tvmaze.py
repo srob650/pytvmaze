@@ -22,7 +22,11 @@ class Show():
         self.populate()
 
     def __repr__(self):
-        return self.name
+        return '{name} ({year}) ({network})'.format(
+            name = self.name,
+            year = str(self.data.get('premiered')[:-6]),
+            network = str(self.network.get('name'))
+        )
 
     def __iter__(self):
         return iter(self.seasons.values())
