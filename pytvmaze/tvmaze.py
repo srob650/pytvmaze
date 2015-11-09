@@ -6,9 +6,11 @@ from pytvmaze import endpoints, fuzzymatch
 try:
     # Python 3 and later
     from urllib.request import urlopen
+    from urllib.parse import quote as url_quote
 except ImportError:
     # Python 2
     from urllib2 import urlopen
+    from urllib import quote as url_quote
 import json
 from datetime import datetime
 
@@ -84,8 +86,6 @@ class Episode():
 
 # Query TV Maze endpoints
 def query(url):
-    url = url.replace(' ', '+')
-
     try:
         data = urlopen(url).read()
     except:
@@ -123,11 +123,13 @@ def get_show_list(name):
 
 # TV Maze Endpoints
 def show_search(show):
+    show = url_quote(show)
     url = endpoints.show_search.format(show)
     q = query(url)
     return q if q else print(show, 'not found')
 
 def show_single_search(show, embed=False):
+    show = url_quote(show)
     if embed:
         url = endpoints.show_single_search.format(show) + '&embed=' + embed
     else:
@@ -201,6 +203,7 @@ def show_index(page=1):
                              'www.tvmaze.com may be down')
 
 def people_search(person):
+    person = url_quote(person)
     url = endpoints.people_search.format(person)
     q = query(url)
     return q if q else print('Couldn\'t find person:', person)
