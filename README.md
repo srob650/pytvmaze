@@ -8,24 +8,25 @@ To install:
 
     # Return list of Show objects from the TVMaze "Show Search" endpoint
     >>> shows = pytvmaze.get_show_list('stargate')
-    >>> print(shows)
-    [Stargate Atlantis,
-     Stargate Universe,
-     Stargate: Infinity,
-     Stargate SG-1,
-     Starcade]
+    >>> for show in shows:
+    ...     print(shows)
+    Stargate Atlantis (2004) (SyFy)
+    Stargate Universe (2009) (SyFy)
+    Stargate: Infinity (2002) (FOX)
+    Stargate SG-1 (1997) (Showtime)
+    Starcade (1982) (tbs)
 
     # Get the best match as a show object using the name of a show
     >>> show = pytvmaze.get_show('dexter')
     >>> print(show)
-    Dexter
+    Dexter (2006) (Showtime)
     >>> print(show.name, show.status, show.maze_id)
     Dexter Ended 161
 
     # Get a show object using a shows tvmaze id
     >>> show = pytvmaze.get_show(161)
     >>> print(show)
-    Dexter
+    Dexter (2006) (Showtime)
 
     # Iterate over all episodes (full episode list available at Show() level)
     >>> for episode in show.episodes:
