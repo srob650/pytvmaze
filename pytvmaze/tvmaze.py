@@ -22,7 +22,10 @@ class Show():
         self.populate()
 
     def __repr__(self):
-        return self.name
+        year = ' (N/A)'
+        if self.premiered:
+            year = ' (' + self.premiered[:-6] + ')'
+        return self.name + year
 
     def __iter__(self):
         return iter(self.seasons.values())
