@@ -10,6 +10,10 @@ class ShowNotFound(BaseError):
     pass
 
 
+class ShowsNotFound(BaseError):
+    pass
+
+
 class IDNotFound(BaseError):
     pass
 
