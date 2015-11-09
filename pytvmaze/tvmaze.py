@@ -103,7 +103,7 @@ def query(url):
 
 # Create Show object using a string name or int maze_id
 def get_show(show):
-    if type(show) == int:
+    if isinstance(show, int):
         return Show(show_main_info(show, embed='episodes'))
     else:
         search_text = fuzzymatch.parse_user_text(show)
