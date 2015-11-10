@@ -6,9 +6,11 @@ from exceptions import *
 try:
     # Python 3 and later
     from urllib.request import urlopen
+    from urllib.parse import quote as url_quote, unquote as url_unquote
 except ImportError:
     # Python 2
     from urllib2 import urlopen
+    from urllib import quote as url_quote, unquote as url_unquote
 import json
 from datetime import datetime
 
@@ -23,7 +25,11 @@ class Show():
         self.populate()
 
     def __repr__(self):
-        return self.name
+        return '{name} ({year}) ({network})'.format(
+            name = self.name,
+            year = str(self.data.get('premiered')[:-6]),
+            network = str(self.network.get('name'))
+        )
 
     def __iter__(self):
         return iter(self.seasons.values())
@@ -81,11 +87,14 @@ class Episode():
         episode = 'E' + str(self.episode_number).zfill(2)
         return season + episode + ' ' + self.title
 
+class Person():
+    def __init__(self, data):
+        self.data = data
+        self.__dict__.update(data)
+        self.__dict__.update(data.get('person'))
 
 # Query TV Maze endpoints
 def query(url):
-    url = url.replace(' ', '+')
-
     try:
         data = urlopen(url).read()
     except:
@@ -104,7 +113,7 @@ def query(url):
 
 # Create Show object using a string name or int maze_id
 def get_show(show):
-    if type(show) == int:
+    if isinstance(show, int):
         return Show(show_main_info(show, embed='episodes'))
     else:
         search_text = fuzzymatch.parse_user_text(show)
@@ -128,10 +137,17 @@ def get_show_list(name):
         raise ShowsNotFound(name + ' did not generate show list')
 
 
+def get_people(name):
+    people = people_search(name)
+    if people:
+        return [ Person(person) for person in people ]
+
 # TV Maze Endpoints
 def show_search(show):
+    show = url_quote(show)
     url = endpoints.show_search.format(show)
     q = query(url)
+    return q if q else print(url_unquote(show), 'not found')
     if q:
         return q
     else:
@@ -139,11 +155,13 @@ def show_search(show):
 
 
 def show_single_search(show, embed=False):
+    show = url_quote(show)
     if embed:
         url = endpoints.show_single_search.format(show) + '&embed=' + embed
     else:
         url = endpoints.show_single_search.format(show)
     q = query(url)
+    return q if q else print(url_unquote(show), 'not found')
     if q:
         return q
     else:
@@ -251,6 +269,7 @@ def show_index(page=1):
 
 
 def people_search(person):
+    person = url_quote(person)
     url = endpoints.people_search.format(person)
     q = query(url)
     if q:
