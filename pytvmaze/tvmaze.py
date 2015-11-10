@@ -84,6 +84,12 @@ class Episode():
         episode = 'E' + str(self.episode_number).zfill(2)
         return season + episode + ' ' + self.title
 
+class Person():
+    def __init__(self, data):
+        self.data = data
+        self.__dict__.update(data)
+        self.__dict__.update(data.get('person'))
+
 # Query TV Maze endpoints
 def query(url):
     try:
@@ -120,6 +126,11 @@ def get_show_list(name):
             Show(show_main_info(show['show']['id'], embed='episodes'))
             for show in shows
         ]
+
+def get_people(name):
+    people = people_search(name)
+    if people:
+        return [ Person(person) for person in people ]
 
 # TV Maze Endpoints
 def show_search(show):
