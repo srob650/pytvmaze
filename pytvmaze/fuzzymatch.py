@@ -1,10 +1,11 @@
 #!/usr/bin/python
-
-from __future__ import print_function
-
+import logging
 from datetime import datetime
 
 from exceptions import *
+
+logging.basicConfig(level=logging.INFO)
+log = logging.getLogger(__name__)
 
 WARN_MULTIPLE_RESULTS = ('\nMultiple shows matched this search, '
                          'try providing more information\nin your search such as '
@@ -103,7 +104,7 @@ def fuzzy_search(search_text, results):
                         matches[match_score[1]]['fuzzy_score']
                 ):
 
-                print(WARN_MULTIPLE_RESULTS)
+                log.warning(WARN_MULTIPLE_RESULTS)
 
                 # Choose most recent show
                 if (datetime.strptime(matches[match_score[0]]['premiered'],
@@ -121,7 +122,7 @@ def fuzzy_search(search_text, results):
         else:
             if len(filtered_results) > 1:
 
-                print(WARN_MULTIPLE_RESULTS)
+                log.warning(WARN_MULTIPLE_RESULTS)
 
                 # Sort results by premier date
                 newest = sorted(filtered_results,
