@@ -15,7 +15,7 @@ import json
 from datetime import datetime
 
 
-class Show():
+class Show(object):
     def __init__(self, data):
         self.data = data
         self.__dict__.update(data)
@@ -25,11 +25,15 @@ class Show():
         self.populate()
 
     def __repr__(self):
-        return '{name} ({year}) ({network})'.format(
+        return '<Show(maze_id={id},name={name},year={year},network={network})>'.format(
+            id=self.maze_id,
             name=self.name,
             year=str(self.data.get('premiered')[:-6]),
             network=str(self.network.get('name'))
         )
+
+    def __str__(self):
+        return self.name
 
     def __iter__(self):
         return iter(self.seasons.values())
@@ -50,13 +54,19 @@ class Show():
             self.seasons[season_num].episodes[episode.episode_number] = episode
 
 
-class Season():
+class Season(object):
     def __init__(self, show, season_number):
         self.show = show
         self.season_number = season_number
         self.episodes = dict()
 
     def __repr__(self):
+        return '<Season(showname={name},season_number={number})>'.format(
+            name=self.show.name,
+            number=str(self.season_number).zfill(2)
+        )
+
+    def __str__(self):
         return self.show.name + ' S' + str(self.season_number).zfill(2)
 
     def __iter__(self):
@@ -69,7 +79,7 @@ class Season():
         return self.episodes[item]
 
 
-class Episode():
+class Episode(object):
     def __init__(self, data):
         self.data = data
         self.title = self.data.get('name')
@@ -83,6 +93,12 @@ class Episode():
         self.maze_id = self.data.get('id')
 
     def __repr__(self):
+        return '<Episode(season={season},episode_number={number})>'.format(
+            season=str(self.season_number).zfill(2),
+            number=str(self.episode_number).zfill(2)
+        )
+
+    def __str__(self):
         season = 'S' + str(self.season_number).zfill(2)
         episode = 'E' + str(self.episode_number).zfill(2)
         return season + episode + ' ' + self.title
@@ -93,6 +109,16 @@ class Person():
         self.data = data
         self.__dict__.update(data)
         self.__dict__.update(data.get('person'))
+
+    def __repr__(self):
+        return '<Person(name={name},maze_id={id})>'.format(
+            name=self.name,
+            id=self.id
+
+        )
+
+    def __str__(self):
+        return self.name
 
 
 # Query TV Maze endpoints
@@ -158,7 +184,7 @@ def show_search(show):
         raise ShowNotFound(show + ' not found')
 
 
-def show_single_search(show, embed=False):
+def show_single_search(show, embed=None):
     show = url_quote(show)
     if embed:
         url = endpoints.show_single_search.format(show) + '&embed=' + embed
@@ -208,7 +234,7 @@ def get_full_schedule():
         raise GeneralError('Something went wrong, www.tvmaze.com may be down')
 
 
-def show_main_info(maze_id, embed=False):
+def show_main_info(maze_id, embed=None):
     if embed:
         url = endpoints.show_main_info.format(maze_id) + '?embed=' + embed
     else:
@@ -220,7 +246,7 @@ def show_main_info(maze_id, embed=False):
         raise IDNotFound('Maze id ' + maze_id + ' not found')
 
 
-def episode_list(maze_id, specials=False):
+def episode_list(maze_id, specials=None):
     if specials:
         url = endpoints.episode_list.format(maze_id) + '&specials=1'
     else:
@@ -281,7 +307,7 @@ def people_search(person):
         raise PersonNotFound('Couldn\'t find person: ' + person)
 
 
-def person_main_info(person_id, embed=False):
+def person_main_info(person_id, embed=None):
     if embed:
         url = endpoints.person_main_info.format(person_id) + '?embed=' + embed
     else:
@@ -293,7 +319,7 @@ def person_main_info(person_id, embed=False):
         raise PersonNotFound('Couldn\'t find person: ' + person_id)
 
 
-def person_cast_credits(person_id, embed=False):
+def person_cast_credits(person_id, embed=None):
     if embed:
         url = endpoints.person_cast_credits.format(person_id) + '?embed=' + embed
     else:
@@ -305,7 +331,7 @@ def person_cast_credits(person_id, embed=False):
         raise CreditsNotFound('Couldn\'t find cast credits for person ID: ' + person_id)
 
 
-def person_crew_credits(person_id, embed=False):
+def person_crew_credits(person_id, embed=None):
     if embed:
         url = endpoints.person_crew_credits.format(person_id) + '?embed=' + embed
     else:
