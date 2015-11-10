@@ -6,11 +6,11 @@ from pytvmaze import endpoints, fuzzymatch
 try:
     # Python 3 and later
     from urllib.request import urlopen
-    from urllib.parse import quote as url_quote
+    from urllib.parse import quote as url_quote, unquote as url_unquote
 except ImportError:
     # Python 2
     from urllib2 import urlopen
-    from urllib import quote as url_quote
+    from urllib import quote as url_quote, unquote as url_unquote
 import json
 from datetime import datetime
 
@@ -137,7 +137,7 @@ def show_search(show):
     show = url_quote(show)
     url = endpoints.show_search.format(show)
     q = query(url)
-    return q if q else print(show, 'not found')
+    return q if q else print(url_unquote(show), 'not found')
 
 def show_single_search(show, embed=False):
     show = url_quote(show)
@@ -146,7 +146,7 @@ def show_single_search(show, embed=False):
     else:
         url = endpoints.show_single_search.format(show)
     q = query(url)
-    return q if q else print(show, 'not found')
+    return q if q else print(url_unquote(show), 'not found')
 
 def lookup_tvrage(tvrage_id):
     url = endpoints.lookup_tvrage.format(tvrage_id)
@@ -217,7 +217,7 @@ def people_search(person):
     person = url_quote(person)
     url = endpoints.people_search.format(person)
     q = query(url)
-    return q if q else print('Couldn\'t find person:', person)
+    return q if q else print('Couldn\'t find person:', url_unquote(person))
 
 def person_main_info(person_id, embed=False):
     if embed:
