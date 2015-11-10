@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
-from pytvmaze import endpoints, fuzzymatch
 from exceptions import *
+from pytvmaze import endpoints, fuzzymatch
 
 try:
     # Python 3 and later
@@ -26,9 +26,9 @@ class Show():
 
     def __repr__(self):
         return '{name} ({year}) ({network})'.format(
-            name = self.name,
-            year = str(self.data.get('premiered')[:-6]),
-            network = str(self.network.get('name'))
+            name=self.name,
+            year=str(self.data.get('premiered')[:-6]),
+            network=str(self.network.get('name'))
         )
 
     def __iter__(self):
@@ -87,11 +87,13 @@ class Episode():
         episode = 'E' + str(self.episode_number).zfill(2)
         return season + episode + ' ' + self.title
 
+
 class Person():
     def __init__(self, data):
         self.data = data
         self.__dict__.update(data)
         self.__dict__.update(data.get('person'))
+
 
 # Query TV Maze endpoints
 def query(url):
@@ -140,14 +142,16 @@ def get_show_list(name):
 def get_people(name):
     people = people_search(name)
     if people:
-        return [ Person(person) for person in people ]
+        return [Person(person) for person in people]
+    else:
+        raise PersonNotFound('Couldn\'t find person: ' + name)
+
 
 # TV Maze Endpoints
 def show_search(show):
     show = url_quote(show)
     url = endpoints.show_search.format(show)
     q = query(url)
-    return q if q else print(url_unquote(show), 'not found')
     if q:
         return q
     else:
@@ -161,7 +165,6 @@ def show_single_search(show, embed=False):
     else:
         url = endpoints.show_single_search.format(show)
     q = query(url)
-    return q if q else print(url_unquote(show), 'not found')
     if q:
         return q
     else:
