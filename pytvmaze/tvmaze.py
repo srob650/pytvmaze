@@ -126,6 +126,7 @@ def get_show_list(name):
             Show(show_main_info(show['show']['id'], embed='episodes'))
             for show in shows
         ]
+    return []
 
 def get_people(name):
     people = people_search(name)
