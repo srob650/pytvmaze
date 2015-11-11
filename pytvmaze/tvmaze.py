@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
-from exceptions import *
-from pytvmaze import endpoints, fuzzymatch
+from pytvmaze.exceptions import *
+from pytvmaze import endpoints
 
 try:
     # Python 3 and later
