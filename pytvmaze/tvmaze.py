@@ -25,11 +25,19 @@ class Show(object):
         self.populate()
 
     def __repr__(self):
-        return '<Show(maze_id={id},name={name},year={year},network={network})>'.format(
-            id=self.maze_id,
-            name=self.name,
-            year=str(self.data.get('premiered')[:-6]),
+        maze_id=self.maze_id
+        name=self.name
+        try:
+            year=str(self.data.get('premiered')[:-6])
+        except:
+            year=None
+        try:
             network=str(self.network.get('name'))
+        except:
+            network=None
+
+        return '<Show(maze_id={id},name={name},year={year},network={network})>'.format(
+            id=maze_id, name=name, year=year, network=network
         )
 
     def __str__(self):
@@ -114,7 +122,6 @@ class Person():
         return '<Person(name={name},maze_id={id})>'.format(
             name=self.name,
             id=self.id
-
         )
 
     def __str__(self):
@@ -139,30 +146,69 @@ def query(url):
         return None
 
 
-# Create Show object using a string name or int maze_id
-def get_show(show):
-    if isinstance(show, int):
-        return Show(show_main_info(show, embed='episodes'))
-    else:
-        search_text = fuzzymatch.parse_user_text(show)
-        results = show_search(search_text['showname'])
-        s = fuzzymatch.fuzzy_search(search_text, results)
-        if s:
-            return Show(show_main_info(s, embed='episodes'))
+# Get Show object directly via id or indirectly via name + optional qualifiers
+def get_show(maze_id=None, tvdb_id=None, tvrage_id=None, show_name=None,
+             show_year=None, show_network=None, show_language=None,
+             show_country=None):
+    if maze_id:
+        return Show(show_main_info(maze_id, embed='episodes'))
+    elif tvdb_id:
+        return Show(show_main_info(lookup_tvdb(tvdb_id)['id'],
+                                   embed='episodes'))
+    elif tvrage_id:
+        return Show(show_main_info(lookup_tvrage(tvrage_id)['id'],
+                                   embed='episodes'))
+    elif show_name:
+        show = get_show_by_search(show_name, show_year, show_network,
+                                  show_language, show_country)
+        return show
+
+
+# Search with user-defined qualifiers
+def get_show_by_search(show_name, show_year, show_network, show_language, show_country):
+    shows = get_show_list(show_name)
+    if shows:
+        qualifiers = [
+            q for q in [show_year, show_network, show_language, show_country]
+            if q
+        ]
+        if qualifiers:
+            for show in shows:
+                try:
+                    premiered = show.premiered[:-6].lower()
+                except:
+                    year = ''
+                try:
+                    country = show.network['country']['code'].lower()
+                except:
+                    country = ''
+                try:
+                    network = show.network['name'].lower()
+                except:
+                    network = ''
+                try:
+                    language = show.language.lower()
+                except:
+                    language = ''
+                attributes = [premiered, country, network, language]
+                show.matched_qualifiers = len(list(set(qualifiers) & set(attributes)))
+            # Return show with most matched qualifiers
+            return max(shows, key=lambda k: k.matched_qualifiers)
         else:
-            raise ShowNotFound(show + ' not found')
+            # Return show with highest tvmaze search score
+            return shows[0]
 
 
 # Return list of Show objects from the TVMaze "Show Search" endpoint
-def get_show_list(name):
-    shows = show_search(name)
+def get_show_list(show_name):
+    shows = show_search(show_name)
     if shows:
         return [
             Show(show_main_info(show['show']['id'], embed='episodes'))
             for show in shows
             ]
     else:
-        raise ShowsNotFound(name + ' did not generate show list')
+        raise ShowsNotFound(show_name + ' did not generate show list')
 
 
 def get_people(name):
@@ -203,7 +249,7 @@ def lookup_tvrage(tvrage_id):
     if q:
         return q
     else:
-        raise IDNotFound('TVRage id ' + tvrage_id + ' not found')
+        raise IDNotFound('TVRage id ' + str(tvrage_id) + ' not found')
 
 
 def lookup_tvdb(tvdb_id):
@@ -212,7 +258,7 @@ def lookup_tvdb(tvdb_id):
     if q:
         return q
     else:
-        raise IDNotFound('TVdb id ' + tvdb_id + ' not found')
+        raise IDNotFound('TVdb id ' + str(tvdb_id) + ' not found')
 
 
 def get_schedule(country='US', date=str(datetime.today().date())):
@@ -243,7 +289,7 @@ def show_main_info(maze_id, embed=None):
     if q:
         return q
     else:
-        raise IDNotFound('Maze id ' + maze_id + ' not found')
+        raise IDNotFound('Maze id ' + str(maze_id) + ' not found')
 
 
 def episode_list(maze_id, specials=None):
@@ -255,7 +301,7 @@ def episode_list(maze_id, specials=None):
     if q:
         return q
     else:
-        raise IDNotFound('Maze id ' + maze_id + ' not found')
+        raise IDNotFound('Maze id ' + str(maze_id) + ' not found')
 
 
 def episode_by_number(maze_id, season_number, episode_number):
@@ -267,7 +313,7 @@ def episode_by_number(maze_id, season_number, episode_number):
         return q
     else:
         raise EpisodeNotFound(
-            'Couldn\'t find season ' + season_number + ' episode ' + episode_number + ' for TVMaze ID ' + maze_id)
+            'Couldn\'t find season ' + str(season_number) + ' episode ' + str(episode_number) + ' for TVMaze ID ' + maze_id)
 
 
 def episodes_by_date(maze_id, airdate):
@@ -276,7 +322,7 @@ def episodes_by_date(maze_id, airdate):
     if q:
         return q
     else:
-        raise NoEpisodesForAirdate('Couldn\'t find an episode airing ' + airdate + ' for TVMaze ID' + maze_id)
+        raise NoEpisodesForAirdate('Couldn\'t find an episode airing ' + airdate + ' for TVMaze ID' + str(maze_id))
 
 
 def show_cast(maze_id):
@@ -285,7 +331,7 @@ def show_cast(maze_id):
     if q:
         return q
     else:
-        raise CastNotFound('Couldn\'nt find show cast for TVMaze ID' + maze_id)
+        raise CastNotFound('Couldn\'nt find show cast for TVMaze ID' + str(maze_id))
 
 
 def show_index(page=1):
@@ -328,7 +374,7 @@ def person_cast_credits(person_id, embed=None):
     if q:
         return q
     else:
-        raise CreditsNotFound('Couldn\'t find cast credits for person ID: ' + person_id)
+        raise CreditsNotFound('Couldn\'t find cast credits for person ID: ' + str(person_id))
 
 
 def person_crew_credits(person_id, embed=None):
@@ -340,7 +386,7 @@ def person_crew_credits(person_id, embed=None):
     if q:
         return q
     else:
-        raise CreditsNotFound('Couldn\'t find crew credits for person ID: ' + person_id)
+        raise CreditsNotFound('Couldn\'t find crew credits for person ID: ' + str(person_id))
 
 
 def show_updates():
@@ -358,4 +404,4 @@ def show_akas(maze_id):
     if q:
         return q
     else:
-        raise AKASNotFound('Couldn\'t find AKA\'s for TVMaze ID: ' + maze_id)
+        raise AKASNotFound('Couldn\'t find AKA\'s for TVMaze ID: ' + str(maze_id))
