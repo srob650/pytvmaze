@@ -191,7 +191,7 @@ def get_show_by_search(show_name, show_year, show_network, show_language, show_c
                 except:
                     language = ''
                 attributes = [premiered, country, network, language]
-                show.matched_qualifiers = len(list(set(qualifiers) & set(attributes)))
+                show.matched_qualifiers = len(set(qualifiers) & set(attributes))
             # Return show with most matched qualifiers
             return max(shows, key=lambda k: k.matched_qualifiers)
         else:
