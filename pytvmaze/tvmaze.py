@@ -169,7 +169,7 @@ def get_show_by_search(show_name, show_year, show_network, show_language, show_c
     shows = get_show_list(show_name)
     if shows:
         qualifiers = [
-            q for q in [show_year, show_network, show_language, show_country]
+            q.lower() for q in [show_year, show_network, show_language, show_country]
             if q
         ]
         if qualifiers:
