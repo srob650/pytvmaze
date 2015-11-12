@@ -146,10 +146,18 @@ def query_endpoint(url):
         return None
 
 
-# Get Show object directly via id or indirectly via name + optional qualifiers
+# Get Show object
 def get_show(maze_id=None, tvdb_id=None, tvrage_id=None, show_name=None,
              show_year=None, show_network=None, show_language=None,
              show_country=None):
+    '''
+    Get Show object directly via id or indirectly via name + optional qualifiers
+
+    If only a show_name is given, the show with the highest score using the
+    tvmaze algorithm will be returned.
+    If you provide extra qualifiers such as network or language they will be
+    used for a more specific match, if one exists.
+    '''
     if maze_id:
         return Show(show_main_info(maze_id, embed='episodes'))
     elif tvdb_id:
@@ -164,7 +172,7 @@ def get_show(maze_id=None, tvdb_id=None, tvrage_id=None, show_name=None,
         return show
 
 
-# Search with user-defined qualifiers
+# Search with user-defined qualifiers, used by get_show() method
 def get_show_by_search(show_name, show_year, show_network, show_language, show_country):
     shows = get_show_list(show_name)
     if shows:
@@ -199,8 +207,14 @@ def get_show_by_search(show_name, show_year, show_network, show_language, show_c
             return shows[0]
 
 
-# Return list of Show objects from the TVMaze "Show Search" endpoint
+# Return list of Show objects
 def get_show_list(show_name):
+    '''
+    Return list of Show objects from the TVMaze "Show Search" endpoint
+
+    List will be ordered by tvmaze score and should mimic the results you see
+    by doing a show search on the website.
+    '''
     shows = show_search(show_name)
     if shows:
         return [
@@ -211,7 +225,11 @@ def get_show_list(show_name):
         raise ShowsNotFound(show_name + ' did not generate show list')
 
 
+# Get list of Person objects
 def get_people(name):
+    '''
+    Return list of Person objects from the TVMaze "People Search" endpoint
+    '''
     people = people_search(name)
     if people:
         return [Person(person) for person in people]
