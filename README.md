@@ -1,3 +1,8 @@
+### **Major Restructure**
+ - Updated get_show() method, see below
+ - Changed the way you add qualifiers for refining your show search
+ - Added custom exceptions (thanks @liiight)
+
 To install:
 
 ```$ pip install pytvmaze```
@@ -10,23 +15,26 @@ To install:
     >>> shows = pytvmaze.get_show_list('stargate')
     >>> for show in shows:
     ...     print(shows)
-    Stargate Atlantis (2004) (SyFy)
-    Stargate Universe (2009) (SyFy)
-    Stargate: Infinity (2002) (FOX)
-    Stargate SG-1 (1997) (Showtime)
-    Starcade (1982) (tbs)
+    Stargate Atlantis
+    Stargate Universe
+    Stargate: Infinity
+    Stargate SG-1
 
     # Get the best match as a show object using the name of a show
-    >>> show = pytvmaze.get_show('dexter')
+    >>> show = pytvmaze.get_show(show_name='dexter')
     >>> print(show)
-    Dexter (2006) (Showtime)
+    Dexter
     >>> print(show.name, show.status, show.maze_id)
     Dexter Ended 161
 
     # Get a show object using a shows tvmaze id
-    >>> show = pytvmaze.get_show(161)
+    >>> show = pytvmaze.get_show(maze_id=161)
     >>> print(show)
-    Dexter (2006) (Showtime)
+    Dexter
+
+    # Get a show object using a shows tvdb or tvrage id
+    >>> show = pytvmaze.get_show(tvdb_id=79349)
+    >>> show = pytvmaze.get_show(tvrage_id=7926)
 
     # Iterate over all episodes (full episode list available at Show() level)
     >>> for episode in show.episodes:
@@ -58,15 +66,16 @@ To install:
 
 **Search with qualifiers**
 
-You can add qualifiers to your search separated by spaces.  These qualifiers will be matched against the following show attributes: premier year, country, network name, and language.  If there are still multiple matches after qualifiers are evaluated, the show with the most recent premier date will be chosen.
+You can add the following qualifiers to your search:
+```
+show_year
+show_network
+show_language
+show_country
+```
+These qualifiers will be matched against the following show attributes: premier year, country, network name, and language.
 
-    >>> show = pytvmaze.get_show('utopia 2014 au abc')
-    utopia 2014 au abc not found
-    Performing fuzzy search...
-    utopia 2014 au not found
-    Performing fuzzy search...
-    utopia 2014 not found
-    Performing fuzzy search...
+    >>> show = pytvmaze.get_show(show_name='utopia', show_year='2014', show_country='au', show_network='abc')
     >>> show.premiered
     2014-08-13
     >>> show.network['name']
