@@ -14,7 +14,7 @@ To install:
     # Return list of Show objects from the TVMaze "Show Search" endpoint
     >>> shows = pytvmaze.get_show_list('stargate')
     >>> for show in shows:
-    ...     print(shows)
+    ...     print(show)
     Stargate Atlantis
     Stargate Universe
     Stargate: Infinity
