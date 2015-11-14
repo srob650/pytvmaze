@@ -48,3 +48,8 @@ class AKASNotFound(BaseError):
 
 class GeneralError(BaseError):
     pass
+
+
+class MissingParameters(BaseError):
+    pass
+

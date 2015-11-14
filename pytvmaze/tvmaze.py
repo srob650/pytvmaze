@@ -25,16 +25,16 @@ class Show(object):
         self.populate()
 
     def __repr__(self):
-        maze_id=self.maze_id
-        name=self.name
+        maze_id = self.maze_id
+        name = self.name
         try:
-            year=str(self.data.get('premiered')[:-6])
+            year = str(self.data.get('premiered')[:-6])
         except:
-            year=None
+            year = None
         try:
-            network=str(self.network.get('name'))
+            network = str(self.network.get('name'))
         except:
-            network=None
+            network = None
 
         return '<Show(maze_id={id},name={name},year={year},network={network})>'.format(
             id=maze_id, name=name, year=year, network=network
@@ -170,6 +170,9 @@ def get_show(maze_id=None, tvdb_id=None, tvrage_id=None, show_name=None,
         show = get_show_by_search(show_name, show_year, show_network,
                                   show_language, show_country)
         return show
+    else:
+        raise MissingParameters(
+            'Either maze_id, tvdb_id, tvrage_id or show_name are required to get show, none provided,')
 
 
 # Search with user-defined qualifiers, used by get_show() method
@@ -178,7 +181,7 @@ def get_show_by_search(show_name, show_year, show_network, show_language, show_c
     qualifiers = [
         q.lower() for q in [show_year, show_network, show_language, show_country]
         if q
-    ]
+        ]
     if qualifiers:
         for show in shows:
             try:
@@ -324,7 +327,8 @@ def episode_by_number(maze_id, season_number, episode_number):
         return q
     else:
         raise EpisodeNotFound(
-            'Couldn\'t find season ' + str(season_number) + ' episode ' + str(episode_number) + ' for TVMaze ID ' + str(maze_id))
+            'Couldn\'t find season ' + str(season_number) + ' episode ' + str(episode_number) + ' for TVMaze ID ' + str(
+                maze_id))
 
 
 def episodes_by_date(maze_id, airdate):
