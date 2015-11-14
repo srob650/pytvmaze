@@ -199,6 +199,10 @@ class ObjectTests(unittest.TestCase):
         self.assertTrue(hasattr(show7, 'episodes'))
         self.assertTrue(show7.language == 'English')
 
+        with self.assertRaises(MissingParameters):
+            empty_search = get_show()
+
+
     def test_get_show_list(self):
         shows = get_show_list('utopia')
         self.assertIsInstance(shows, list)
