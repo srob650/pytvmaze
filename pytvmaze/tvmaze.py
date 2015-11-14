@@ -175,36 +175,35 @@ def get_show(maze_id=None, tvdb_id=None, tvrage_id=None, show_name=None,
 # Search with user-defined qualifiers, used by get_show() method
 def get_show_by_search(show_name, show_year, show_network, show_language, show_country):
     shows = get_show_list(show_name)
-    if shows:
-        qualifiers = [
-            q.lower() for q in [show_year, show_network, show_language, show_country]
-            if q
-        ]
-        if qualifiers:
-            for show in shows:
-                try:
-                    premiered = show.premiered[:-6].lower()
-                except:
-                    year = ''
-                try:
-                    country = show.network['country']['code'].lower()
-                except:
-                    country = ''
-                try:
-                    network = show.network['name'].lower()
-                except:
-                    network = ''
-                try:
-                    language = show.language.lower()
-                except:
-                    language = ''
-                attributes = [premiered, country, network, language]
-                show.matched_qualifiers = len(set(qualifiers) & set(attributes))
-            # Return show with most matched qualifiers
-            return max(shows, key=lambda k: k.matched_qualifiers)
-        else:
-            # Return show with highest tvmaze search score
-            return shows[0]
+    qualifiers = [
+        q.lower() for q in [show_year, show_network, show_language, show_country]
+        if q
+    ]
+    if qualifiers:
+        for show in shows:
+            try:
+                premiered = show.premiered[:-6].lower()
+            except:
+                year = ''
+            try:
+                country = show.network['country']['code'].lower()
+            except:
+                country = ''
+            try:
+                network = show.network['name'].lower()
+            except:
+                network = ''
+            try:
+                language = show.language.lower()
+            except:
+                language = ''
+            attributes = [premiered, country, network, language]
+            show.matched_qualifiers = len(set(qualifiers) & set(attributes))
+        # Return show with most matched qualifiers
+        return max(shows, key=lambda k: k.matched_qualifiers)
+    else:
+        # Return show with highest tvmaze search score
+        return shows[0]
 
 
 # Return list of Show objects
@@ -216,13 +215,10 @@ def get_show_list(show_name):
     by doing a show search on the website.
     '''
     shows = show_search(show_name)
-    if shows:
-        return [
-            Show(show_main_info(show['show']['id'], embed='episodes'))
-            for show in shows
-            ]
-    else:
-        raise ShowsNotFound(str(show_name) + ' did not generate show list')
+    return [
+        Show(show_main_info(show['show']['id'], embed='episodes'))
+        for show in shows
+        ]
 
 
 # Get list of Person objects
@@ -231,10 +227,7 @@ def get_people(name):
     Return list of Person objects from the TVMaze "People Search" endpoint
     '''
     people = people_search(name)
-    if people:
-        return [Person(person) for person in people]
-    else:
-        raise PersonNotFound('Couldn\'t find person: ' + str(name))
+    return [Person(person) for person in people]
 
 
 # TV Maze Endpoints
