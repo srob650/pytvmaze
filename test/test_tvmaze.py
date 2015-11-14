@@ -56,9 +56,9 @@ class EndpointTests(unittest.TestCase):
         with self.assertRaises(ScheduleNotFound):
             get_schedule(country='fakecountry')
 
-    # def test_get_full_schedule(self):
-    #     schedule = get_full_schedule()
-    #     self.assertIsInstance(schedule, list)
+    def test_get_full_schedule(self):
+        schedule = get_full_schedule()
+        self.assertIsInstance(schedule, list)
 
     def test_show_main_info(self):
         show1 = show_main_info(1)
