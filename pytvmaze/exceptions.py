@@ -53,3 +53,10 @@ class GeneralError(BaseError):
 class MissingParameters(BaseError):
     pass
 
+
+class SeasonNotFound(BaseError):
+    pass
+
+
+class EpisodeNotFound(BaseError):
+    pass
