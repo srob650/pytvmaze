@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
-from pytvmaze.exceptions import *
 from pytvmaze import endpoints
+from pytvmaze.exceptions import *
 
 try:
     # Python 3 and later
@@ -50,7 +50,10 @@ class Show(object):
         return len(self.seasons)
 
     def __getitem__(self, item):
-        return self.seasons[item]
+        try:
+            return self.seasons[item]
+        except KeyError:
+            raise SeasonNotFound('Season {0} does not exist for show {1}.'.format(item, self.name))
 
     def populate(self):
         for episode in self.data.get('_embedded').get('episodes'):
@@ -84,7 +87,11 @@ class Season(object):
         return len(self.episodes)
 
     def __getitem__(self, item):
-        return self.episodes[item]
+        try:
+            return self.episodes[item]
+        except KeyError:
+            raise EpisodeNotFound(
+                'Episode {0} does not exist for season {1} of show {2}.'.format(item, self.season_number, self.show))
 
 
 class Episode(object):
