@@ -18,8 +18,26 @@ from datetime import datetime
 class Show(object):
     def __init__(self, data):
         self.data = data
-        self.__dict__.update(data)
-        self.maze_id = self.data.get('id')
+        self.status = self.data.get('status')
+        self.rating = self.data.get('rating')
+        self.genres = self.data.get('genres')
+        self.weight = self.data.get('weight')
+        self.updated = self.data.get('updated')
+        self.name = self.data.get('name')
+        self.language = self.data.get('language')
+        self.schedule = self.data.get('schedule')
+        self.url = self.data.get('url')
+        self.image = self.data.get('image')
+        self.externals = self.data.get('externals')
+        self.premiered = self.data.get('premiered')
+        self.summary = self.data.get('summary')
+        self._links = self.data.get('_links')
+        self.webChannel = self.data.get('webChannel')
+        self.runtime = self.data.get('runtime')
+        self.type = self.data.get('type')
+        self.id = self.data.get('id')
+        self.maze_id = self.id
+        self.network = self.data.get('network')
         self.episodes = list()
         self.seasons = dict()
         self.populate()
