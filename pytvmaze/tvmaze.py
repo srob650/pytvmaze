@@ -1,4 +1,5 @@
 #!/usr/bin/python
+from __future__ import unicode_literals
 
 from pytvmaze import endpoints
 from pytvmaze.exceptions import *
