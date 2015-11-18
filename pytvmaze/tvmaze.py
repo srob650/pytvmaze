@@ -1,4 +1,5 @@
 #!/usr/bin/python
+from __future__ import unicode_literals
 
 from pytvmaze import endpoints
 from pytvmaze.exceptions import *
@@ -204,7 +205,7 @@ def get_show(maze_id=None, tvdb_id=None, tvrage_id=None, show_name=None,
 def get_show_by_search(show_name, show_year, show_network, show_language, show_country):
     shows = get_show_list(show_name)
     qualifiers = [
-        q.lower() for q in [show_year, show_network, show_language, show_country]
+        q.lower() for q in [str(show_year), show_network, show_language, show_country]
         if q
         ]
     if qualifiers:
@@ -212,7 +213,7 @@ def get_show_by_search(show_name, show_year, show_network, show_language, show_c
             try:
                 premiered = show.premiered[:-6].lower()
             except:
-                year = ''
+                premiered = ''
             try:
                 country = show.network['country']['code'].lower()
             except:

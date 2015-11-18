@@ -56,7 +56,3 @@ class MissingParameters(BaseError):
 
 class SeasonNotFound(BaseError):
     pass
-
-
-class EpisodeNotFound(BaseError):
-    pass
