@@ -170,6 +170,10 @@ class ObjectTests(unittest.TestCase):
         show1 = get_show(maze_id=163)
         self.assertIsInstance(show1, Show)
         self.assertTrue(hasattr(show1, 'episodes'))
+        with self.assertRaises(SeasonNotFound):
+            show1[999]
+        with self.assertRaises(EpisodeNotFound):
+            show1[1][999]
 
         show2 = get_show(tvdb_id=81189)
         self.assertIsInstance(show2, Show)
