@@ -1,6 +1,8 @@
 #!/usr/bin/python
 from __future__ import unicode_literals
 
+import xml.etree.ElementTree as et
+
 from pytvmaze import endpoints
 from pytvmaze.exceptions import *
 
@@ -31,7 +33,7 @@ class Show(object):
         self.image = self.data.get('image')
         self.externals = self.data.get('externals')
         self.premiered = self.data.get('premiered')
-        self.summary = self.data.get('summary')
+        self.summary = self.remove_tags(self.data.get('summary'))
         self._links = self.data.get('_links')
         self.webChannel = self.data.get('webChannel')
         self.runtime = self.data.get('runtime')
@@ -82,6 +84,9 @@ class Show(object):
             if season_num not in self.seasons:
                 self.seasons[season_num] = Season(self, season_num)
             self.seasons[season_num].episodes[episode.episode_number] = episode
+
+    def remove_tags(self, text):
+        return ''.join(et.fromstring(text).itertext())
 
 
 class Season(object):
