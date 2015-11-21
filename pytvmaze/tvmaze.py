@@ -1,7 +1,7 @@
 #!/usr/bin/python
 from __future__ import unicode_literals
 
-import xml.etree.ElementTree as et
+import re
 
 from pytvmaze import endpoints
 from pytvmaze.exceptions import *
@@ -86,7 +86,7 @@ class Show(object):
             self.seasons[season_num].episodes[episode.episode_number] = episode
 
     def remove_tags(self, text):
-        return ''.join(et.fromstring(text).itertext())
+        return re.sub(r'<.*?>', '', text)
 
 
 class Season(object):
