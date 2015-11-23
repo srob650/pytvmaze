@@ -356,7 +356,7 @@ def episode_by_number(maze_id, season_number, episode_number):
                                              episode_number)
     q = query_endpoint(url)
     if q:
-        return [Episode(episode) for episode in q]
+        return Episode(q)
     else:
         raise EpisodeNotFound(
             'Couldn\'t find season ' + str(season_number) + ' episode ' + str(episode_number) + ' for TVMaze ID ' + str(
