@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 
 import re
+from dateutil import parser
 
 from pytvmaze import endpoints
 from pytvmaze.exceptions import *
@@ -364,6 +365,14 @@ def episode_by_number(maze_id, season_number, episode_number):
 
 
 def episodes_by_date(maze_id, airdate):
+    try:
+        airdate = parser.parse(airdate)
+    except ValueError as e:
+        raise IllegalAirDate(e.args[0])
+    try:
+        airdate = datetime.strftime(airdate, '%Y-%m-%d')
+    except ValueError as e:
+        raise IllegalAirDate(e.args[0])
     url = endpoints.episodes_by_date.format(maze_id, airdate)
     q = query_endpoint(url)
     if q:

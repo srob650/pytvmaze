@@ -56,3 +56,7 @@ class MissingParameters(BaseError):
 
 class SeasonNotFound(BaseError):
     pass
+
+
+class IllegalAirDate(BaseError):
+    pass
