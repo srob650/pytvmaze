@@ -1,6 +1,9 @@
 #!/usr/bin/python
 from __future__ import unicode_literals
 
+import re
+from dateutil import parser
+
 from pytvmaze import endpoints
 from pytvmaze.exceptions import *
 
@@ -31,7 +34,7 @@ class Show(object):
         self.image = self.data.get('image')
         self.externals = self.data.get('externals')
         self.premiered = self.data.get('premiered')
-        self.summary = self.data.get('summary')
+        self.summary = self.remove_tags(self.data.get('summary'))
         self._links = self.data.get('_links')
         self.webChannel = self.data.get('webChannel')
         self.runtime = self.data.get('runtime')
@@ -75,13 +78,17 @@ class Show(object):
             raise SeasonNotFound('Season {0} does not exist for show {1}.'.format(item, self.name))
 
     def populate(self):
-        for episode in self.data.get('_embedded').get('episodes'):
-            self.episodes.append(Episode(episode))
-        for episode in self.episodes:
-            season_num = int(episode.season_number)
-            if season_num not in self.seasons:
-                self.seasons[season_num] = Season(self, season_num)
-            self.seasons[season_num].episodes[episode.episode_number] = episode
+        if self.data.get('_embedded'):
+            for episode in self.data.get('_embedded').get('episodes'):
+                self.episodes.append(Episode(episode))
+            for episode in self.episodes:
+                season_num = int(episode.season_number)
+                if season_num not in self.seasons:
+                    self.seasons[season_num] = Season(self, season_num)
+                self.seasons[season_num].episodes[episode.episode_number] = episode
+
+    def remove_tags(self, text):
+        return re.sub(r'<.*?>', '', text)
 
 
 class Season(object):
@@ -175,7 +182,7 @@ def query_endpoint(url):
 # Get Show object
 def get_show(maze_id=None, tvdb_id=None, tvrage_id=None, show_name=None,
              show_year=None, show_network=None, show_language=None,
-             show_country=None):
+             show_country=None, embed=None):
     '''
     Get Show object directly via id or indirectly via name + optional qualifiers
 
@@ -185,16 +192,16 @@ def get_show(maze_id=None, tvdb_id=None, tvrage_id=None, show_name=None,
     used for a more specific match, if one exists.
     '''
     if maze_id:
-        return Show(show_main_info(maze_id, embed='episodes'))
+        return Show(show_main_info(maze_id, embed=embed))
     elif tvdb_id:
         return Show(show_main_info(lookup_tvdb(tvdb_id)['id'],
-                                   embed='episodes'))
+                                   embed=embed))
     elif tvrage_id:
         return Show(show_main_info(lookup_tvrage(tvrage_id)['id'],
-                                   embed='episodes'))
+                                   embed=embed))
     elif show_name:
         show = get_show_by_search(show_name, show_year, show_network,
-                                  show_language, show_country)
+                                  show_language, show_country, embed=embed)
         return show
     else:
         raise MissingParameters(
@@ -202,8 +209,8 @@ def get_show(maze_id=None, tvdb_id=None, tvrage_id=None, show_name=None,
 
 
 # Search with user-defined qualifiers, used by get_show() method
-def get_show_by_search(show_name, show_year, show_network, show_language, show_country):
-    shows = get_show_list(show_name)
+def get_show_by_search(show_name, show_year, show_network, show_language, show_country, embed):
+    shows = get_show_list(show_name, embed)
     qualifiers = [
         q.lower() for q in [str(show_year), show_network, show_language, show_country]
         if q
@@ -236,7 +243,7 @@ def get_show_by_search(show_name, show_year, show_network, show_language, show_c
 
 
 # Return list of Show objects
-def get_show_list(show_name):
+def get_show_list(show_name, embed=None):
     '''
     Return list of Show objects from the TVMaze "Show Search" endpoint
 
@@ -245,7 +252,7 @@ def get_show_list(show_name):
     '''
     shows = show_search(show_name)
     return [
-        Show(show_main_info(show['show']['id'], embed='episodes'))
+        Show(show_main_info(show['show']['id'], embed=embed))
         for show in shows
         ]
 
@@ -339,7 +346,7 @@ def episode_list(maze_id, specials=None):
         url = endpoints.episode_list.format(maze_id)
     q = query_endpoint(url)
     if q:
-        return q
+        return [Episode(episode) for episode in q]
     else:
         raise IDNotFound('Maze id ' + str(maze_id) + ' not found')
 
@@ -350,7 +357,7 @@ def episode_by_number(maze_id, season_number, episode_number):
                                              episode_number)
     q = query_endpoint(url)
     if q:
-        return q
+        return Episode(q)
     else:
         raise EpisodeNotFound(
             'Couldn\'t find season ' + str(season_number) + ' episode ' + str(episode_number) + ' for TVMaze ID ' + str(
@@ -358,10 +365,18 @@ def episode_by_number(maze_id, season_number, episode_number):
 
 
 def episodes_by_date(maze_id, airdate):
+    try:
+        airdate = parser.parse(airdate)
+    except ValueError as e:
+        raise IllegalAirDate(e.args[0])
+    try:
+        airdate = datetime.strftime(airdate, '%Y-%m-%d')
+    except ValueError as e:
+        raise IllegalAirDate(e.args[0])
     url = endpoints.episodes_by_date.format(maze_id, airdate)
     q = query_endpoint(url)
     if q:
-        return q
+        return [Episode(episode) for episode in q]
     else:
         raise NoEpisodesForAirdate('Couldn\'t find an episode airing ' + str(airdate) + ' for TVMaze ID' + str(maze_id))
 
