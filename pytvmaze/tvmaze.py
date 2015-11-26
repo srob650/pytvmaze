@@ -147,8 +147,13 @@ class Episode(object):
 class Person():
     def __init__(self, data):
         self.data = data
-        self.__dict__.update(data)
-        self.__dict__.update(data.get('person'))
+        self._links = self.data.get('_links')
+        self.id = self.data.get('id')
+        self.image = self.data.get('image')
+        self.name = self.data.get('name')
+        self.score = self.data.get('score')
+        self.url = self.data.get('url')
+
 
     def __repr__(self):
         return '<Person(name={name},maze_id={id})>'.format(
