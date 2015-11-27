@@ -74,18 +74,18 @@ class EndpointTests(unittest.TestCase):
     def test_episode_list(self):
         episodes = episode_list(3)
         self.assertIsInstance(episodes, list)
-        self.assertIsInstance(episodes[0], dict)
+        self.assertIsInstance(episodes[0], Episode)
 
         specials = episode_list(4, specials=True)
         self.assertIsInstance(specials, list)
-        self.assertIsInstance(specials[0], dict)
+        self.assertIsInstance(specials[0], Episode)
 
         with self.assertRaises(IDNotFound):
             episode_list(9999999999)
 
     def test_episode_by_number(self):
         episode = episode_by_number(5,1,1)
-        self.assertIsInstance(episode, dict)
+        self.assertIsInstance(episode, Episode)
 
         with self.assertRaises(EpisodeNotFound):
             episode_by_number(9999999999,1,1)
@@ -167,34 +167,38 @@ class EndpointTests(unittest.TestCase):
 class ObjectTests(unittest.TestCase):
 
     def test_get_show(self):
-        show1 = get_show(maze_id=163)
+        show1 = get_show(maze_id=163, embed='episodes')
         self.assertIsInstance(show1, Show)
         self.assertTrue(hasattr(show1, 'episodes'))
+        with self.assertRaises(SeasonNotFound):
+            show1[999]
+        with self.assertRaises(EpisodeNotFound):
+            show1[1][999]
 
-        show2 = get_show(tvdb_id=81189)
+        show2 = get_show(tvdb_id=81189, embed='episodes')
         self.assertIsInstance(show2, Show)
         self.assertTrue(hasattr(show2, 'episodes'))
 
-        show3 = get_show(tvrage_id=24493)
+        show3 = get_show(tvrage_id=24493, embed='episodes')
         self.assertIsInstance(show3, Show)
         self.assertTrue(hasattr(show3, 'episodes'))
 
-        show4 = get_show(show_name='person of interest')
+        show4 = get_show(show_name='person of interest', embed='episodes')
         self.assertIsInstance(show4, Show)
         self.assertTrue(hasattr(show4, 'episodes'))
 
-        show5 = get_show(show_name='utopia', show_country='au', show_network='abc')
+        show5 = get_show(show_name='utopia', show_country='au', show_network='abc', embed='episodes')
         self.assertIsInstance(show5, Show)
         self.assertTrue(hasattr(show5, 'episodes'))
         self.assertTrue(show5.network['country']['code'] == 'AU')
         self.assertTrue(show5.network['name'] == 'ABC')
 
-        show6 = get_show(show_name='the flash', show_year='1967')
+        show6 = get_show(show_name='the flash', show_year='1967', embed='episodes')
         self.assertIsInstance(show6, Show)
         self.assertTrue(hasattr(show6, 'episodes'))
         self.assertTrue(show6.premiered == '1967-11-11')
 
-        show7 = get_show(show_name='drunk history', show_language='english')
+        show7 = get_show(show_name='drunk history', show_language='english', embed='episodes')
         self.assertIsInstance(show7, Show)
         self.assertTrue(hasattr(show7, 'episodes'))
         self.assertTrue(show7.language == 'English')
