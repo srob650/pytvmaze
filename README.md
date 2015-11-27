@@ -1,7 +1,6 @@
-### **Major Restructure**
- - Updated get_show() method, see below
- - Changed the way you add qualifiers for refining your show search
- - Added custom exceptions (thanks @liiight)
+### **Notice**
+ - Updated get_show() method to require explicit embedding of episodes
+ - Plan to add other embeds in future commit such as cast, nextepisode,  and previousepisode
 
 To install:
 
@@ -37,6 +36,7 @@ To install:
     >>> show = pytvmaze.get_show(tvrage_id=7926)
 
     # Iterate over all episodes (full episode list available at Show() level)
+    >>> show = pytvmaze.get_show(maze_id=161, embed='episodes')
     >>> for episode in show.episodes:
     ...     print(episode.title)
     Dexter
