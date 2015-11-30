@@ -199,25 +199,6 @@ class Character():
         return self.name
 
 
-class Character():
-    def __init__(self, data):
-        self.data = data
-        self.id = self.data.get('id')
-        self.url = self.data.get('url')
-        self.name = self.data.get('name').encode('utf-8')
-        self.image = self.data.get('image')
-        self._links = self.data.get('_links')
-
-    def __repr__(self):
-        return u'<Character(name={name},maze_id={id})>'.format(
-            name=self.name,
-            id=self.id
-        )
-
-    def __str__(self):
-        return self.name
-
-
 # Query TV Maze endpoints
 def query_endpoint(url):
     try:
