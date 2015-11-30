@@ -3,6 +3,10 @@ from __future__ import unicode_literals
 
 import re
 import unicodedata
+import sys
+if sys.version_info[0] == 3:
+    def unicode(text, encoding):
+        return str(text, encoding)
 
 from pytvmaze import endpoints
 from pytvmaze.exceptions import *
