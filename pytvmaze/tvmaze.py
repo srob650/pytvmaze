@@ -10,10 +10,12 @@ try:
     # Python 3 and later
     from urllib.request import urlopen
     from urllib.parse import quote as url_quote, unquote as url_unquote
+    from urllib.error import URLError
 except ImportError:
     # Python 2
     from urllib2 import urlopen
     from urllib import quote as url_quote, unquote as url_unquote
+    from urllib2 import URLError
 import json
 from datetime import datetime
 
@@ -169,8 +171,8 @@ class Person():
 def query_endpoint(url):
     try:
         data = urlopen(url).read()
-    except:
-        return None
+    except URLError as e:
+        raise ConnectionError(e)
 
     try:
         results = json.loads(data)

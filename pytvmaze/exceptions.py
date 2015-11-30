@@ -60,3 +60,7 @@ class SeasonNotFound(BaseError):
 
 class IllegalAirDate(BaseError):
     pass
+
+
+class ConnectionError(BaseError):
+    pass
