@@ -160,7 +160,7 @@ class Episode(object):
         return season + episode + ' ' + self.title
 
 
-class Person():
+class Person(object):
     def __init__(self, data):
         if data.get('person'):
             self.data = data['person']
@@ -185,7 +185,7 @@ class Person():
         return self.name
 
 
-class Character():
+class Character(object):
     def __init__(self, data):
         self.data = data
         self.id = self.data.get('id')
