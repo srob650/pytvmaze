@@ -222,3 +222,8 @@ class ObjectTests(unittest.TestCase):
 
         with self.assertRaises(PersonNotFound):
             get_people('person that doesnt exist')
+
+    def test_cast_embed(self):
+        show = get_show(maze_id=161, embed='cast')
+        self.assertIsInstance(show.cast[0], Person)
+        self.assertIsInstance(show.characters[0], Character)

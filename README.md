@@ -1,6 +1,7 @@
 ### **Notice**
  - Updated get_show() method to require explicit embedding of episodes
- - Plan to add other embeds in future commit such as cast, nextepisode,  and previousepisode
+ - Added Character class
+ - You can now embed "cast" in a Show object.  This adds show.cast (list of Person objects) and show.characters (list of Character objects)
 
 To install:
 
@@ -63,6 +64,18 @@ To install:
     S01E08 Shrink Wrap
     >>> print(ep.title)
     Shrink Wrap
+
+    # Embed cast in Show object
+    >>> show = pytvmaze.get_show(maze_id=161, embed='cast')
+    >>> show.cast
+    [<Person(name=Michael C. Hall,maze_id=29740)>,
+    <Person(name=Jennifer Carpenter,maze_id=20504)>,
+    etc.]
+
+    >>> show.characters
+    [<Character(name=Dexter Morgan,maze_id=41784)>,
+    <Character(name=Debra Morgan,maze_id=41786)>,
+    etc.]
 
 **Search with qualifiers**
 
