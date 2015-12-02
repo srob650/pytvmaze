@@ -187,10 +187,6 @@ def query_endpoint(url):
     else:
         return None
 
-def _quote(url):
-    return url_quote(url.encode('utf-8'))
-
-
 # Get Show object
 def get_show(maze_id=None, tvdb_id=None, tvrage_id=None, show_name=None,
              show_year=None, show_network=None, show_language=None,
@@ -280,7 +276,7 @@ def get_people(name):
 
 # TV Maze Endpoints
 def show_search(show):
-    show = _quote(show)
+    show = url_quote(show)
     url = endpoints.show_search.format(show)
     q = query_endpoint(url)
     if q:
@@ -290,7 +286,7 @@ def show_search(show):
 
 
 def show_single_search(show, embed=None):
-    show = _quote(show)
+    show = url_quote(show)
     if embed:
         url = endpoints.show_single_search.format(show) + '&embed=' + embed
     else:
@@ -408,7 +404,7 @@ def show_index(page=1):
 
 
 def people_search(person):
-    person = _quote(person)
+    person = url_quote(person)
     url = endpoints.people_search.format(person)
     q = query_endpoint(url)
     if q:
