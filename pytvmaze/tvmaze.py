@@ -172,7 +172,10 @@ def query_endpoint(url):
     try:
         data = urlopen(url).read()
     except URLError as e:
-        raise ConnectionError(e)
+        if e.code == 404 or e.code == 422:
+            return None
+        else:
+            raise ConnectionError(repr(e))
 
     try:
         results = json.loads(data)
