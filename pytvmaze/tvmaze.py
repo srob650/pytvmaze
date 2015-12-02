@@ -2,6 +2,11 @@
 from __future__ import unicode_literals
 
 import re
+import unicodedata
+import sys
+if sys.version_info[0] == 3:
+    def unicode(text, encoding):
+        return str(text, encoding)
 
 from pytvmaze import endpoints
 from pytvmaze.exceptions import *
@@ -45,6 +50,8 @@ class Show(object):
         self.network = self.data.get('network')
         self.episodes = list()
         self.seasons = dict()
+        self.cast = list()
+        self.characters = list()
         self.populate()
 
     def __repr__(self):
@@ -79,14 +86,21 @@ class Show(object):
             raise SeasonNotFound('Season {0} does not exist for show {1}.'.format(item, self.name))
 
     def populate(self):
-        if self.data.get('_embedded'):
-            for episode in self.data.get('_embedded').get('episodes'):
-                self.episodes.append(Episode(episode))
-            for episode in self.episodes:
-                season_num = int(episode.season_number)
-                if season_num not in self.seasons:
-                    self.seasons[season_num] = Season(self, season_num)
-                self.seasons[season_num].episodes[episode.episode_number] = episode
+        embedded =  self.data.get('_embedded')
+        if embedded:
+            if embedded.get('episodes'):
+                for episode in embedded.get('episodes'):
+                    self.episodes.append(Episode(episode))
+                for episode in self.episodes:
+                    season_num = int(episode.season_number)
+                    if season_num not in self.seasons:
+                        self.seasons[season_num] = Season(self, season_num)
+                    self.seasons[season_num].episodes[episode.episode_number] = episode
+            if embedded.get('cast'):
+                for cast_member in embedded.get('cast'):
+                    self.cast.append(Person(cast_member['person']))
+                    self.characters.append(Character(cast_member['character']))
+
 
     def remove_tags(self, text):
         return re.sub(r'<.*?>', '', text)
@@ -148,18 +162,42 @@ class Episode(object):
 
 class Person():
     def __init__(self, data):
-        self.data = data
+        if data.get('person'):
+            self.data = data['person']
+        else:
+            self.data = data
         self._links = self.data.get('_links')
         self.id = self.data.get('id')
         self.image = self.data.get('image')
-        self.name = self.data.get('name')
+        self.name = self.data.get('name').encode('utf-8')
         self.score = self.data.get('score')
         self.url = self.data.get('url')
 
 
     def __repr__(self):
-        return '<Person(name={name},maze_id={id})>'.format(
-            name=self.name,
+        return u'<Person(name={name},maze_id={id})>'.format(
+            name=unicodedata.normalize(
+                'NFD', unicode(self.name, 'utf-8')).encode('ascii', 'ignore'),
+            id=self.id
+        )
+
+    def __str__(self):
+        return self.name
+
+
+class Character():
+    def __init__(self, data):
+        self.data = data
+        self.id = self.data.get('id')
+        self.url = self.data.get('url')
+        self.name = self.data.get('name').encode('utf-8')
+        self.image = self.data.get('image')
+        self._links = self.data.get('_links')
+
+    def __repr__(self):
+        return u'<Character(name={name},maze_id={id})>'.format(
+            name=unicodedata.normalize(
+                'NFD', unicode(self.name, 'utf-8')).encode('ascii', 'ignore'),
             id=self.id
         )
 
@@ -271,7 +309,8 @@ def get_people(name):
     Return list of Person objects from the TVMaze "People Search" endpoint
     '''
     people = people_search(name)
-    return [Person(person) for person in people]
+    if people:
+        return [Person(person) for person in people]
 
 
 # TV Maze Endpoints
