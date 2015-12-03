@@ -79,6 +79,9 @@ class Show(object):
     def __len__(self):
         return len(self.seasons)
 
+    def __bool__(self):
+        return bool(self.id)
+
     def __getitem__(self, item):
         try:
             return self.seasons[item]
