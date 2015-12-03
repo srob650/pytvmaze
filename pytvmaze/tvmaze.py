@@ -76,6 +76,14 @@ class Show(object):
     def __iter__(self):
         return iter(self.seasons.values())
 
+    # Python 3 bool evaluation
+    def __bool__(self):
+        return bool(self.data)
+
+    # Python 2 bool evaluation
+    def __nonzero__(self):
+        return bool(self.data)
+
     def __len__(self):
         return len(self.seasons)
 
