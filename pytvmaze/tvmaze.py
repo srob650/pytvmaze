@@ -76,6 +76,14 @@ class Show(object):
     def __iter__(self):
         return iter(self.seasons.values())
 
+    # Python 3 bool evaluation
+    def __bool__(self):
+        return bool(self.data)
+
+    # Python 2 bool evaluation
+    def __nonzero__(self):
+        return bool(self.data)
+
     def __len__(self):
         return len(self.seasons)
 
@@ -160,7 +168,7 @@ class Episode(object):
         return season + episode + ' ' + self.title
 
 
-class Person():
+class Person(object):
     def __init__(self, data):
         if data.get('person'):
             self.data = data['person']
@@ -185,7 +193,7 @@ class Person():
         return self.name
 
 
-class Character():
+class Character(object):
     def __init__(self, data):
         self.data = data
         self.id = self.data.get('id')
