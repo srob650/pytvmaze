@@ -85,6 +85,7 @@ show_year
 show_network
 show_language
 show_country
+show_web_channel
 ```
 These qualifiers will be matched against the following show attributes: premier year, country, network name, and language.
 
