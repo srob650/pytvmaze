@@ -235,7 +235,7 @@ def query_endpoint(url):
 # Get Show object
 def get_show(maze_id=None, tvdb_id=None, tvrage_id=None, show_name=None,
              show_year=None, show_network=None, show_language=None,
-             show_country=None, embed=None):
+             show_country=None, show_web_channel=None, embed=None):
     """
     Get Show object directly via id or indirectly via name + optional qualifiers
 
@@ -248,7 +248,8 @@ def get_show(maze_id=None, tvdb_id=None, tvrage_id=None, show_name=None,
     :param tvrage_id: Show tvrage_id
     :param show_name: Show name to be searched
     :param show_year: Show premiere year
-    :param show_network: Show TV Network
+    :param show_network: Show TV Network (like ABC, NBC, etc.)
+    :param show_web_channel: Show Web Channel (like Netflix, Amazon, etc.)
     :param show_language: Show language
     :param show_country: Show country
     :param embed: embed parameter to include additional data. Currently 'episodes' and 'cast' are supported
@@ -264,7 +265,7 @@ def get_show(maze_id=None, tvdb_id=None, tvrage_id=None, show_name=None,
                                    embed=embed))
     elif show_name:
         show = get_show_by_search(show_name, show_year, show_network,
-                                  show_language, show_country, embed=embed)
+                                  show_language, show_country, show_web_channel, embed=embed)
         return show
     else:
         raise MissingParameters(
@@ -272,10 +273,10 @@ def get_show(maze_id=None, tvdb_id=None, tvrage_id=None, show_name=None,
 
 
 # Search with user-defined qualifiers, used by get_show() method
-def get_show_by_search(show_name, show_year, show_network, show_language, show_country, embed):
+def get_show_by_search(show_name, show_year, show_network, show_language, show_country, show_web_channel, embed):
     shows = get_show_list(show_name, embed)
     qualifiers = [
-        q.lower() for q in [str(show_year), show_network, show_language, show_country]
+        q.lower() for q in [str(show_year), show_network, show_language, show_country, show_web_channel]
         if q
         ]
     if qualifiers:
@@ -287,16 +288,23 @@ def get_show_by_search(show_name, show_year, show_network, show_language, show_c
             try:
                 country = show.network['country']['code'].lower()
             except TypeError:
-                country = ''
+                try:
+                    country = show.webChannel['country']['code'].lower()
+                except TypeError:
+                    country = ''
             try:
                 network = show.network['name'].lower()
             except TypeError:
                 network = ''
             try:
+                webChannel = show.webChannel['name'].lower()
+            except TypeError:
+                webChannel = ''
+            try:
                 language = show.language.lower()
             except TypeError:
                 language = ''
-            attributes = [premiered, country, network, language]
+            attributes = [premiered, country, network, language, webChannel]
             show.matched_qualifiers = len(set(qualifiers) & set(attributes))
         # Return show with most matched qualifiers
         return max(shows, key=lambda k: k.matched_qualifiers)
