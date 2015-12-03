@@ -203,6 +203,12 @@ class ObjectTests(unittest.TestCase):
         self.assertTrue(hasattr(show7, 'episodes'))
         self.assertTrue(show7.language == 'English')
 
+        show8 = get_show(show_name='jessica jones', show_web_channel='netflix', embed='episodes')
+        self.assertIsInstance(show8, Show)
+        self.assertTrue(hasattr(show8, 'episodes'))
+        self.assertTrue(show8.language == 'English')
+        self.assertTrue(show8.webChannel['name'] == 'Netflix')
+
         with self.assertRaises(MissingParameters):
             empty_search = get_show()
 

@@ -2,25 +2,26 @@
 from __future__ import unicode_literals
 
 import re
-import unicodedata
 import sys
-if sys.version_info[0] == 3:
-    def unicode(text, encoding):
-        return str(text, encoding)
+import unicodedata
 
 from pytvmaze import endpoints
 from pytvmaze.exceptions import *
+
+# Temporary workaround for unicode issues
+if sys.version_info[0] == 3:
+    def unicode(text, encoding):
+        return str(text)
 
 try:
     # Python 3 and later
     from urllib.request import urlopen
     from urllib.parse import quote as url_quote, unquote as url_unquote
-    from urllib.error import URLError
+    from urllib.error import URLError, HTTPError
 except ImportError:
     # Python 2
-    from urllib2 import urlopen
+    from urllib2 import urlopen, URLError, HTTPError
     from urllib import quote as url_quote, unquote as url_unquote
-    from urllib2 import URLError
 import json
 from datetime import datetime
 
@@ -59,11 +60,11 @@ class Show(object):
         name = self.name
         try:
             year = str(self.data.get('premiered')[:-6])
-        except:
+        except AttributeError:
             year = None
         try:
             network = str(self.network.get('name'))
-        except:
+        except AttributeError:
             network = None
 
         return '<Show(maze_id={id},name={name},year={year},network={network})>'.format(
@@ -94,7 +95,7 @@ class Show(object):
             raise SeasonNotFound('Season {0} does not exist for show {1}.'.format(item, self.name))
 
     def populate(self):
-        embedded =  self.data.get('_embedded')
+        embedded = self.data.get('_embedded')
         if embedded:
             if embedded.get('episodes'):
                 for episode in embedded.get('episodes'):
@@ -108,7 +109,6 @@ class Show(object):
                 for cast_member in embedded.get('cast'):
                     self.cast.append(Person(cast_member['person']))
                     self.characters.append(Character(cast_member['character']))
-
 
     def remove_tags(self, text):
         return re.sub(r'<.*?>', '', text)
@@ -181,7 +181,6 @@ class Person(object):
         self.score = self.data.get('score')
         self.url = self.data.get('url')
 
-
     def __repr__(self):
         return u'<Person(name={name},maze_id={id})>'.format(
             name=unicodedata.normalize(
@@ -217,11 +216,11 @@ class Character(object):
 def query_endpoint(url):
     try:
         data = urlopen(url).read()
-    except URLError as e:
+    except HTTPError as e:
         if e.code == 404 or e.code == 422:
             return None
-        else:
-            raise ConnectionError(repr(e))
+    except URLError as e:
+        raise ConnectionError(repr(e))
 
     try:
         results = json.loads(data)
@@ -233,18 +232,30 @@ def query_endpoint(url):
     else:
         return None
 
+
 # Get Show object
 def get_show(maze_id=None, tvdb_id=None, tvrage_id=None, show_name=None,
              show_year=None, show_network=None, show_language=None,
-             show_country=None, embed=None):
-    '''
+             show_country=None, show_web_channel=None, embed=None):
+    """
     Get Show object directly via id or indirectly via name + optional qualifiers
 
     If only a show_name is given, the show with the highest score using the
     tvmaze algorithm will be returned.
     If you provide extra qualifiers such as network or language they will be
     used for a more specific match, if one exists.
-    '''
+    :param maze_id: Show maze_id
+    :param tvdb_id: Show tvdb_id
+    :param tvrage_id: Show tvrage_id
+    :param show_name: Show name to be searched
+    :param show_year: Show premiere year
+    :param show_network: Show TV Network (like ABC, NBC, etc.)
+    :param show_web_channel: Show Web Channel (like Netflix, Amazon, etc.)
+    :param show_language: Show language
+    :param show_country: Show country
+    :param embed: embed parameter to include additional data. Currently 'episodes' and 'cast' are supported
+    :return:
+    """
     if maze_id:
         return Show(show_main_info(maze_id, embed=embed))
     elif tvdb_id:
@@ -255,7 +266,7 @@ def get_show(maze_id=None, tvdb_id=None, tvrage_id=None, show_name=None,
                                    embed=embed))
     elif show_name:
         show = get_show_by_search(show_name, show_year, show_network,
-                                  show_language, show_country, embed=embed)
+                                  show_language, show_country, show_web_channel, embed=embed)
         return show
     else:
         raise MissingParameters(
@@ -263,31 +274,43 @@ def get_show(maze_id=None, tvdb_id=None, tvrage_id=None, show_name=None,
 
 
 # Search with user-defined qualifiers, used by get_show() method
-def get_show_by_search(show_name, show_year, show_network, show_language, show_country, embed):
+def get_show_by_search(show_name, show_year, show_network, show_language, show_country, show_web_channel, embed):
     shows = get_show_list(show_name, embed)
     qualifiers = [
-        q.lower() for q in [str(show_year), show_network, show_language, show_country]
+        q.lower() for q in [str(show_year), show_network, show_language, show_country, show_web_channel]
         if q
         ]
     if qualifiers:
         for show in shows:
             try:
                 premiered = show.premiered[:-6].lower()
-            except:
+            except (TypeError, AttributeError):
                 premiered = ''
+
             try:
                 country = show.network['country']['code'].lower()
-            except:
-                country = ''
+            except (TypeError, AttributeError):
+                try:
+                    country = show.webChannel['country']['code'].lower()
+                except (TypeError, AttributeError):
+                    country = ''
+
             try:
                 network = show.network['name'].lower()
-            except:
+            except (TypeError, AttributeError):
                 network = ''
+
+            try:
+                webChannel = show.webChannel['name'].lower()
+            except (TypeError, AttributeError):
+                webChannel = ''
+
             try:
                 language = show.language.lower()
-            except:
+            except (TypeError, AttributeError):
                 language = ''
-            attributes = [premiered, country, network, language]
+
+            attributes = [premiered, country, network, language, webChannel]
             show.matched_qualifiers = len(set(qualifiers) & set(attributes))
         # Return show with most matched qualifiers
         return max(shows, key=lambda k: k.matched_qualifiers)
