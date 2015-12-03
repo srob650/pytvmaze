@@ -283,27 +283,32 @@ def get_show_by_search(show_name, show_year, show_network, show_language, show_c
         for show in shows:
             try:
                 premiered = show.premiered[:-6].lower()
-            except TypeError:
+            except (TypeError, AttributeError):
                 premiered = ''
+
             try:
                 country = show.network['country']['code'].lower()
-            except TypeError:
+            except (TypeError, AttributeError):
                 try:
                     country = show.webChannel['country']['code'].lower()
-                except TypeError:
+                except (TypeError, AttributeError):
                     country = ''
+
             try:
                 network = show.network['name'].lower()
-            except TypeError:
+            except (TypeError, AttributeError):
                 network = ''
+
             try:
                 webChannel = show.webChannel['name'].lower()
-            except TypeError:
+            except (TypeError, AttributeError):
                 webChannel = ''
+
             try:
                 language = show.language.lower()
-            except TypeError:
+            except (TypeError, AttributeError):
                 language = ''
+
             attributes = [premiered, country, network, language, webChannel]
             show.matched_qualifiers = len(set(qualifiers) & set(attributes))
         # Return show with most matched qualifiers
