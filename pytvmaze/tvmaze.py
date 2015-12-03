@@ -8,9 +8,10 @@ import unicodedata
 from pytvmaze import endpoints
 from pytvmaze.exceptions import *
 
+# Temporary workaround for unicode issues
 if sys.version_info[0] == 3:
     def unicode(text, encoding):
-        return str(text, encoding)
+        return str(text)
 
 try:
     # Python 3 and later
