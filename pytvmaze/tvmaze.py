@@ -257,13 +257,11 @@ def get_show(maze_id=None, tvdb_id=None, tvrage_id=None, show_name=None,
     :return:
     """
     if maze_id:
-        return Show(show_main_info(maze_id, embed=embed))
+        return show_main_info(maze_id, embed=embed)
     elif tvdb_id:
-        return Show(show_main_info(lookup_tvdb(tvdb_id)['id'],
-                                   embed=embed))
+        return show_main_info(lookup_tvdb(tvdb_id)['id'], embed=embed)
     elif tvrage_id:
-        return Show(show_main_info(lookup_tvrage(tvrage_id)['id'],
-                                   embed=embed))
+        return show_main_info(lookup_tvrage(tvrage_id)['id'], embed=embed)
     elif show_name:
         show = get_show_by_search(show_name, show_year, show_network,
                                   show_language, show_country, show_web_channel, embed=embed)
@@ -318,9 +316,10 @@ def get_show_by_search(show_name, show_year, show_network, show_language, show_c
         # Return show with highest tvmaze search score
         show = shows[0]
     if embed:
-        return show_single_search(show.name, embed=embed)
+        return show_main_info(maze_id=show.id, embed=embed)
     else:
         return show
+
 
 def _url_quote(show):
     return url_quote(show.encode('UTF-8'))
@@ -416,7 +415,7 @@ def show_main_info(maze_id, embed=None):
         url = endpoints.show_main_info.format(maze_id)
     q = query_endpoint(url)
     if q:
-        return q
+        return Show(q)
     else:
         raise IDNotFound('Maze id ' + str(maze_id) + ' not found')
 
