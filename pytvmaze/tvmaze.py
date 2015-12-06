@@ -328,10 +328,7 @@ def get_show_list(show_name, embed=None):
     by doing a show search on the website.
     '''
     shows = show_search(show_name)
-    return [
-        Show(show_main_info(show['show']['id'], embed=embed))
-        for show in shows
-        ]
+    return [Show(show['show']['id']) for show in shows]
 
 
 # Get list of Person objects
@@ -345,9 +342,12 @@ def get_people(name):
 
 
 # TV Maze Endpoints
-def show_search(show):
+def show_search(show, embed=None):
     show = url_quote(show)
-    url = endpoints.show_search.format(show)
+    if embed:
+        url = endpoints.show_search.format(show) + '&embed=' + embed
+    else:
+        url = endpoints.show_search.format(show)
     q = query_endpoint(url)
     if q:
         return q
