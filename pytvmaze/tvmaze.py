@@ -328,7 +328,7 @@ def get_show_list(show_name, embed=None):
     by doing a show search on the website.
     '''
     shows = show_search(show_name)
-    return [Show(show['show']['id']) for show in shows]
+    return [Show(show['show']) for show in shows]
 
 
 # Get list of Person objects
