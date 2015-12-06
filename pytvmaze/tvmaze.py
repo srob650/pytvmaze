@@ -286,9 +286,9 @@ def _get_show_with_qualifiers(show_name, qualifiers):
         else:
             network = None
         if show.webChannel:
-            webChannel = show.webChannel['name'].lower()
+            web_channel = show.webChannel['name'].lower()
         else:
-            webChannel = None
+            web_channel = None
         if show.network:
             country = show.network['country']['code'].lower()
         else:
@@ -301,7 +301,7 @@ def _get_show_with_qualifiers(show_name, qualifiers):
         else:
             language = None
 
-        attributes = [premiered, country, network, language, webChannel]
+        attributes = [premiered, country, network, language, web_channel]
         show_score = len(set(qualifiers) & set(attributes))
         if show_score > best_match:
             best_match = show_score
@@ -329,21 +329,25 @@ def _url_quote(show):
 
 # Return list of Show objects
 def get_show_list(show_name):
-    '''
+    """
     Return list of Show objects from the TVMaze "Show Search" endpoint
 
     List will be ordered by tvmaze score and should mimic the results you see
     by doing a show search on the website.
-    '''
+    :param show_name: Name of show
+    :return: List of Show(s)
+    """
     shows = show_search(show_name)
     return [Show(show['show']) for show in shows]
 
 
 # Get list of Person objects
 def get_people(name):
-    '''
+    """
     Return list of Person objects from the TVMaze "People Search" endpoint
-    '''
+    :param name: Name of person
+    :return: List of Person(s)
+    """
     people = people_search(name)
     if people:
         return [Person(person) for person in people]
