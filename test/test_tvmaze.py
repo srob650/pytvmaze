@@ -233,3 +233,7 @@ class ObjectTests(unittest.TestCase):
         show = get_show(maze_id=161, embed='cast')
         self.assertIsInstance(show.cast[0], Person)
         self.assertIsInstance(show.characters[0], Character)
+
+    def test_unicode_shows(self):
+        show1 = get_show(show_name=u'Unit\xe9 9')
+        self.assertTrue(show1.id == 8652)
