@@ -346,7 +346,7 @@ def get_people(name):
 
 # TV Maze Endpoints
 def show_search(show):
-    show = url_quote(show)
+    show = url_quote(show.encode('UTF-8'))
     url = endpoints.show_search.format(show)
     q = query_endpoint(url)
     if q:
