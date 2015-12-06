@@ -275,7 +275,7 @@ def get_show(maze_id=None, tvdb_id=None, tvrage_id=None, show_name=None,
 
 # Search with user-defined qualifiers, used by get_show() method
 def get_show_by_search(show_name, show_year, show_network, show_language, show_country, show_web_channel, embed):
-    shows = get_show_list(show_name, embed)
+    shows = get_show_list(show_name)
     qualifiers = [
         q.lower() for q in [str(show_year), show_network, show_language, show_country, show_web_channel]
         if q
@@ -313,14 +313,21 @@ def get_show_by_search(show_name, show_year, show_network, show_language, show_c
             attributes = [premiered, country, network, language, webChannel]
             show.matched_qualifiers = len(set(qualifiers) & set(attributes))
         # Return show with most matched qualifiers
-        return max(shows, key=lambda k: k.matched_qualifiers)
+        show = max(shows, key=lambda k: k.matched_qualifiers)
     else:
         # Return show with highest tvmaze search score
-        return shows[0]
+        show = shows[0]
+    if embed:
+        return show_single_search(show.name, embed=embed)
+    else:
+        return show
+
+def _url_quote(show):
+    return url_quote(show.encode('UTF-8'))
 
 
 # Return list of Show objects
-def get_show_list(show_name, embed=None):
+def get_show_list(show_name):
     '''
     Return list of Show objects from the TVMaze "Show Search" endpoint
 
@@ -342,12 +349,9 @@ def get_people(name):
 
 
 # TV Maze Endpoints
-def show_search(show, embed=None):
-    show = url_quote(show.encode('UTF-8'))
-    if embed:
-        url = endpoints.show_search.format(show) + '&embed=' + embed
-    else:
-        url = endpoints.show_search.format(show)
+def show_search(show):
+    show = _url_quote(show)
+    url = endpoints.show_search.format(show)
     q = query_endpoint(url)
     if q:
         return q
@@ -356,14 +360,14 @@ def show_search(show, embed=None):
 
 
 def show_single_search(show, embed=None):
-    show = url_quote(show)
+    show = _url_quote(show)
     if embed:
         url = endpoints.show_single_search.format(show) + '&embed=' + embed
     else:
         url = endpoints.show_single_search.format(show)
     q = query_endpoint(url)
     if q:
-        return q
+        return Show(q)
     else:
         raise ShowNotFound(str(show) + ' not found')
 
@@ -474,7 +478,7 @@ def show_index(page=1):
 
 
 def people_search(person):
-    person = url_quote(person)
+    person = _url_quote(person)
     url = endpoints.people_search.format(person)
     q = query_endpoint(url)
     if q:
