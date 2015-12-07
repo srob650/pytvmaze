@@ -41,7 +41,7 @@ class Show(object):
         self.image = self.data.get('image')
         self.externals = self.data.get('externals')
         self.premiered = self.data.get('premiered')
-        self.summary = self.remove_tags(self.data.get('summary'))
+        self.summary = _remove_tags(self.data.get('summary'))
         self._links = self.data.get('_links')
         self.webChannel = self.data.get('webChannel')
         self.runtime = self.data.get('runtime')
@@ -110,9 +110,6 @@ class Show(object):
                     self.cast.append(Person(cast_member['person']))
                     self.characters.append(Character(cast_member['character']))
 
-    def remove_tags(self, text):
-        return re.sub(r'<.*?>', '', text)
-
 
 class Season(object):
     def __init__(self, show, season_number):
@@ -154,6 +151,7 @@ class Episode(object):
         self.image = self.data.get('image')
         self.airstamp = self.data.get('airstamp')
         self.runtime = self.data.get('runtime')
+        self.summary = _remove_tags(self.data.get('summary'))
         self.maze_id = self.data.get('id')
 
     def __repr__(self):
@@ -210,6 +208,10 @@ class Character(object):
 
     def __str__(self):
         return self.name
+
+
+def _remove_tags(text):
+    return re.sub(r'<.*?>', '', text)
 
 
 # Query TV Maze endpoints
