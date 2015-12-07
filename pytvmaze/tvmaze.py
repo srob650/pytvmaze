@@ -1,9 +1,11 @@
 #!/usr/bin/python
 from __future__ import unicode_literals
 
+import json
 import re
 import sys
 import unicodedata
+from datetime import datetime
 
 from pytvmaze import endpoints
 from pytvmaze.exceptions import *
@@ -22,8 +24,6 @@ except ImportError:
     # Python 2
     from urllib2 import urlopen, URLError, HTTPError
     from urllib import quote as url_quote, unquote as url_unquote
-import json
-from datetime import datetime
 
 
 class Show(object):
@@ -41,7 +41,7 @@ class Show(object):
         self.image = self.data.get('image')
         self.externals = self.data.get('externals')
         self.premiered = self.data.get('premiered')
-        self.summary = self.remove_tags(self.data.get('summary'))
+        self.summary = _remove_tags(self.data.get('summary'))
         self._links = self.data.get('_links')
         self.webChannel = self.data.get('webChannel')
         self.runtime = self.data.get('runtime')
@@ -110,9 +110,6 @@ class Show(object):
                     self.cast.append(Person(cast_member['person']))
                     self.characters.append(Character(cast_member['character']))
 
-    def remove_tags(self, text):
-        return re.sub(r'<.*?>', '', text)
-
 
 class Season(object):
     def __init__(self, show, season_number):
@@ -154,6 +151,7 @@ class Episode(object):
         self.image = self.data.get('image')
         self.airstamp = self.data.get('airstamp')
         self.runtime = self.data.get('runtime')
+        self.summary = _remove_tags(self.data.get('summary'))
         self.maze_id = self.data.get('id')
 
     def __repr__(self):
@@ -212,6 +210,10 @@ class Character(object):
         return self.name
 
 
+def _remove_tags(text):
+    return re.sub(r'<.*?>', '', text)
+
+
 # Query TV Maze endpoints
 def query_endpoint(url):
     try:
@@ -257,88 +259,97 @@ def get_show(maze_id=None, tvdb_id=None, tvrage_id=None, show_name=None,
     :return:
     """
     if maze_id:
-        return Show(show_main_info(maze_id, embed=embed))
+        return show_main_info(maze_id, embed=embed)
     elif tvdb_id:
-        return Show(show_main_info(lookup_tvdb(tvdb_id)['id'],
-                                   embed=embed))
+        return show_main_info(lookup_tvdb(tvdb_id)['id'], embed=embed)
     elif tvrage_id:
-        return Show(show_main_info(lookup_tvrage(tvrage_id)['id'],
-                                   embed=embed))
+        return show_main_info(lookup_tvrage(tvrage_id)['id'], embed=embed)
     elif show_name:
-        show = get_show_by_search(show_name, show_year, show_network,
-                                  show_language, show_country, show_web_channel, embed=embed)
+        show = get_show_by_search(show_name, show_year, show_network, show_language, show_country, show_web_channel,
+                                  embed=embed)
         return show
     else:
         raise MissingParameters(
             'Either maze_id, tvdb_id, tvrage_id or show_name are required to get show, none provided,')
 
 
+def _get_show_with_qualifiers(show_name, qualifiers):
+    shows = get_show_list(show_name)
+    best_match = -1  # Initialize match value score
+    show_match = None
+
+    for show in shows:
+        if show.premiered:
+            premiered = show.premiered[:-6].lower()
+        else:
+            premiered = None
+        if show.network:
+            network = show.network['name'].lower()
+        else:
+            network = None
+        if show.webChannel:
+            web_channel = show.webChannel['name'].lower()
+        else:
+            web_channel = None
+        if show.network:
+            country = show.network['country']['code'].lower()
+        else:
+            if show.webChannel:
+                country = show.webChannel['country']['code'].lower()
+            else:
+                country = None
+        if show.language:
+            language = show.language.lower()
+        else:
+            language = None
+
+        attributes = [premiered, country, network, language, web_channel]
+        show_score = len(set(qualifiers) & set(attributes))
+        if show_score > best_match:
+            best_match = show_score
+            show_match = show
+    return show_match
+
+
 # Search with user-defined qualifiers, used by get_show() method
 def get_show_by_search(show_name, show_year, show_network, show_language, show_country, show_web_channel, embed):
-    shows = get_show_list(show_name, embed)
-    qualifiers = [
-        q.lower() for q in [str(show_year), show_network, show_language, show_country, show_web_channel]
-        if q
-        ]
+    qualifiers = [str(show_year), show_network, show_language, show_country, show_web_channel]
     if qualifiers:
-        for show in shows:
-            try:
-                premiered = show.premiered[:-6].lower()
-            except (TypeError, AttributeError):
-                premiered = ''
-
-            try:
-                country = show.network['country']['code'].lower()
-            except (TypeError, AttributeError):
-                try:
-                    country = show.webChannel['country']['code'].lower()
-                except (TypeError, AttributeError):
-                    country = ''
-
-            try:
-                network = show.network['name'].lower()
-            except (TypeError, AttributeError):
-                network = ''
-
-            try:
-                webChannel = show.webChannel['name'].lower()
-            except (TypeError, AttributeError):
-                webChannel = ''
-
-            try:
-                language = show.language.lower()
-            except (TypeError, AttributeError):
-                language = ''
-
-            attributes = [premiered, country, network, language, webChannel]
-            show.matched_qualifiers = len(set(qualifiers) & set(attributes))
-        # Return show with most matched qualifiers
-        return max(shows, key=lambda k: k.matched_qualifiers)
+        qualifiers = [q.lower() for q in qualifiers if q]
+        show = _get_show_with_qualifiers(show_name, qualifiers)
     else:
-        # Return show with highest tvmaze search score
-        return shows[0]
+        return show_single_search(show=show_name, embed=embed)
+    if embed:
+        return show_main_info(maze_id=show.id, embed=embed)
+    else:
+        return show
+
+
+def _url_quote(show):
+    return url_quote(show.encode('UTF-8'))
 
 
 # Return list of Show objects
-def get_show_list(show_name, embed=None):
-    '''
+def get_show_list(show_name):
+    """
     Return list of Show objects from the TVMaze "Show Search" endpoint
 
     List will be ordered by tvmaze score and should mimic the results you see
     by doing a show search on the website.
-    '''
+    :param show_name: Name of show
+    :return: List of Show(s)
+    """
     shows = show_search(show_name)
-    return [
-        Show(show_main_info(show['show']['id'], embed=embed))
-        for show in shows
-        ]
+    return [Show(show['show']) for show in shows]
 
 
 # Get list of Person objects
 def get_people(name):
-    '''
+    """
     Return list of Person objects from the TVMaze "People Search" endpoint
-    '''
+    :param name: Name of person
+    :return: List of Person(s)
+    """
     people = people_search(name)
     if people:
         return [Person(person) for person in people]
@@ -346,7 +357,7 @@ def get_people(name):
 
 # TV Maze Endpoints
 def show_search(show):
-    show = url_quote(show)
+    show = _url_quote(show)
     url = endpoints.show_search.format(show)
     q = query_endpoint(url)
     if q:
@@ -356,14 +367,14 @@ def show_search(show):
 
 
 def show_single_search(show, embed=None):
-    show = url_quote(show)
+    show = _url_quote(show)
     if embed:
         url = endpoints.show_single_search.format(show) + '&embed=' + embed
     else:
         url = endpoints.show_single_search.format(show)
     q = query_endpoint(url)
     if q:
-        return q
+        return Show(q)
     else:
         raise ShowNotFound(str(show) + ' not found')
 
@@ -412,7 +423,7 @@ def show_main_info(maze_id, embed=None):
         url = endpoints.show_main_info.format(maze_id)
     q = query_endpoint(url)
     if q:
-        return q
+        return Show(q)
     else:
         raise IDNotFound('Maze id ' + str(maze_id) + ' not found')
 
@@ -474,7 +485,7 @@ def show_index(page=1):
 
 
 def people_search(person):
-    person = url_quote(person)
+    person = _url_quote(person)
     url = endpoints.people_search.format(person)
     q = query_endpoint(url)
     if q:

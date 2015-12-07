@@ -138,6 +138,7 @@ There are many possible attributes of the Show class, but since TV Maze is full 
     episode.airstamp
     episode.runtime
     episode.maze_id
+    episode.summary
 
 **Direct api.tvmaze.com endpoint access**
 

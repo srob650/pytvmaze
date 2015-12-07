@@ -15,16 +15,16 @@ class EndpointTests(unittest.TestCase):
             show_search('abcdefg')
 
     def test_show_single_search(self):
-        show1 = show_single_search('bobs burgers')
-        self.assertIsInstance(show1, dict)
+        show1 = show_single_search(show='bobs burgers')
+        self.assertIsInstance(show1, Show)
 
-        show2 = show_single_search('extant', embed='episodes')
-        self.assertIsInstance(show2, dict)
-        self.assertIn('episodes', show2['_embedded'].keys())
+        show2 = show_single_search(show='extant', embed='episodes')
+        self.assertIsInstance(show2, Show)
+        self.assertTrue(show2.episodes)
 
-        show3 = show_single_search('archer', embed='cast')
-        self.assertIsInstance(show3, dict)
-        self.assertIn('cast', show3['_embedded'].keys())
+        show3 = show_single_search(show='archer', embed='cast')
+        self.assertIsInstance(show3, Show)
+        self.assertTrue(show3.cast)
 
         with self.assertRaises(ShowNotFound):
             show_single_search('show that doesnt exist')
@@ -61,12 +61,12 @@ class EndpointTests(unittest.TestCase):
         self.assertIsInstance(schedule, list)
 
     def test_show_main_info(self):
-        show1 = show_main_info(1)
-        self.assertIsInstance(show1, dict)
+        show1 = show_main_info(maze_id=1)
+        self.assertIsInstance(show1, Show)
 
-        show2 = show_main_info(2, embed='episodes')
-        self.assertIsInstance(show2, dict)
-        self.assertIn('episodes', show2['_embedded'].keys())
+        show2 = show_main_info(maze_id=2, embed='episodes')
+        self.assertIsInstance(show2, Show)
+        self.assertTrue(show2.episodes)
 
         with self.assertRaises(IDNotFound):
             show_main_info(9999999999)
@@ -233,3 +233,7 @@ class ObjectTests(unittest.TestCase):
         show = get_show(maze_id=161, embed='cast')
         self.assertIsInstance(show.cast[0], Person)
         self.assertIsInstance(show.characters[0], Character)
+
+    def test_unicode_shows(self):
+        show1 = get_show(show_name=u'Unit\xe9 9')
+        self.assertTrue(show1.id == 8652)
