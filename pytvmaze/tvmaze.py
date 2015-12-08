@@ -28,38 +28,37 @@ except ImportError:
 
 class Show(object):
     def __init__(self, data):
-        self.data = data
-        self.status = self.data.get('status')
-        self.rating = self.data.get('rating')
-        self.genres = self.data.get('genres')
-        self.weight = self.data.get('weight')
-        self.updated = self.data.get('updated')
-        self.name = self.data.get('name')
-        self.language = self.data.get('language')
-        self.schedule = self.data.get('schedule')
-        self.url = self.data.get('url')
-        self.image = self.data.get('image')
-        self.externals = self.data.get('externals')
-        self.premiered = self.data.get('premiered')
-        self.summary = _remove_tags(self.data.get('summary'))
-        self._links = self.data.get('_links')
-        self.webChannel = self.data.get('webChannel')
-        self.runtime = self.data.get('runtime')
-        self.type = self.data.get('type')
-        self.id = self.data.get('id')
+        self.status = data.get('status')
+        self.rating = data.get('rating')
+        self.genres = data.get('genres')
+        self.weight = data.get('weight')
+        self.updated = data.get('updated')
+        self.name = data.get('name')
+        self.language = data.get('language')
+        self.schedule = data.get('schedule')
+        self.url = data.get('url')
+        self.image = data.get('image')
+        self.externals = data.get('externals')
+        self.premiered = data.get('premiered')
+        self.summary = _remove_tags(data.get('summary'))
+        self._links = data.get('_links')
+        self.webChannel = data.get('webChannel')
+        self.runtime = data.get('runtime')
+        self.type = data.get('type')
+        self.id = data.get('id')
         self.maze_id = self.id
-        self.network = self.data.get('network')
+        self.network = data.get('network')
         self.episodes = list()
         self.seasons = dict()
         self.cast = list()
         self.characters = list()
-        self.populate()
+        self.populate(data)
 
     def __repr__(self):
         maze_id = self.maze_id
         name = self.name
         try:
-            year = str(self.data.get('premiered')[:-6])
+            year = str(self.premiered[:-6])
         except AttributeError:
             year = None
         try:
@@ -79,11 +78,11 @@ class Show(object):
 
     # Python 3 bool evaluation
     def __bool__(self):
-        return bool(self.data)
+        return bool(self.id)
 
     # Python 2 bool evaluation
     def __nonzero__(self):
-        return bool(self.data)
+        return bool(self.id)
 
     def __len__(self):
         return len(self.seasons)
@@ -94,8 +93,8 @@ class Show(object):
         except KeyError:
             raise SeasonNotFound('Season {0} does not exist for show {1}.'.format(item, self.name))
 
-    def populate(self):
-        embedded = self.data.get('_embedded')
+    def populate(self, data):
+        embedded = data.get('_embedded')
         if embedded:
             if embedded.get('episodes'):
                 for episode in embedded.get('episodes'):
@@ -144,17 +143,16 @@ class Season(object):
 
 class Episode(object):
     def __init__(self, data):
-        self.data = data
-        self.title = self.data.get('name')
-        self.airdate = self.data.get('airdate')
-        self.url = self.data.get('url')
-        self.season_number = self.data.get('season')
-        self.episode_number = self.data.get('number')
-        self.image = self.data.get('image')
-        self.airstamp = self.data.get('airstamp')
-        self.runtime = self.data.get('runtime')
-        self.summary = _remove_tags(self.data.get('summary'))
-        self.maze_id = self.data.get('id')
+        self.title = data.get('name')
+        self.airdate = data.get('airdate')
+        self.url = data.get('url')
+        self.season_number = data.get('season')
+        self.episode_number = data.get('number')
+        self.image = data.get('image')
+        self.airstamp = data.get('airstamp')
+        self.runtime = data.get('runtime')
+        self.summary = _remove_tags(data.get('summary'))
+        self.maze_id = data.get('id')
 
     def __repr__(self):
         return '<Episode(season={season},episode_number={number})>'.format(
@@ -171,15 +169,13 @@ class Episode(object):
 class Person(object):
     def __init__(self, data):
         if data.get('person'):
-            self.data = data['person']
-        else:
-            self.data = data
-        self._links = self.data.get('_links')
-        self.id = self.data.get('id')
-        self.image = self.data.get('image')
-        self.name = self.data.get('name').encode('utf-8')
-        self.score = self.data.get('score')
-        self.url = self.data.get('url')
+            data = data['person']
+        self._links = data.get('_links')
+        self.id = data.get('id')
+        self.image = data.get('image')
+        self.name = data.get('name').encode('utf-8')
+        self.score = data.get('score')
+        self.url = data.get('url')
         self.character = None
 
     def __repr__(self):
@@ -195,12 +191,11 @@ class Person(object):
 
 class Character(object):
     def __init__(self, data):
-        self.data = data
-        self.id = self.data.get('id')
-        self.url = self.data.get('url')
-        self.name = self.data.get('name').encode('utf-8')
-        self.image = self.data.get('image')
-        self._links = self.data.get('_links')
+        self.id = data.get('id')
+        self.url = data.get('url')
+        self.name = data.get('name').encode('utf-8')
+        self.image = data.get('image')
+        self._links = data.get('_links')
         self.person = None
 
     def __repr__(self):
