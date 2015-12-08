@@ -109,6 +109,8 @@ class Show(object):
                 for cast_member in embedded.get('cast'):
                     self.cast.append(Person(cast_member['person']))
                     self.characters.append(Character(cast_member['character']))
+                    self.cast[-1].character = self.characters[-1] # add reference to character
+                    self.characters[-1].person = self.cast[-1] # add reference to cast member
 
 
 class Season(object):
@@ -178,6 +180,7 @@ class Person(object):
         self.name = self.data.get('name').encode('utf-8')
         self.score = self.data.get('score')
         self.url = self.data.get('url')
+        self.character = None
 
     def __repr__(self):
         return u'<Person(name={name},maze_id={id})>'.format(
@@ -198,6 +201,7 @@ class Character(object):
         self.name = self.data.get('name').encode('utf-8')
         self.image = self.data.get('image')
         self._links = self.data.get('_links')
+        self.person = None
 
     def __repr__(self):
         return u'<Character(name={name},maze_id={id})>'.format(
