@@ -112,7 +112,7 @@ class EndpointTests(unittest.TestCase):
     def test_show_index(self):
         index = show_index()
         self.assertIsInstance(index, list)
-        self.assertIsInstance(index[0], dict)
+        self.assertIsInstance(index[0], Show)
 
         with self.assertRaises(ShowIndexError):
             show_index(page=9999999999)

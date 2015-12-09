@@ -495,7 +495,7 @@ def show_index(page=1):
     url = endpoints.show_index.format(page)
     q = query_endpoint(url)
     if q:
-        return q
+        return [Show(show) for show in q]
     else:
         raise ShowIndexError('Error getting show_index, www.tvmaze.com may be down')
 
