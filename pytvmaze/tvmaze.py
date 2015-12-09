@@ -253,6 +253,13 @@ class CrewCredit(object):
                 self.show = Show(data['_embedded']['show'])
 
 
+class Update(object):
+    def __init__(self, id, time):
+        self.id = id
+        self.seconds_since_epoch = time
+        self.timestamp = datetime.fromtimestamp(time)
+
+
 class AKA(object):
     def __init__(self, data):
         self.country = data.get('country')
@@ -583,7 +590,9 @@ def show_updates():
     url = endpoints.show_updates
     q = query_endpoint(url)
     if q:
-        return q
+        updates = [Update(id, time) for id, time in q.items()]
+        updates.sort(key=lambda k: k.seconds_since_epoch, reverse=True)
+        return updates
     else:
         raise ShowIndexError('Error getting show_index, www.tvmaze.com may be down')
 

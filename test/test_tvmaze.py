@@ -3,6 +3,7 @@
 import unittest
 from pytvmaze.tvmaze import *
 from pytvmaze.exceptions import *
+import datetime
 
 class EndpointTests(unittest.TestCase):
 
@@ -173,7 +174,9 @@ class EndpointTests(unittest.TestCase):
 
     def test_show_updates(self):
         updates = show_updates()
-        self.assertIsInstance(updates, dict)
+        self.assertIsInstance(updates, list)
+        self.assertIsInstance(updates[0], Update)
+        self.assertIsInstance(updates[0].timestamp, datetime.datetime)
 
     def test_show_akas(self):
         akas = show_akas(1)
