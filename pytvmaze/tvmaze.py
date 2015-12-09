@@ -219,7 +219,6 @@ class Character(object):
         self.links = data.get('_links')
         self.person = None
 
-
     def __repr__(self):
         return u'<Character(name={name},maze_id={id})>'.format(
             name=unicodedata.normalize(
@@ -241,8 +240,8 @@ class Cast(object):
         for cast_member in data:
             self.people.append(Person(cast_member['person']))
             self.characters.append(Character(cast_member['character']))
-            self.people[-1].character = self.characters[-1] # add reference to character
-            self.characters[-1].person = self.people[-1] # add reference to cast member
+            self.people[-1].character = self.characters[-1]  # add reference to character
+            self.characters[-1].person = self.people[-1]  # add reference to cast member
 
 
 class CastCredit(object):
@@ -295,8 +294,10 @@ def query_endpoint(url):
     try:
         data = urlopen(url).read()
     except HTTPError as e:
-        if e.code == 404 or e.code == 422:
+        if e.code in [404, 422]:
             return None
+        elif e.code == 400:
+            raise BadRequest(e.reason + ' ' + str(e.code) + ' ' + e.url)
     except URLError as e:
         raise ConnectionError(repr(e))
 
@@ -479,7 +480,7 @@ def get_schedule(country='US', date=str(datetime.today().date())):
     if q:
         return [Episode(episode) for episode in q]
     else:
-        raise ScheduleNotFound('Schedule for country ' + str(country) + ' not found')
+        raise ScheduleNotFound('Schedule for country ' + str(country) + 'at date ' + str(date) + 'not found')
 
 
 # ALL known future episodes, several MB large, cached for 24 hours

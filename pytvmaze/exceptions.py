@@ -64,3 +64,8 @@ class IllegalAirDate(BaseError):
 
 class ConnectionError(BaseError):
     pass
+
+
+class BadRequest(BaseError):
+    pass
+
