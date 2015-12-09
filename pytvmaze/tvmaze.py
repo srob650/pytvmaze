@@ -185,6 +185,12 @@ class Person(object):
         self.score = data.get('score')
         self.url = data.get('url')
         self.character = None
+        self.castcredits = None
+        self.crewcredits = None
+
+        self.populate(data)
+
+    def populate(self, data):
         if data.get('_embedded'):
             if data['_embedded'].get('castcredits'):
                 self.castcredits = [CastCredit(credit)
