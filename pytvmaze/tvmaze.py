@@ -226,6 +226,25 @@ class Cast(object):
             self.characters[-1].person = self.people[-1] # add reference to cast member
 
 
+class CastCredit(object):
+    def __init__(self, data):
+        self.links = data.get('_links')
+        if data.get('_embedded'):
+            if data['_embedded'].get('character'):
+                self.character = Character(data['_embedded']['character'])
+            elif data['_embedded'].get('show'):
+                self.show = Show(data['_embedded']['show'])
+
+
+class CrewCredit(object):
+    def __init__(self, data):
+        self.links = data.get('_links')
+        self.type = data.get('type')
+        if data.get('_embedded'):
+            if data['_embedded'].get('show'):
+                self.show = Show(data['_embedded']['show'])
+
+
 class AKA(object):
     def __init__(self, data):
         self.country = data.get('country')
@@ -537,7 +556,7 @@ def person_cast_credits(person_id, embed=None):
         url = endpoints.person_cast_credits.format(person_id)
     q = query_endpoint(url)
     if q:
-        return q
+        return [CastCredit(credit) for credit in q]
     else:
         raise CreditsNotFound('Couldn\'t find cast credits for person ID: ' + str(person_id))
 
@@ -549,7 +568,7 @@ def person_crew_credits(person_id, embed=None):
         url = endpoints.person_crew_credits.format(person_id)
     q = query_endpoint(url)
     if q:
-        return q
+        return [CrewCredit(credit) for credit in q]
     else:
         raise CreditsNotFound('Couldn\'t find crew credits for person ID: ' + str(person_id))
 

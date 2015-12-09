@@ -138,12 +138,16 @@ class EndpointTests(unittest.TestCase):
             person_main_info(9999999999)
 
     def test_person_cast_credits(self):
-        credits1 = person_cast_credits(6)
+        credits1 = person_cast_credits(6, embed='character')
         self.assertIsInstance(credits1, list)
+        self.assertIsInstance(credits1[0].character, Character)
+        self.assertIsInstance(credits1[0].links, dict)
 
         credits2 = person_cast_credits(7, embed='show')
         self.assertIsInstance(credits2, list)
-        self.assertIn('show', credits2[0]['_embedded'])
+        self.assertIsInstance(credits2[0].show, Show)
+        self.assertIsInstance(credits2[0].links, dict)
+
 
         with self.assertRaises(CreditsNotFound):
             person_cast_credits(9999999999)
@@ -151,10 +155,13 @@ class EndpointTests(unittest.TestCase):
     def test_person_crew_credits(self):
         credits1 = person_crew_credits(100)
         self.assertIsInstance(credits1, list)
+        self.assertIsInstance(credits1[0], CrewCredit)
+        self.assertIsInstance(credits1[0].links, dict)
+        self.assertIsInstance(credits1[0].type, unicode)
 
         credits2 = person_crew_credits(100, embed='show')
         self.assertIsInstance(credits2, list)
-        self.assertIn('show', credits2[0]['_embedded'])
+        self.assertIsInstance(credits2[0].show, Show)
 
         with self.assertRaises(CreditsNotFound):
             person_crew_credits(9999999999)
