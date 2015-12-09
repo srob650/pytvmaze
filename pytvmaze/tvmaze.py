@@ -42,7 +42,7 @@ class Show(object):
         self.premiered = data.get('premiered')
         self.summary = _remove_tags(data.get('summary'))
         self.links = data.get('_links')
-        self.webChannel = data.get('webChannel')
+        self.web_channel = data.get('webChannel')
         self.runtime = data.get('runtime')
         self.type = data.get('type')
         self.id = data.get('id')
@@ -60,13 +60,18 @@ class Show(object):
             year = str(self.premiered[:4])
         except AttributeError:
             year = None
-        try:
-            network = str(self.network.get('name'))
-        except AttributeError:
-            network = None
+        if self.web_channel:
+            platform = 'show_web_channel'
+            network = self.web_channel.get('name')
+        elif self.network:
+            platform = 'network'
+            try:
+                network = str(self.network.get('name'))
+            except AttributeError:
+                network = None
 
-        return '<Show(maze_id={id},name={name},year={year},network={network})>'.format(
-            id=maze_id, name=name, year=year, network=network
+        return '<Show(maze_id={id},name={name},year={year},{platform}={network})>'.format(
+            id=maze_id, name=name, year=year, platform=platform, network=network
         )
 
     def __str__(self):
@@ -343,15 +348,15 @@ def _get_show_with_qualifiers(show_name, qualifiers):
             network = show.network['name'].lower()
         else:
             network = None
-        if show.webChannel:
-            web_channel = show.webChannel['name'].lower()
+        if show.web_channel:
+            web_channel = show.web_channel['name'].lower()
         else:
             web_channel = None
         if show.network:
             country = show.network['country']['code'].lower()
         else:
-            if show.webChannel:
-                country = show.webChannel['country']['code'].lower()
+            if show.web_channel:
+                country = show.web_channel['country']['code'].lower()
             else:
                 country = None
         if show.language:
