@@ -180,6 +180,13 @@ class Person(object):
         self.score = data.get('score')
         self.url = data.get('url')
         self.character = None
+        if data.get('_embedded'):
+            if data['_embedded'].get('castcredits'):
+                self.castcredits = [CastCredit(credit)
+                                    for credit in data['_embedded']['castcredits']]
+            elif data['_embedded'].get('crewcredits'):
+                self.crewcredits = [CrewCredit(credit)
+                                    for credit in data['_embedded']['crewcredits']]
 
     def __repr__(self):
         return u'<Person(name={name},maze_id={id})>'.format(
@@ -200,6 +207,7 @@ class Character(object):
         self.image = data.get('image')
         self.links = data.get('_links')
         self.person = None
+
 
     def __repr__(self):
         return u'<Character(name={name},maze_id={id})>'.format(
@@ -542,8 +550,6 @@ def person_main_info(person_id, embed=None):
         url = endpoints.person_main_info.format(person_id)
     q = query_endpoint(url)
     if q:
-        # Still need to handle embeds here
-        # Waiting for a reply on tvmaze forums about inconsistent data being returned
         return Person(q)
     else:
         raise PersonNotFound('Couldn\'t find person: ' + str(person_id))

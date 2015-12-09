@@ -126,13 +126,15 @@ class EndpointTests(unittest.TestCase):
             people_search('person who does not exist')
 
     def test_person_main_info(self):
-        person1 = person_main_info(1)
+        person1 = person_main_info(100, embed='crewcredits')
         self.assertIsInstance(person1, Person)
+        self.assertIsInstance(person1.crewcredits, list)
+        self.assertIsInstance(person1.crewcredits[0], CrewCredit)
 
         person2 = person_main_info(2, embed='castcredits')
         self.assertIsInstance(person2, Person)
-        # Test disabled until I hear back from David at tvmaze about inconsistent data
-        # self.assertIn('castcredits', person2['_embedded'].keys())
+        self.assertIsInstance(person2.castcredits, list)
+        self.assertIsInstance(person2.castcredits[0], CastCredit)
 
         with self.assertRaises(PersonNotFound):
             person_main_info(9999999999)
@@ -140,11 +142,13 @@ class EndpointTests(unittest.TestCase):
     def test_person_cast_credits(self):
         credits1 = person_cast_credits(6, embed='character')
         self.assertIsInstance(credits1, list)
+        self.assertIsInstance(credits1[0], CastCredit)
         self.assertIsInstance(credits1[0].character, Character)
         self.assertIsInstance(credits1[0].links, dict)
 
         credits2 = person_cast_credits(7, embed='show')
         self.assertIsInstance(credits2, list)
+        self.assertIsInstance(credits2[0], CastCredit)
         self.assertIsInstance(credits2[0].show, Show)
         self.assertIsInstance(credits2[0].links, dict)
 
@@ -157,11 +161,12 @@ class EndpointTests(unittest.TestCase):
         self.assertIsInstance(credits1, list)
         self.assertIsInstance(credits1[0], CrewCredit)
         self.assertIsInstance(credits1[0].links, dict)
-        self.assertIsInstance(credits1[0].type, unicode)
 
         credits2 = person_crew_credits(100, embed='show')
         self.assertIsInstance(credits2, list)
+        self.assertIsInstance(credits2[0], CrewCredit)
         self.assertIsInstance(credits2[0].show, Show)
+        self.assertIsInstance(credits2[0].links, dict)
 
         with self.assertRaises(CreditsNotFound):
             person_crew_credits(9999999999)
