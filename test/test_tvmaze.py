@@ -46,12 +46,13 @@ class EndpointTests(unittest.TestCase):
     def test_get_schedule(self):
         schedule = get_schedule()
         self.assertIsInstance(schedule, list)
-        self.assertIsInstance(schedule[0], dict)
+        self.assertIsInstance(schedule[0], Episode)
+        self.assertIsInstance(schedule[0].show, Show)
 
         gb_schedule = get_schedule(country='gb', date='2015-01-01')
         self.assertIsInstance(gb_schedule, list)
-        self.assertIsInstance(gb_schedule[0], dict)
-        self.assertEqual(gb_schedule[0]['airdate'], '2015-01-01')
+        self.assertIsInstance(gb_schedule[0], Episode)
+        self.assertEqual(gb_schedule[0].airdate, '2015-01-01')
 
         with self.assertRaises(ScheduleNotFound):
             get_schedule(country='fakecountry')
@@ -59,6 +60,8 @@ class EndpointTests(unittest.TestCase):
     def test_get_full_schedule(self):
         schedule = get_full_schedule()
         self.assertIsInstance(schedule, list)
+        self.assertIsInstance(schedule[0], Episode)
+        self.assertIsInstance(schedule[0].show, Show)
 
     def test_show_main_info(self):
         show1 = show_main_info(maze_id=1)
