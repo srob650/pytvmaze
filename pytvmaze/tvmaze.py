@@ -41,7 +41,7 @@ class Show(object):
         self.externals = data.get('externals')
         self.premiered = data.get('premiered')
         self.summary = _remove_tags(data.get('summary'))
-        self._links = data.get('_links')
+        self.links = data.get('_links')
         self.webChannel = data.get('webChannel')
         self.runtime = data.get('runtime')
         self.type = data.get('type')
@@ -173,7 +173,7 @@ class Person(object):
     def __init__(self, data):
         if data.get('person'):
             data = data['person']
-        self._links = data.get('_links')
+        self.links = data.get('_links')
         self.id = data.get('id')
         self.image = data.get('image')
         self.name = data.get('name').encode('utf-8')
@@ -198,7 +198,7 @@ class Character(object):
         self.url = data.get('url')
         self.name = data.get('name').encode('utf-8')
         self.image = data.get('image')
-        self._links = data.get('_links')
+        self.links = data.get('_links')
         self.person = None
 
     def __repr__(self):
