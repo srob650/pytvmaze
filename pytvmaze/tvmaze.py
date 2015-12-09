@@ -362,7 +362,7 @@ def get_show_list(show_name):
     :return: List of Show(s)
     """
     shows = show_search(show_name)
-    return [Show(show['show']) for show in shows]
+    return shows
 
 
 # Get list of Person objects
@@ -383,7 +383,7 @@ def show_search(show):
     url = endpoints.show_search.format(show)
     q = query_endpoint(url)
     if q:
-        return q
+        return [Show(show['show']) for show in q]
     else:
         raise ShowNotFound(str(show) + ' not found')
 

@@ -9,7 +9,7 @@ class EndpointTests(unittest.TestCase):
     def test_show_search(self):
         show_list = show_search('dexter')
         self.assertIsInstance(show_list, list)
-        self.assertIsInstance(show_list[0], dict)
+        self.assertIsInstance(show_list[0], Show)
 
         with self.assertRaises(ShowNotFound):
             show_search('abcdefg')
