@@ -1,12 +1,13 @@
 #!/usr/bin/python
 
 import unittest
+
+import mock
+
 from pytvmaze.tvmaze import *
-from pytvmaze.exceptions import *
-import datetime
+
 
 class EndpointTests(unittest.TestCase):
-
     def test_show_search(self):
         show_list = show_search('dexter')
         self.assertIsInstance(show_list, list)
@@ -88,11 +89,11 @@ class EndpointTests(unittest.TestCase):
             episode_list(9999999999)
 
     def test_episode_by_number(self):
-        episode = episode_by_number(5,1,1)
+        episode = episode_by_number(5, 1, 1)
         self.assertIsInstance(episode, Episode)
 
         with self.assertRaises(EpisodeNotFound):
-            episode_by_number(9999999999,1,1)
+            episode_by_number(9999999999, 1, 1)
 
     def test_episodes_by_date(self):
         episodes1 = episodes_by_date(1, '2013-07-01')
@@ -153,7 +154,6 @@ class EndpointTests(unittest.TestCase):
         self.assertIsInstance(credits2[0].show, Show)
         self.assertIsInstance(credits2[0].links, dict)
 
-
         with self.assertRaises(CreditsNotFound):
             person_cast_credits(9999999999)
 
@@ -176,7 +176,7 @@ class EndpointTests(unittest.TestCase):
         updates = show_updates()
         self.assertIsInstance(updates, list)
         self.assertIsInstance(updates[0], Update)
-        self.assertIsInstance(updates[0].timestamp, datetime.datetime)
+        self.assertIsInstance(updates[0].timestamp, datetime)
 
     def test_show_akas(self):
         akas = show_akas(1)
@@ -185,7 +185,6 @@ class EndpointTests(unittest.TestCase):
 
 
 class ObjectTests(unittest.TestCase):
-
     def test_get_show(self):
         show1 = get_show(maze_id=163, embed='episodes')
         self.assertIsInstance(show1, Show)
@@ -232,7 +231,6 @@ class ObjectTests(unittest.TestCase):
         with self.assertRaises(MissingParameters):
             empty_search = get_show()
 
-
     def test_get_show_list(self):
         shows = get_show_list('utopia')
         self.assertIsInstance(shows, list)
@@ -259,3 +257,99 @@ class ObjectTests(unittest.TestCase):
     def test_unicode_shows(self):
         show1 = get_show(show_name=u'Unit\xe9 9')
         self.assertTrue(show1.id == 8652)
+
+
+class ExceptionsTests(unittest.TestCase):
+    def test_BadRequest_exception(self):
+        with self.assertRaises(BadRequest):
+            result = get_show(maze_id=13, embed='sdfgsdfgs')
+
+    def test_MissingParameters_exception(self):
+        with self.assertRaises(MissingParameters):
+            result = get_show()
+
+    def test_ShowNotFound1_exception(self):
+        with self.assertRaises(ShowNotFound):
+            result = show_search('sdfgsdfgsdfg4t4w3dfg')
+
+    def test_ShowNotFound2_exception(self):
+        with self.assertRaises(ShowNotFound):
+            result = show_single_search('sdfgsdfgsdfg4t4w3dfg')
+
+    def test_IDNotFound1_exception(self):
+        with self.assertRaises(IDNotFound):
+            result = lookup_tvdb('sdfgsdfgsdfg4t4w3dfg')
+
+    def test_IDNotFound2_exception(self):
+        with self.assertRaises(IDNotFound):
+            result = lookup_tvrage('sdfgsdfgsdfg4t4w3dfg')
+
+    def test_IDNotFound3_exception(self):
+        with self.assertRaises(IDNotFound):
+            result = show_main_info(maze_id=4563456354)
+
+    def test_IDNotFound4_exception(self):
+        with self.assertRaises(IDNotFound):
+            result = episode_list(maze_id=4563456354)
+
+    def test_ScheduleNotFound1_exception(self):
+        with self.assertRaises(ScheduleNotFound):
+            result = get_schedule(country='fdsfgf')
+
+    def test_ScheduleNotFound2_exception(self):
+        with self.assertRaises(ScheduleNotFound):
+            result = get_schedule(date=(datetime(1900, 1, 1)))
+
+    @mock.patch('pytvmaze.tvmaze.query_endpoint')
+    def test_GeneralError_exception(self, mock_query):
+        with self.assertRaises(GeneralError):
+            mock_query.return_value = None
+            result = get_full_schedule()
+
+    def test_EpisodeNotFound_exception(self):
+        with self.assertRaises(EpisodeNotFound):
+            result = episode_by_number(maze_id=4563456354, season_number=1, episode_number=2)
+
+    def test_NoEpisodesForAirdate_exception(self):
+        with self.assertRaises(NoEpisodesForAirdate):
+            result = episodes_by_date(maze_id=4563456354, airdate='2015-01-01')
+
+    def test_IllegalAirDate_exception(self):
+        with self.assertRaises(IllegalAirDate):
+            result = episodes_by_date(maze_id=4563456354, airdate='dfdfdf')
+
+    def test_CastNotFound_exception(self):
+        with self.assertRaises(CastNotFound):
+            result = show_cast(maze_id=4563456354)
+
+    @mock.patch('pytvmaze.tvmaze.query_endpoint')
+    def test_ShowIndexError_exception(self, mock_query):
+        with self.assertRaises(ShowIndexError):
+            mock_query.return_value = None
+            result = show_index()
+
+    def test_PersonNotFound1_exception(self):
+        with self.assertRaises(PersonNotFound):
+            result = people_search('345345')
+
+    def test_PersonNotFound2_exception(self):
+        with self.assertRaises(PersonNotFound):
+            result = person_main_info(person_id=5634563456)
+
+    def test_CreditsNotFound1_exception(self):
+        with self.assertRaises(CreditsNotFound):
+            result = person_cast_credits(person_id=5634563456)
+
+    def test_CreditsNotFound2_exception(self):
+        with self.assertRaises(CreditsNotFound):
+            result = person_crew_credits(person_id=5634563456)
+
+    @mock.patch('pytvmaze.tvmaze.query_endpoint')
+    def test_ShowIndexError_exception(self, mock_query):
+        with self.assertRaises(ShowIndexError):
+            mock_query.return_value = None
+            result = show_updates()
+
+    def test_AKASNotFound_exception(self):
+        with self.assertRaises(AKASNotFound):
+            result = show_akas(maze_id=5634563456)
