@@ -248,6 +248,11 @@ class Cast(object):
 class CastCredit(object):
     def __init__(self, data):
         self.links = data.get('_links')
+        self.character = None
+        self.show = None
+        self.populate(data)
+
+    def populate(self, data):
         if data.get('_embedded'):
             if data['_embedded'].get('character'):
                 self.character = Character(data['_embedded']['character'])
@@ -259,6 +264,10 @@ class CrewCredit(object):
     def __init__(self, data):
         self.links = data.get('_links')
         self.type = data.get('type')
+        self.show = None
+        self.populate(data)
+
+    def populate(self, data):
         if data.get('_embedded'):
             if data['_embedded'].get('show'):
                 self.show = Show(data['_embedded']['show'])
