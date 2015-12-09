@@ -226,6 +226,12 @@ class Cast(object):
             self.characters[-1].person = self.people[-1] # add reference to cast member
 
 
+class AKA(object):
+    def __init__(self, data):
+        self.country = data.get('country')
+        self.name = data.get('name')
+
+
 def _remove_tags(text):
     return re.sub(r'<.*?>', '', text)
 
@@ -368,7 +374,7 @@ def get_people(name):
     """
     people = people_search(name)
     if people:
-        return [Person(person) for person in people]
+        return people
 
 
 # TV Maze Endpoints
@@ -505,7 +511,7 @@ def people_search(person):
     url = endpoints.people_search.format(person)
     q = query_endpoint(url)
     if q:
-        return q
+        return [Person(person) for person in q]
     else:
         raise PersonNotFound('Couldn\'t find person: ' + str(person))
 
@@ -517,7 +523,9 @@ def person_main_info(person_id, embed=None):
         url = endpoints.person_main_info.format(person_id)
     q = query_endpoint(url)
     if q:
-        return q
+        # Still need to handle embeds here
+        # Waiting for a reply on tvmaze forums about inconsistent data being returned
+        return Person(q)
     else:
         raise PersonNotFound('Couldn\'t find person: ' + str(person_id))
 
@@ -559,6 +567,6 @@ def show_akas(maze_id):
     url = endpoints.show_akas.format(maze_id)
     q = query_endpoint(url)
     if q:
-        return q
+        return [AKA(aka) for aka in q]
     else:
         raise AKASNotFound('Couldn\'t find AKA\'s for TVMaze ID: ' + str(maze_id))
