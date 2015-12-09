@@ -56,19 +56,19 @@ class Show(object):
     def __repr__(self):
         maze_id = self.maze_id
         name = self.name
-        try:
+        if self.premiered:
             year = str(self.premiered[:4])
-        except AttributeError:
+        else:
             year = None
         if self.web_channel:
             platform = 'show_web_channel'
             network = self.web_channel.get('name')
         elif self.network:
             platform = 'network'
-            try:
-                network = str(self.network.get('name'))
-            except AttributeError:
-                network = None
+            network = str(self.network.get('name'))
+        else:
+            platform = ''
+            network = ''
 
         return '<Show(maze_id={id},name={name},year={year},{platform}={network})>'.format(
             id=maze_id, name=name, year=year, platform=platform, network=network
