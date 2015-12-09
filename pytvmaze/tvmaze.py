@@ -58,7 +58,7 @@ class Show(object):
         maze_id = self.maze_id
         name = self.name
         try:
-            year = str(self.premiered[:-6])
+            year = str(self.premiered[:4])
         except AttributeError:
             year = None
         try:
@@ -150,9 +150,12 @@ class Episode(object):
         self.episode_number = data.get('number')
         self.image = data.get('image')
         self.airstamp = data.get('airstamp')
+        self.airtime = data.get('airtime')
         self.runtime = data.get('runtime')
         self.summary = _remove_tags(data.get('summary'))
         self.maze_id = data.get('id')
+        if data.get('show'):
+            self.show = Show(data.get('show'))
 
     def __repr__(self):
         return '<Episode(season={season},episode_number={number})>'.format(
@@ -400,7 +403,7 @@ def get_schedule(country='US', date=str(datetime.today().date())):
     url = endpoints.get_schedule.format(country, date)
     q = query_endpoint(url)
     if q:
-        return q
+        return [Episode(episode) for episode in q]
     else:
         raise ScheduleNotFound('Schedule for country ' + str(country) + ' not found')
 
