@@ -154,8 +154,13 @@ class Episode(object):
         self.runtime = data.get('runtime')
         self.summary = _remove_tags(data.get('summary'))
         self.maze_id = data.get('id')
+        # Reference to show for when using get_schedule()
         if data.get('show'):
             self.show = Show(data.get('show'))
+        # Reference to show for when using get_full_schedule()
+        if data.get('_embedded'):
+            if data['_embedded'].get('show'):
+                self.show = Show(data['_embedded']['show'])
 
     def __repr__(self):
         return '<Episode(season={season},episode_number={number})>'.format(
@@ -413,7 +418,7 @@ def get_full_schedule():
     url = endpoints.get_full_schedule
     q = query_endpoint(url)
     if q:
-        return q
+        return [Episode(episode) for episode in q]
     else:
         raise GeneralError('Something went wrong, www.tvmaze.com may be down')
 
