@@ -31,14 +31,14 @@ class EndpointTests(unittest.TestCase):
 
     def test_lookup_tvrage(self):
         show = lookup_tvrage(24493)
-        self.assertIsInstance(show, dict)
+        self.assertIsInstance(show, Show)
 
         with self.assertRaises(IDNotFound):
             lookup_tvrage(9999999999)
 
     def test_lookup_tvdb(self):
         show = lookup_tvdb(81189)
-        self.assertIsInstance(show, dict)
+        self.assertIsInstance(show, Show)
 
         with self.assertRaises(IDNotFound):
             lookup_tvdb(9999999999)
@@ -102,8 +102,9 @@ class EndpointTests(unittest.TestCase):
 
     def test_show_cast(self):
         cast = show_cast(6)
-        self.assertIsInstance(cast, list)
-        self.assertIsInstance(cast[0], dict)
+        self.assertIsInstance(cast, Cast)
+        self.assertIsInstance(cast.people[0], Person)
+        self.assertIsInstance(cast.characters[0], Character)
 
         with self.assertRaises(CastNotFound):
             show_cast(9999999999)
@@ -234,10 +235,10 @@ class ObjectTests(unittest.TestCase):
 
     def test_cast_embed(self):
         show = get_show(maze_id=161, embed='cast')
-        self.assertIsInstance(show.cast[0], Person)
-        self.assertIsInstance(show.characters[0], Character)
-        self.assertIsInstance(show.characters[0].person, Person)
-        self.assertIsInstance(show.cast[0].character, Character)
+        self.assertIsInstance(show.cast.people[0], Person)
+        self.assertIsInstance(show.cast.characters[0], Character)
+        self.assertIsInstance(show.cast.characters[0].person, Person)
+        self.assertIsInstance(show.cast.people[0].character, Character)
 
     def test_unicode_shows(self):
         show1 = get_show(show_name=u'Unit\xe9 9')

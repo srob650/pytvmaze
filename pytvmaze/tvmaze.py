@@ -50,8 +50,7 @@ class Show(object):
         self.network = data.get('network')
         self.episodes = list()
         self.seasons = dict()
-        self.cast = list()
-        self.characters = list()
+        self.cast = None
         self.populate(data)
 
     def __repr__(self):
@@ -105,11 +104,7 @@ class Show(object):
                         self.seasons[season_num] = Season(self, season_num)
                     self.seasons[season_num].episodes[episode.episode_number] = episode
             if embedded.get('cast'):
-                for cast_member in embedded.get('cast'):
-                    self.cast.append(Person(cast_member['person']))
-                    self.characters.append(Character(cast_member['character']))
-                    self.cast[-1].character = self.characters[-1] # add reference to character
-                    self.characters[-1].person = self.cast[-1] # add reference to cast member
+                self.cast = Cast(embedded.get('cast'))
 
 
 class Season(object):
@@ -217,6 +212,20 @@ class Character(object):
         return self.name
 
 
+class Cast(object):
+    def __init__(self, data):
+        self.people = []
+        self.characters = []
+        self.populate(data)
+
+    def populate(self, data):
+        for cast_member in data:
+            self.people.append(Person(cast_member['person']))
+            self.characters.append(Character(cast_member['character']))
+            self.people[-1].character = self.characters[-1] # add reference to character
+            self.characters[-1].person = self.people[-1] # add reference to cast member
+
+
 def _remove_tags(text):
     return re.sub(r'<.*?>', '', text)
 
@@ -268,9 +277,9 @@ def get_show(maze_id=None, tvdb_id=None, tvrage_id=None, show_name=None,
     if maze_id:
         return show_main_info(maze_id, embed=embed)
     elif tvdb_id:
-        return show_main_info(lookup_tvdb(tvdb_id)['id'], embed=embed)
+        return show_main_info(lookup_tvdb(tvdb_id).id, embed=embed)
     elif tvrage_id:
-        return show_main_info(lookup_tvrage(tvrage_id)['id'], embed=embed)
+        return show_main_info(lookup_tvrage(tvrage_id).id, embed=embed)
     elif show_name:
         show = get_show_by_search(show_name, show_year, show_network, show_language, show_country, show_web_channel,
                                   embed=embed)
@@ -390,7 +399,7 @@ def lookup_tvrage(tvrage_id):
     url = endpoints.lookup_tvrage.format(tvrage_id)
     q = query_endpoint(url)
     if q:
-        return q
+        return Show(q)
     else:
         raise IDNotFound('TVRage id ' + str(tvrage_id) + ' not found')
 
@@ -399,7 +408,7 @@ def lookup_tvdb(tvdb_id):
     url = endpoints.lookup_tvdb.format(tvdb_id)
     q = query_endpoint(url)
     if q:
-        return q
+        return Show(q)
     else:
         raise IDNotFound('TVdb id ' + str(tvdb_id) + ' not found')
 
@@ -477,7 +486,7 @@ def show_cast(maze_id):
     url = endpoints.show_cast.format(maze_id)
     q = query_endpoint(url)
     if q:
-        return q
+        return Cast(q)
     else:
         raise CastNotFound('Couldn\'nt find show cast for TVMaze ID' + str(maze_id))
 
