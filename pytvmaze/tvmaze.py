@@ -182,6 +182,7 @@ class Person(object):
         self.id = data.get('id')
         self.image = data.get('image')
         self.name = data.get('name').encode('utf-8')
+        self.score = data.get('score')
         self.url = data.get('url')
         self.character = None
         self.castcredits = None
