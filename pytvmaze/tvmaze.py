@@ -10,10 +10,6 @@ from datetime import datetime
 from pytvmaze import endpoints
 from pytvmaze.exceptions import *
 
-# Temporary workaround for unicode issues
-if sys.version_info[0] == 3:
-    def unicode(text, encoding):
-        return str(text)
 
 try:
     # Python 3 and later
@@ -53,9 +49,13 @@ class Show(object):
         self.cast = None
         self.populate(data)
 
-    def __repr__(self):
+
+    def _repr_obj(self, as_unicode=False):
         maze_id = self.maze_id
-        name = self.name
+        if as_unicode:
+            name = self.name
+        else:
+            name = _repr_string(self.name),
         try:
             year = str(self.premiered[:4])
         except AttributeError:
@@ -74,8 +74,14 @@ class Show(object):
             id=maze_id, name=name, year=year, platform=platform, network=network
         )
 
+    def __repr__(self):
+        return self._repr_obj()
+
     def __str__(self):
         return self.name
+
+    def __unicode__(self):
+        return self._repr_obj(as_unicode=True)
 
     def __iter__(self):
         return iter(self.seasons.values())
@@ -181,7 +187,7 @@ class Person(object):
         self.links = data.get('_links')
         self.id = data.get('id')
         self.image = data.get('image')
-        self.name = data.get('name').encode('utf-8')
+        self.name = data.get('name')
         self.score = data.get('score')
         self.url = data.get('url')
         self.character = None
@@ -195,9 +201,8 @@ class Person(object):
 
     def __repr__(self):
         return u'<Person(name={name},maze_id={id})>'.format(
-            name=unicodedata.normalize(
-                'NFD', unicode(self.name, 'utf-8')).encode('ascii', 'ignore'),
-            id=self.id
+            name = _repr_string(self.name),
+            id = self.id
         )
 
     def __str__(self):
@@ -208,7 +213,7 @@ class Character(object):
     def __init__(self, data):
         self.id = data.get('id')
         self.url = data.get('url')
-        self.name = data.get('name').encode('utf-8')
+        self.name = data.get('name')
         self.image = data.get('image')
         self.links = data.get('_links')
         self.person = None
@@ -216,8 +221,7 @@ class Character(object):
 
     def __repr__(self):
         return u'<Character(name={name},maze_id={id})>'.format(
-            name=unicodedata.normalize(
-                'NFD', unicode(self.name, 'utf-8')).encode('ascii', 'ignore'),
+            name = _repr_string(self.name),
             id=self.id
         )
 
@@ -273,6 +277,14 @@ class AKA(object):
 
 def _remove_tags(text):
     return re.sub(r'<.*?>', '', text)
+
+
+# For Python 2
+def _repr_string(msg):
+    if sys.version_info[0] == 3:
+        return msg
+    else:
+        return unicodedata.normalize('NFD', msg).encode('ascii', 'ignore')
 
 
 # Query TV Maze endpoints
