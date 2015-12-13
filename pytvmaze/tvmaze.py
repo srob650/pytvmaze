@@ -291,7 +291,7 @@ def _repr_string(msg):
 
 
 # Query TV Maze endpoints
-def query_endpoint(url):
+def _query_endpoint(url):
     try:
         data = urlopen(url).read()
     except HTTPError as e:
@@ -341,7 +341,7 @@ def get_show(maze_id=None, tvdb_id=None, tvrage_id=None, show_name=None,
     elif tvrage_id:
         return show_main_info(lookup_tvrage(tvrage_id).id, embed=embed)
     elif show_name:
-        show = get_show_by_search(show_name, show_year, show_network, show_language, show_country, show_web_channel,
+        show = _get_show_by_search(show_name, show_year, show_network, show_language, show_country, show_web_channel,
                                   embed=embed)
         return show
     else:
@@ -388,7 +388,7 @@ def _get_show_with_qualifiers(show_name, qualifiers):
 
 
 # Search with user-defined qualifiers, used by get_show() method
-def get_show_by_search(show_name, show_year, show_network, show_language, show_country, show_web_channel, embed):
+def _get_show_by_search(show_name, show_year, show_network, show_language, show_country, show_web_channel, embed):
     qualifiers = [str(show_year), show_network, show_language, show_country, show_web_channel]
     if qualifiers:
         qualifiers = [q.lower() for q in qualifiers if q]
@@ -435,7 +435,7 @@ def get_people(name):
 def show_search(show):
     show = _url_quote(show)
     url = endpoints.show_search.format(show)
-    q = query_endpoint(url)
+    q = _query_endpoint(url)
     if q:
         return [Show(show['show']) for show in q]
     else:
@@ -448,7 +448,7 @@ def show_single_search(show, embed=None):
         url = endpoints.show_single_search.format(show) + '&embed=' + embed
     else:
         url = endpoints.show_single_search.format(show)
-    q = query_endpoint(url)
+    q = _query_endpoint(url)
     if q:
         return Show(q)
     else:
@@ -457,7 +457,7 @@ def show_single_search(show, embed=None):
 
 def lookup_tvrage(tvrage_id):
     url = endpoints.lookup_tvrage.format(tvrage_id)
-    q = query_endpoint(url)
+    q = _query_endpoint(url)
     if q:
         return Show(q)
     else:
@@ -466,7 +466,7 @@ def lookup_tvrage(tvrage_id):
 
 def lookup_tvdb(tvdb_id):
     url = endpoints.lookup_tvdb.format(tvdb_id)
-    q = query_endpoint(url)
+    q = _query_endpoint(url)
     if q:
         return Show(q)
     else:
@@ -475,7 +475,7 @@ def lookup_tvdb(tvdb_id):
 
 def get_schedule(country='US', date=str(datetime.today().date())):
     url = endpoints.get_schedule.format(country, date)
-    q = query_endpoint(url)
+    q = _query_endpoint(url)
     if q:
         return [Episode(episode) for episode in q]
     else:
@@ -485,7 +485,7 @@ def get_schedule(country='US', date=str(datetime.today().date())):
 # ALL known future episodes, several MB large, cached for 24 hours
 def get_full_schedule():
     url = endpoints.get_full_schedule
-    q = query_endpoint(url)
+    q = _query_endpoint(url)
     if q:
         return [Episode(episode) for episode in q]
     else:
@@ -497,7 +497,7 @@ def show_main_info(maze_id, embed=None):
         url = endpoints.show_main_info.format(maze_id) + '?embed=' + embed
     else:
         url = endpoints.show_main_info.format(maze_id)
-    q = query_endpoint(url)
+    q = _query_endpoint(url)
     if q:
         return Show(q)
     else:
@@ -509,7 +509,7 @@ def episode_list(maze_id, specials=None):
         url = endpoints.episode_list.format(maze_id) + '&specials=1'
     else:
         url = endpoints.episode_list.format(maze_id)
-    q = query_endpoint(url)
+    q = _query_endpoint(url)
     if q:
         return [Episode(episode) for episode in q]
     else:
@@ -520,7 +520,7 @@ def episode_by_number(maze_id, season_number, episode_number):
     url = endpoints.episode_by_number.format(maze_id,
                                              season_number,
                                              episode_number)
-    q = query_endpoint(url)
+    q = _query_endpoint(url)
     if q:
         return Episode(q)
     else:
@@ -535,7 +535,7 @@ def episodes_by_date(maze_id, airdate):
     except ValueError:
         raise IllegalAirDate('Airdate must be string formatted as \"YYYY-MM-DD\"')
     url = endpoints.episodes_by_date.format(maze_id, airdate)
-    q = query_endpoint(url)
+    q = _query_endpoint(url)
     if q:
         return [Episode(episode) for episode in q]
     else:
@@ -544,7 +544,7 @@ def episodes_by_date(maze_id, airdate):
 
 def show_cast(maze_id):
     url = endpoints.show_cast.format(maze_id)
-    q = query_endpoint(url)
+    q = _query_endpoint(url)
     if q:
         return Cast(q)
     else:
@@ -553,7 +553,7 @@ def show_cast(maze_id):
 
 def show_index(page=1):
     url = endpoints.show_index.format(page)
-    q = query_endpoint(url)
+    q = _query_endpoint(url)
     if q:
         return [Show(show) for show in q]
     else:
@@ -563,7 +563,7 @@ def show_index(page=1):
 def people_search(person):
     person = _url_quote(person)
     url = endpoints.people_search.format(person)
-    q = query_endpoint(url)
+    q = _query_endpoint(url)
     if q:
         return [Person(person) for person in q]
     else:
@@ -575,7 +575,7 @@ def person_main_info(person_id, embed=None):
         url = endpoints.person_main_info.format(person_id) + '?embed=' + embed
     else:
         url = endpoints.person_main_info.format(person_id)
-    q = query_endpoint(url)
+    q = _query_endpoint(url)
     if q:
         return Person(q)
     else:
@@ -587,7 +587,7 @@ def person_cast_credits(person_id, embed=None):
         url = endpoints.person_cast_credits.format(person_id) + '?embed=' + embed
     else:
         url = endpoints.person_cast_credits.format(person_id)
-    q = query_endpoint(url)
+    q = _query_endpoint(url)
     if q:
         return [CastCredit(credit) for credit in q]
     else:
@@ -599,7 +599,7 @@ def person_crew_credits(person_id, embed=None):
         url = endpoints.person_crew_credits.format(person_id) + '?embed=' + embed
     else:
         url = endpoints.person_crew_credits.format(person_id)
-    q = query_endpoint(url)
+    q = _query_endpoint(url)
     if q:
         return [CrewCredit(credit) for credit in q]
     else:
@@ -608,7 +608,7 @@ def person_crew_credits(person_id, embed=None):
 
 def show_updates():
     url = endpoints.show_updates
-    q = query_endpoint(url)
+    q = _query_endpoint(url)
     if q:
         updates = [Update(id, time) for id, time in q.items()]
         updates.sort(key=lambda k: k.seconds_since_epoch, reverse=True)
@@ -619,7 +619,7 @@ def show_updates():
 
 def show_akas(maze_id):
     url = endpoints.show_akas.format(maze_id)
-    q = query_endpoint(url)
+    q = _query_endpoint(url)
     if q:
         return [AKA(aka) for aka in q]
     else:
