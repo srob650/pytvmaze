@@ -56,19 +56,19 @@ class Show(object):
             name = self.name
         else:
             name = _repr_string(self.name)
-        try:
+        if self.premiered:
             year = str(self.premiered[:4])
-        except AttributeError:
+        else:
             year = None
         if self.web_channel:
             platform = 'show_web_channel'
             network = self.web_channel.get('name')
         elif self.network:
             platform = 'network'
-            try:
-                network = str(self.network.get('name'))
-            except AttributeError:
-                network = None
+            network = str(self.network.get('name'))
+        else:
+            platform = ''
+            network = ''
 
         return '<Show(maze_id={id},name={name},year={year},{platform}={network})>'.format(
             id=maze_id, name=name, year=year, platform=platform, network=network
@@ -191,6 +191,12 @@ class Person(object):
         self.score = data.get('score')
         self.url = data.get('url')
         self.character = None
+        self.castcredits = None
+        self.crewcredits = None
+
+        self.populate(data)
+
+    def populate(self, data):
         if data.get('_embedded'):
             if data['_embedded'].get('castcredits'):
                 self.castcredits = [CastCredit(credit)
@@ -261,13 +267,18 @@ class Cast(object):
         for cast_member in data:
             self.people.append(Person(cast_member['person']))
             self.characters.append(Character(cast_member['character']))
-            self.people[-1].character = self.characters[-1] # add reference to character
-            self.characters[-1].person = self.people[-1] # add reference to cast member
+            self.people[-1].character = self.characters[-1]  # add reference to character
+            self.characters[-1].person = self.people[-1]  # add reference to cast member
 
 
 class CastCredit(object):
     def __init__(self, data):
         self.links = data.get('_links')
+        self.character = None
+        self.show = None
+        self.populate(data)
+
+    def populate(self, data):
         if data.get('_embedded'):
             if data['_embedded'].get('character'):
                 self.character = Character(data['_embedded']['character'])
@@ -279,6 +290,10 @@ class CrewCredit(object):
     def __init__(self, data):
         self.links = data.get('_links')
         self.type = data.get('type')
+        self.show = None
+        self.populate(data)
+
+    def populate(self, data):
         if data.get('_embedded'):
             if data['_embedded'].get('show'):
                 self.show = Show(data['_embedded']['show'])
@@ -317,8 +332,10 @@ def _query_endpoint(url):
     try:
         data = urlopen(url).read()
     except HTTPError as e:
-        if e.code == 404 or e.code == 422:
+        if e.code in [404, 422]:
             return None
+        elif e.code == 400:
+            raise BadRequest(e.reason + ' ' + str(e.code) + ' ' + e.url)
     except URLError as e:
         raise ConnectionError(repr(e))
 
@@ -501,7 +518,7 @@ def get_schedule(country='US', date=str(datetime.today().date())):
     if q:
         return [Episode(episode) for episode in q]
     else:
-        raise ScheduleNotFound('Schedule for country ' + str(country) + ' not found')
+        raise ScheduleNotFound('Schedule for country ' + str(country) + 'at date ' + str(date) + 'not found')
 
 
 # ALL known future episodes, several MB large, cached for 24 hours
