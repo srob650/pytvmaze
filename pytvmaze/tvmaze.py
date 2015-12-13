@@ -298,9 +298,24 @@ class CrewCredit(object):
                 self.show = Show(data['_embedded']['show'])
 
 
+class Updates(object):
+    def __init__(self, data):
+        self.updates = dict()
+        self.populate(data)
+
+    def populate(self, data):
+        for maze_id, time in data.items():
+            self.updates[int(maze_id)] = Update(maze_id, time)
+
+    def __getitem__(self, item):
+        try:
+            return self.updates[item]
+        except KeyError:
+            raise UpdateNotFound('No update found for Maze id {}.'.format(item))
+
 class Update(object):
-    def __init__(self, id_, time):
-        self.id = int(id_)
+    def __init__(self, maze_id, time):
+        self.maze_id = int(maze_id)
         self.seconds_since_epoch = time
         self.timestamp = datetime.fromtimestamp(time)
 
@@ -595,7 +610,7 @@ def show_index(page=1):
     if q:
         return [Show(show) for show in q]
     else:
-        raise ShowIndexError('Error getting show_index, www.tvmaze.com may be down')
+        raise ShowIndexError('Error getting show index, www.tvmaze.com may be down')
 
 
 def people_search(person):
@@ -648,11 +663,9 @@ def show_updates():
     url = endpoints.show_updates
     q = _query_endpoint(url)
     if q:
-        updates = [Update(id_, time) for id_, time in q.items()]
-        updates.sort(key=lambda k: k.seconds_since_epoch, reverse=True)
-        return updates
+        return Updates(q)
     else:
-        raise ShowIndexError('Error getting show_index, www.tvmaze.com may be down')
+        raise ShowIndexError('Error getting show updates, www.tvmaze.com may be down')
 
 
 def show_akas(maze_id):

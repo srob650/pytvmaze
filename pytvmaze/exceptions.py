@@ -42,6 +42,10 @@ class CreditsNotFound(BaseError):
     pass
 
 
+class UpdateNotFound(BaseError):
+    pass
+
+
 class AKASNotFound(BaseError):
     pass
 
@@ -68,4 +72,3 @@ class ConnectionError(BaseError):
 
 class BadRequest(BaseError):
     pass
-

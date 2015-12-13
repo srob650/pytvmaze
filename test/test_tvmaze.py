@@ -173,9 +173,9 @@ class EndpointTests(unittest.TestCase):
 
     def test_show_updates(self):
         updates = show_updates()
-        self.assertIsInstance(updates, list)
-        self.assertIsInstance(updates[0], Update)
-        self.assertIsInstance(updates[0].timestamp, datetime)
+        self.assertIsInstance(updates, Updates)
+        self.assertIsInstance(updates[1], Update)
+        self.assertIsInstance(updates[1].timestamp, datetime)
 
     def test_show_akas(self):
         akas = show_akas(1)
