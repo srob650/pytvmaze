@@ -285,8 +285,8 @@ class CrewCredit(object):
 
 
 class Update(object):
-    def __init__(self, id, time):
-        self.id = id
+    def __init__(self, id_, time):
+        self.id = int(id_)
         self.seconds_since_epoch = time
         self.timestamp = datetime.fromtimestamp(time)
 
@@ -632,7 +632,7 @@ def show_updates():
     url = endpoints.show_updates
     q = _query_endpoint(url)
     if q:
-        updates = [Update(id, time) for id, time in q.items()]
+        updates = [Update(id_, time) for id_, time in q.items()]
         updates.sort(key=lambda k: k.seconds_since_epoch, reverse=True)
         return updates
     else:
