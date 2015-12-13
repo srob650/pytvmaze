@@ -1,7 +1,9 @@
 ### **Notice**
- - Updated get_show() method to require explicit embedding of episodes
- - Added Character class
- - You can now embed "cast" in a Show object.  This adds show.cast (list of Person objects) and show.characters (list of Character objects)
+ - Cast embedding changed with Cast() object, see below **Embed cast in Show object** example
+ - ```Show._links``` changed to ```Show.links```
+ - ```Show.webChannel``` changed to ```Show.web_channel```
+ - Updated unicode handling to better support non-english languages in show/person/character names
+ - Added Updates() class with dict of Update() objects
 
 To install:
 
@@ -67,12 +69,12 @@ To install:
 
     # Embed cast in Show object
     >>> show = pytvmaze.get_show(maze_id=161, embed='cast')
-    >>> show.cast
+    >>> show.cast.people
     [<Person(name=Michael C. Hall,maze_id=29740)>,
     <Person(name=Jennifer Carpenter,maze_id=20504)>,
     etc.]
 
-    >>> show.characters
+    >>> show.cast.characters
     [<Character(name=Dexter Morgan,maze_id=41784)>,
     <Character(name=Debra Morgan,maze_id=41786)>,
     etc.]
@@ -95,6 +97,14 @@ These qualifiers will be matched against the following show attributes: premier 
     >>> show.network['name']
     ABC
 
+    # Show updates
+    >>> updates = pytvmaze.show_updates()
+    >>> updates[1]
+    <Update(maze_id=1,time=1444852010)>
+    # Time format is seconds since epoch - timestamp attribute gives datetime object
+    >>> print(updates[1].timestamp)
+    2015-10-14 12:46:50
+
 **Show() Season() and Episode() class attributes**
 
 There are many possible attributes of the Show class, but since TV Maze is full of user contributions and always being updated, shows will have different available attributes.  Possible attributes are:
@@ -113,8 +123,8 @@ There are many possible attributes of the Show class, but since TV Maze is full 
     show.externals # dict of tvdb and tvrage id's if available
     show.premiered
     show.summary
-    show._links # dict of previousepisode and nextepisode keys for their links
-    show.webChannel
+    show.links # dict of previousepisode and nextepisode keys for their links
+    show.web_channel
     show.runtime
     show.type
     show.id
