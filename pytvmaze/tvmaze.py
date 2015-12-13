@@ -199,14 +199,25 @@ class Person(object):
                 self.crewcredits = [CrewCredit(credit)
                                     for credit in data['_embedded']['crewcredits']]
 
-    def __repr__(self):
-        return u'<Person(name={name},maze_id={id})>'.format(
+    def _repr_obj(self, as_unicode=False):
+        if as_unicode:
+            name = self.name
+        else:
             name = _repr_string(self.name),
+
+        return u'<Person(name={name},maze_id={id})>'.format(
+            name = name,
             id = self.id
         )
 
+    def __repr__(self):
+        return self._repr_obj()
+
     def __str__(self):
         return self.name
+
+    def __unicode__(self):
+        return self._repr_obj(as_unicode=True)
 
 
 class Character(object):
@@ -219,14 +230,25 @@ class Character(object):
         self.person = None
 
 
-    def __repr__(self):
-        return u'<Character(name={name},maze_id={id})>'.format(
+    def _repr_obj(self, as_unicode=False):
+        if as_unicode:
+            name = self.name
+        else:
             name = _repr_string(self.name),
+
+        return u'<Character(name={name},maze_id={id})>'.format(
+            name = name,
             id = self.id
         )
 
+    def __repr__(self):
+        return self._repr_obj()
+
     def __str__(self):
         return self.name
+
+    def __unicode__(self):
+        return self._repr_obj(as_unicode=True)
 
 
 class Cast(object):
