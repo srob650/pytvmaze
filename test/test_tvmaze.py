@@ -1,8 +1,7 @@
 #!/usr/bin/python
 
 import unittest
-
-import mock
+import datetime
 
 from pytvmaze.tvmaze import *
 
@@ -300,12 +299,6 @@ class ExceptionsTests(unittest.TestCase):
         with self.assertRaises(ScheduleNotFound):
             result = get_schedule(date=(datetime(1900, 1, 1)))
 
-    @mock.patch('pytvmaze.tvmaze.query_endpoint')
-    def test_GeneralError_exception(self, mock_query):
-        with self.assertRaises(GeneralError):
-            mock_query.return_value = None
-            result = get_full_schedule()
-
     def test_EpisodeNotFound_exception(self):
         with self.assertRaises(EpisodeNotFound):
             result = episode_by_number(maze_id=4563456354, season_number=1, episode_number=2)
@@ -322,12 +315,6 @@ class ExceptionsTests(unittest.TestCase):
         with self.assertRaises(CastNotFound):
             result = show_cast(maze_id=4563456354)
 
-    @mock.patch('pytvmaze.tvmaze.query_endpoint')
-    def test_ShowIndexError_exception(self, mock_query):
-        with self.assertRaises(ShowIndexError):
-            mock_query.return_value = None
-            result = show_index()
-
     def test_PersonNotFound1_exception(self):
         with self.assertRaises(PersonNotFound):
             result = people_search('345345')
@@ -343,12 +330,6 @@ class ExceptionsTests(unittest.TestCase):
     def test_CreditsNotFound2_exception(self):
         with self.assertRaises(CreditsNotFound):
             result = person_crew_credits(person_id=5634563456)
-
-    @mock.patch('pytvmaze.tvmaze.query_endpoint')
-    def test_ShowIndexError_exception(self, mock_query):
-        with self.assertRaises(ShowIndexError):
-            mock_query.return_value = None
-            result = show_updates()
 
     def test_AKASNotFound_exception(self):
         with self.assertRaises(AKASNotFound):
