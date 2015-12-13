@@ -55,7 +55,7 @@ class Show(object):
         if as_unicode:
             name = self.name
         else:
-            name = _repr_string(self.name),
+            name = _repr_string(self.name)
         try:
             year = str(self.premiered[:4])
         except AttributeError:
@@ -203,7 +203,7 @@ class Person(object):
         if as_unicode:
             name = self.name
         else:
-            name = _repr_string(self.name),
+            name = _repr_string(self.name)
 
         return u'<Person(name={name},maze_id={id})>'.format(
             name = name,
@@ -234,7 +234,7 @@ class Character(object):
         if as_unicode:
             name = self.name
         else:
-            name = _repr_string(self.name),
+            name = _repr_string(self.name)
 
         return u'<Character(name={name},maze_id={id})>'.format(
             name = name,
