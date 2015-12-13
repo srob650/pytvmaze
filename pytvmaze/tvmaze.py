@@ -284,7 +284,10 @@ def _repr_string(msg):
     if sys.version_info[0] == 3:
         return msg
     else:
-        return unicodedata.normalize('NFD', msg).encode('ascii', 'ignore')
+        norm_msg = unicodedata.normalize('NFD', msg).encode('ascii', 'ignore')
+        if norm_msg == '':
+            norm_msg = 'CAN NOT REPRESENT UNICODE'
+        return norm_msg
 
 
 # Query TV Maze endpoints
