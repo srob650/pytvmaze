@@ -126,8 +126,8 @@ class Season(object):
 
     def __repr__(self):
         return '<Season(showname={name},season_number={number})>'.format(
-            name=self.show.name,
-            number=str(self.season_number).zfill(2)
+            name = self.show.name,
+            number = str(self.season_number).zfill(2)
         )
 
     def __str__(self):
@@ -170,8 +170,8 @@ class Episode(object):
 
     def __repr__(self):
         return '<Episode(season={season},episode_number={number})>'.format(
-            season=str(self.season_number).zfill(2),
-            number=str(self.episode_number).zfill(2)
+            season = str(self.season_number).zfill(2),
+            number = str(self.episode_number).zfill(2)
         )
 
     def __str__(self):
@@ -222,7 +222,7 @@ class Character(object):
     def __repr__(self):
         return u'<Character(name={name},maze_id={id})>'.format(
             name = _repr_string(self.name),
-            id=self.id
+            id = self.id
         )
 
     def __str__(self):
