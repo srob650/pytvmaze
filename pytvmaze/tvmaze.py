@@ -61,16 +61,16 @@ class Show(object):
         else:
             year = None
         if self.web_channel:
-            platform = 'show_web_channel'
+            platform = ',show_web_channel='
             network = self.web_channel.get('name')
         elif self.network:
-            platform = 'network'
+            platform = ',network='
             network = str(self.network.get('name'))
         else:
             platform = ''
             network = ''
 
-        return '<Show(maze_id={id},name={name},year={year},{platform}={network})>'.format(
+        return '<Show(maze_id={id},name={name},year={year}{platform}{network})>'.format(
             id=maze_id, name=name, year=year, platform=platform, network=network
         )
 
