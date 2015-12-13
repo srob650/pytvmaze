@@ -42,6 +42,10 @@ class CreditsNotFound(BaseError):
     pass
 
 
+class UpdateNotFound(BaseError):
+    pass
+
+
 class AKASNotFound(BaseError):
     pass
 
@@ -63,4 +67,8 @@ class IllegalAirDate(BaseError):
 
 
 class ConnectionError(BaseError):
+    pass
+
+
+class BadRequest(BaseError):
     pass

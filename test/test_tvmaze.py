@@ -1,15 +1,16 @@
 #!/usr/bin/python
 
 import unittest
+import datetime
+
 from pytvmaze.tvmaze import *
-from pytvmaze.exceptions import *
+
 
 class EndpointTests(unittest.TestCase):
-
     def test_show_search(self):
         show_list = show_search('dexter')
         self.assertIsInstance(show_list, list)
-        self.assertIsInstance(show_list[0], dict)
+        self.assertIsInstance(show_list[0], Show)
 
         with self.assertRaises(ShowNotFound):
             show_search('abcdefg')
@@ -31,14 +32,14 @@ class EndpointTests(unittest.TestCase):
 
     def test_lookup_tvrage(self):
         show = lookup_tvrage(24493)
-        self.assertIsInstance(show, dict)
+        self.assertIsInstance(show, Show)
 
         with self.assertRaises(IDNotFound):
             lookup_tvrage(9999999999)
 
     def test_lookup_tvdb(self):
         show = lookup_tvdb(81189)
-        self.assertIsInstance(show, dict)
+        self.assertIsInstance(show, Show)
 
         with self.assertRaises(IDNotFound):
             lookup_tvdb(9999999999)
@@ -46,12 +47,13 @@ class EndpointTests(unittest.TestCase):
     def test_get_schedule(self):
         schedule = get_schedule()
         self.assertIsInstance(schedule, list)
-        self.assertIsInstance(schedule[0], dict)
+        self.assertIsInstance(schedule[0], Episode)
+        self.assertIsInstance(schedule[0].show, Show)
 
         gb_schedule = get_schedule(country='gb', date='2015-01-01')
         self.assertIsInstance(gb_schedule, list)
-        self.assertIsInstance(gb_schedule[0], dict)
-        self.assertEqual(gb_schedule[0]['airdate'], '2015-01-01')
+        self.assertIsInstance(gb_schedule[0], Episode)
+        self.assertEqual(gb_schedule[0].airdate, '2015-01-01')
 
         with self.assertRaises(ScheduleNotFound):
             get_schedule(country='fakecountry')
@@ -59,6 +61,8 @@ class EndpointTests(unittest.TestCase):
     def test_get_full_schedule(self):
         schedule = get_full_schedule()
         self.assertIsInstance(schedule, list)
+        self.assertIsInstance(schedule[0], Episode)
+        self.assertIsInstance(schedule[0].show, Show)
 
     def test_show_main_info(self):
         show1 = show_main_info(maze_id=1)
@@ -84,11 +88,11 @@ class EndpointTests(unittest.TestCase):
             episode_list(9999999999)
 
     def test_episode_by_number(self):
-        episode = episode_by_number(5,1,1)
+        episode = episode_by_number(5, 1, 1)
         self.assertIsInstance(episode, Episode)
 
         with self.assertRaises(EpisodeNotFound):
-            episode_by_number(9999999999,1,1)
+            episode_by_number(9999999999, 1, 1)
 
     def test_episodes_by_date(self):
         episodes1 = episodes_by_date(1, '2013-07-01')
@@ -99,8 +103,9 @@ class EndpointTests(unittest.TestCase):
 
     def test_show_cast(self):
         cast = show_cast(6)
-        self.assertIsInstance(cast, list)
-        self.assertIsInstance(cast[0], dict)
+        self.assertIsInstance(cast, Cast)
+        self.assertIsInstance(cast.people[0], Person)
+        self.assertIsInstance(cast.characters[0], Character)
 
         with self.assertRaises(CastNotFound):
             show_cast(9999999999)
@@ -108,7 +113,7 @@ class EndpointTests(unittest.TestCase):
     def test_show_index(self):
         index = show_index()
         self.assertIsInstance(index, list)
-        self.assertIsInstance(index[0], dict)
+        self.assertIsInstance(index[0], Show)
 
         with self.assertRaises(ShowIndexError):
             show_index(page=9999999999)
@@ -116,29 +121,37 @@ class EndpointTests(unittest.TestCase):
     def test_people_search(self):
         people = people_search('jennifer carpenter')
         self.assertIsInstance(people, list)
-        self.assertIsInstance(people[0], dict)
+        self.assertIsInstance(people[0], Person)
 
         with self.assertRaises(PersonNotFound):
             people_search('person who does not exist')
 
     def test_person_main_info(self):
-        person1 = person_main_info(1)
-        self.assertIsInstance(person1, dict)
+        person1 = person_main_info(100, embed='crewcredits')
+        self.assertIsInstance(person1, Person)
+        self.assertIsInstance(person1.crewcredits, list)
+        self.assertIsInstance(person1.crewcredits[0], CrewCredit)
 
         person2 = person_main_info(2, embed='castcredits')
-        self.assertIsInstance(person2, dict)
-        self.assertIn('castcredits', person2['_embedded'].keys())
+        self.assertIsInstance(person2, Person)
+        self.assertIsInstance(person2.castcredits, list)
+        self.assertIsInstance(person2.castcredits[0], CastCredit)
 
         with self.assertRaises(PersonNotFound):
             person_main_info(9999999999)
 
     def test_person_cast_credits(self):
-        credits1 = person_cast_credits(6)
+        credits1 = person_cast_credits(6, embed='character')
         self.assertIsInstance(credits1, list)
+        self.assertIsInstance(credits1[0], CastCredit)
+        self.assertIsInstance(credits1[0].character, Character)
+        self.assertIsInstance(credits1[0].links, dict)
 
         credits2 = person_cast_credits(7, embed='show')
         self.assertIsInstance(credits2, list)
-        self.assertIn('show', credits2[0]['_embedded'])
+        self.assertIsInstance(credits2[0], CastCredit)
+        self.assertIsInstance(credits2[0].show, Show)
+        self.assertIsInstance(credits2[0].links, dict)
 
         with self.assertRaises(CreditsNotFound):
             person_cast_credits(9999999999)
@@ -146,26 +159,31 @@ class EndpointTests(unittest.TestCase):
     def test_person_crew_credits(self):
         credits1 = person_crew_credits(100)
         self.assertIsInstance(credits1, list)
+        self.assertIsInstance(credits1[0], CrewCredit)
+        self.assertIsInstance(credits1[0].links, dict)
 
         credits2 = person_crew_credits(100, embed='show')
         self.assertIsInstance(credits2, list)
-        self.assertIn('show', credits2[0]['_embedded'])
+        self.assertIsInstance(credits2[0], CrewCredit)
+        self.assertIsInstance(credits2[0].show, Show)
+        self.assertIsInstance(credits2[0].links, dict)
 
         with self.assertRaises(CreditsNotFound):
             person_crew_credits(9999999999)
 
     def test_show_updates(self):
         updates = show_updates()
-        self.assertIsInstance(updates, dict)
+        self.assertIsInstance(updates, Updates)
+        self.assertIsInstance(updates[1], Update)
+        self.assertIsInstance(updates[1].timestamp, datetime)
 
     def test_show_akas(self):
         akas = show_akas(1)
         self.assertIsInstance(akas, list)
-        self.assertIsInstance(akas[0], dict)
+        self.assertIsInstance(akas[0], AKA)
 
 
 class ObjectTests(unittest.TestCase):
-
     def test_get_show(self):
         show1 = get_show(maze_id=163, embed='episodes')
         self.assertIsInstance(show1, Show)
@@ -207,11 +225,10 @@ class ObjectTests(unittest.TestCase):
         self.assertIsInstance(show8, Show)
         self.assertTrue(hasattr(show8, 'episodes'))
         self.assertTrue(show8.language == 'English')
-        self.assertTrue(show8.webChannel['name'] == 'Netflix')
+        self.assertTrue(show8.web_channel['name'] == 'Netflix')
 
         with self.assertRaises(MissingParameters):
             empty_search = get_show()
-
 
     def test_get_show_list(self):
         shows = get_show_list('utopia')
@@ -231,9 +248,89 @@ class ObjectTests(unittest.TestCase):
 
     def test_cast_embed(self):
         show = get_show(maze_id=161, embed='cast')
-        self.assertIsInstance(show.cast[0], Person)
-        self.assertIsInstance(show.characters[0], Character)
+        self.assertIsInstance(show.cast.people[0], Person)
+        self.assertIsInstance(show.cast.characters[0], Character)
+        self.assertIsInstance(show.cast.characters[0].person, Person)
+        self.assertIsInstance(show.cast.people[0].character, Character)
 
     def test_unicode_shows(self):
         show1 = get_show(show_name=u'Unit\xe9 9')
         self.assertTrue(show1.id == 8652)
+
+
+class ExceptionsTests(unittest.TestCase):
+    def test_BadRequest_exception(self):
+        with self.assertRaises(BadRequest):
+            result = get_show(maze_id=13, embed='sdfgsdfgs')
+
+    def test_MissingParameters_exception(self):
+        with self.assertRaises(MissingParameters):
+            result = get_show()
+
+    def test_ShowNotFound1_exception(self):
+        with self.assertRaises(ShowNotFound):
+            result = show_search('sdfgsdfgsdfg4t4w3dfg')
+
+    def test_ShowNotFound2_exception(self):
+        with self.assertRaises(ShowNotFound):
+            result = show_single_search('sdfgsdfgsdfg4t4w3dfg')
+
+    def test_IDNotFound1_exception(self):
+        with self.assertRaises(IDNotFound):
+            result = lookup_tvdb('sdfgsdfgsdfg4t4w3dfg')
+
+    def test_IDNotFound2_exception(self):
+        with self.assertRaises(IDNotFound):
+            result = lookup_tvrage('sdfgsdfgsdfg4t4w3dfg')
+
+    def test_IDNotFound3_exception(self):
+        with self.assertRaises(IDNotFound):
+            result = show_main_info(maze_id=4563456354)
+
+    def test_IDNotFound4_exception(self):
+        with self.assertRaises(IDNotFound):
+            result = episode_list(maze_id=4563456354)
+
+    def test_ScheduleNotFound1_exception(self):
+        with self.assertRaises(ScheduleNotFound):
+            result = get_schedule(country='fdsfgf')
+
+    def test_ScheduleNotFound2_exception(self):
+        with self.assertRaises(ScheduleNotFound):
+            result = get_schedule(date=(datetime(1900, 1, 1)))
+
+    def test_EpisodeNotFound_exception(self):
+        with self.assertRaises(EpisodeNotFound):
+            result = episode_by_number(maze_id=4563456354, season_number=1, episode_number=2)
+
+    def test_NoEpisodesForAirdate_exception(self):
+        with self.assertRaises(NoEpisodesForAirdate):
+            result = episodes_by_date(maze_id=4563456354, airdate='2015-01-01')
+
+    def test_IllegalAirDate_exception(self):
+        with self.assertRaises(IllegalAirDate):
+            result = episodes_by_date(maze_id=4563456354, airdate='dfdfdf')
+
+    def test_CastNotFound_exception(self):
+        with self.assertRaises(CastNotFound):
+            result = show_cast(maze_id=4563456354)
+
+    def test_PersonNotFound1_exception(self):
+        with self.assertRaises(PersonNotFound):
+            result = people_search('345345')
+
+    def test_PersonNotFound2_exception(self):
+        with self.assertRaises(PersonNotFound):
+            result = person_main_info(person_id=5634563456)
+
+    def test_CreditsNotFound1_exception(self):
+        with self.assertRaises(CreditsNotFound):
+            result = person_cast_credits(person_id=5634563456)
+
+    def test_CreditsNotFound2_exception(self):
+        with self.assertRaises(CreditsNotFound):
+            result = person_crew_credits(person_id=5634563456)
+
+    def test_AKASNotFound_exception(self):
+        with self.assertRaises(AKASNotFound):
+            result = show_akas(maze_id=5634563456)

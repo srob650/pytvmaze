@@ -2,10 +2,11 @@ from setuptools import setup, find_packages
 
 setup(
     name = 'pytvmaze',
-    version = '1.3.9',
+    version = '1.4.0',
     description = 'Python interface to the TV Maze API (www.tvmaze.com)',
     url = 'https://github.com/srob650/pytvmaze',
     author = 'Spencer Roberts',
+    author_email = 'pytvmaze@gmail.com',
     license='MIT',
 
     classifiers = [
