@@ -319,6 +319,12 @@ class Update(object):
         self.seconds_since_epoch = time
         self.timestamp = datetime.fromtimestamp(time)
 
+    def __repr__(self):
+        return '<Update(maze_id={maze_id},time={time})>'.format(
+            maze_id = self.maze_id,
+            time = self.seconds_since_epoch
+        )
+
 
 class AKA(object):
     def __init__(self, data):
