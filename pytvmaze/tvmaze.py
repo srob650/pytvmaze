@@ -10,7 +10,6 @@ from datetime import datetime
 from pytvmaze import endpoints
 from pytvmaze.exceptions import *
 
-
 try:
     # Python 3 and later
     from urllib.request import urlopen
@@ -48,7 +47,6 @@ class Show(object):
         self.seasons = dict()
         self.cast = None
         self.populate(data)
-
 
     def _repr_obj(self, as_unicode=False):
         maze_id = self.maze_id
@@ -126,8 +124,8 @@ class Season(object):
 
     def __repr__(self):
         return '<Season(showname={name},season_number={number})>'.format(
-            name = self.show.name,
-            number = str(self.season_number).zfill(2)
+            name=self.show.name,
+            number=str(self.season_number).zfill(2)
         )
 
     def __str__(self):
@@ -170,8 +168,8 @@ class Episode(object):
 
     def __repr__(self):
         return '<Episode(season={season},episode_number={number})>'.format(
-            season = str(self.season_number).zfill(2),
-            number = str(self.episode_number).zfill(2)
+            season=str(self.season_number).zfill(2),
+            number=str(self.episode_number).zfill(2)
         )
 
     def __str__(self):
@@ -211,8 +209,8 @@ class Person(object):
             name = _repr_string(self.name)
 
         return u'<Person(name={name},maze_id={id})>'.format(
-            name = name,
-            id = self.id
+            name=name,
+            id=self.id
         )
 
     def __repr__(self):
@@ -234,7 +232,6 @@ class Character(object):
         self.links = data.get('_links')
         self.person = None
 
-
     def _repr_obj(self, as_unicode=False):
         if as_unicode:
             name = self.name
@@ -242,8 +239,8 @@ class Character(object):
             name = _repr_string(self.name)
 
         return u'<Character(name={name},maze_id={id})>'.format(
-            name = name,
-            id = self.id
+            name=name,
+            id=self.id
         )
 
     def __repr__(self):
@@ -313,6 +310,7 @@ class Updates(object):
         except KeyError:
             raise UpdateNotFound('No update found for Maze id {}.'.format(item))
 
+
 class Update(object):
     def __init__(self, maze_id, time):
         self.maze_id = int(maze_id)
@@ -321,8 +319,8 @@ class Update(object):
 
     def __repr__(self):
         return '<Update(maze_id={maze_id},time={time})>'.format(
-            maze_id = self.maze_id,
-            time = self.seconds_since_epoch
+            maze_id=self.maze_id,
+            time=self.seconds_since_epoch
         )
 
 
@@ -393,19 +391,33 @@ def get_show(maze_id=None, tvdb_id=None, tvrage_id=None, show_name=None,
     :param embed: embed parameter to include additional data. Currently 'episodes' and 'cast' are supported
     :return:
     """
-    if maze_id:
-        return show_main_info(maze_id, embed=embed)
-    elif tvdb_id:
-        return show_main_info(lookup_tvdb(tvdb_id).id, embed=embed)
-    elif tvrage_id:
-        return show_main_info(lookup_tvrage(tvrage_id).id, embed=embed)
-    elif show_name:
-        show = _get_show_by_search(show_name, show_year, show_network, show_language, show_country, show_web_channel,
-                                  embed=embed)
-        return show
-    else:
+    errors = []
+    if not (maze_id or tvdb_id or tvdb_id or show_name):
         raise MissingParameters(
             'Either maze_id, tvdb_id, tvrage_id or show_name are required to get show, none provided,')
+    if maze_id:
+        try:
+            return show_main_info(maze_id, embed=embed)
+        except IDNotFound as e:
+            errors.append(e.value)
+    if tvdb_id:
+        try:
+            return show_main_info(lookup_tvdb(tvdb_id).id, embed=embed)
+        except IDNotFound as e:
+            errors.append(e.value)
+    if tvrage_id:
+        try:
+            return show_main_info(lookup_tvrage(tvrage_id).id, embed=embed)
+        except IDNotFound as e:
+            errors.append(e.value)
+    if show_name:
+        try:
+            show = _get_show_by_search(show_name, show_year, show_network, show_language, show_country,
+                                       show_web_channel, embed=embed)
+            return show
+        except ShowNotFound as e:
+            errors.append(e.value)
+    raise ShowNotFound(' ,'.join(errors))
 
 
 def _get_show_with_qualifiers(show_name, qualifiers):
@@ -448,7 +460,9 @@ def _get_show_with_qualifiers(show_name, qualifiers):
 
 # Search with user-defined qualifiers, used by get_show() method
 def _get_show_by_search(show_name, show_year, show_network, show_language, show_country, show_web_channel, embed):
-    qualifiers = [str(show_year), show_network, show_language, show_country, show_web_channel]
+    if show_year:
+        show_year = str(show_year)
+    qualifiers = filter(None, [show_year, show_network, show_language, show_country, show_web_channel])
     if qualifiers:
         qualifiers = [q.lower() for q in qualifiers if q]
         show = _get_show_with_qualifiers(show_name, qualifiers)
@@ -511,7 +525,7 @@ def show_single_search(show, embed=None):
     if q:
         return Show(q)
     else:
-        raise ShowNotFound(str(show) + ' not found')
+        raise ShowNotFound('show name ' + '"' + url_unquote(show) + '"' + ' not found')
 
 
 def lookup_tvrage(tvrage_id):
@@ -529,7 +543,7 @@ def lookup_tvdb(tvdb_id):
     if q:
         return Show(q)
     else:
-        raise IDNotFound('TVdb id ' + str(tvdb_id) + ' not found')
+        raise IDNotFound('TVDB ID ' + str(tvdb_id) + ' not found')
 
 
 def get_schedule(country='US', date=str(datetime.today().date())):
