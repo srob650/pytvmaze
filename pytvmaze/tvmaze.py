@@ -392,7 +392,7 @@ def get_show(maze_id=None, tvdb_id=None, tvrage_id=None, show_name=None,
     :return:
     """
     errors = []
-    if not (maze_id or tvdb_id or tvdb_id or show_name):
+    if not (maze_id or tvdb_id or tvrage_id or show_name):
         raise MissingParameters(
             'Either maze_id, tvdb_id, tvrage_id or show_name are required to get show, none provided,')
     if maze_id:
