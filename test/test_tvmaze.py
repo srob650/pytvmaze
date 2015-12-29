@@ -227,6 +227,10 @@ class ObjectTests(unittest.TestCase):
         self.assertTrue(show8.language == 'English')
         self.assertTrue(show8.web_channel['name'] == 'Netflix')
 
+        # Test lookup with bad ID but good name
+        show9 = get_show(maze_id=999999999, tvdb_id=999999999, tvrage_id=999999999, show_name='lost')
+        self.assertIsInstance(show9, Show)
+
         with self.assertRaises(MissingParameters):
             empty_search = get_show()
 
