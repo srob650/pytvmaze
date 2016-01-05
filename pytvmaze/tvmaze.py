@@ -3,8 +3,6 @@ from __future__ import unicode_literals
 
 import json
 import re
-import sys
-import unicodedata
 from datetime import datetime
 
 from pytvmaze import endpoints
@@ -28,14 +26,14 @@ class Show(object):
         self.genres = data.get('genres')
         self.weight = data.get('weight')
         self.updated = data.get('updated')
-        self.name = data.get('name')
+        self.name = data.get('name').encode('utf-8', 'ignore')
         self.language = data.get('language')
         self.schedule = data.get('schedule')
         self.url = data.get('url')
         self.image = data.get('image')
         self.externals = data.get('externals')
         self.premiered = data.get('premiered')
-        self.summary = _remove_tags(data.get('summary'))
+        self.summary = _remove_tags(data.get('summary')).encode('utf-8', 'ignore')
         self.links = data.get('_links')
         self.web_channel = data.get('webChannel')
         self.runtime = data.get('runtime')
@@ -48,38 +46,34 @@ class Show(object):
         self.cast = None
         self.populate(data)
 
-    def _repr_obj(self, as_unicode=False):
-        maze_id = self.maze_id
-        if as_unicode:
-            name = self.name
-        else:
-            name = _repr_string(self.name)
+    def __repr__(self):
         if self.premiered:
             year = str(self.premiered[:4])
         else:
             year = None
         if self.web_channel:
             platform = ',show_web_channel='
-            network = self.web_channel.get('name')
+            network = self.web_channel.get('name').encode('utf-8', 'ignore')
         elif self.network:
             platform = ',network='
-            network = str(self.network.get('name'))
+            network = self.network.get('name').encode('utf-8', 'ignore')
         else:
             platform = ''
             network = ''
 
         return '<Show(maze_id={id},name={name},year={year}{platform}{network})>'.format(
-            id=maze_id, name=name, year=year, platform=platform, network=network
-        )
-
-    def __repr__(self):
-        return self._repr_obj()
+            id=self.maze_id,
+            name=self.name.decode('utf-8', 'ignore'),
+            year=year,
+            platform=platform,
+            network=network.decode('utf-8', 'ignore')
+        ).encode('utf-8', 'ignore')
 
     def __str__(self):
         return self.name
 
     def __unicode__(self):
-        return self._repr_obj(as_unicode=True)
+        return self.name
 
     def __iter__(self):
         return iter(self.seasons.values())
@@ -185,7 +179,7 @@ class Person(object):
         self.links = data.get('_links')
         self.id = data.get('id')
         self.image = data.get('image')
-        self.name = data.get('name')
+        self.name = data.get('name').encode('utf-8', 'ignore')
         self.score = data.get('score')
         self.url = data.get('url')
         self.character = None
@@ -202,55 +196,33 @@ class Person(object):
                 self.crewcredits = [CrewCredit(credit)
                                     for credit in data['_embedded']['crewcredits']]
 
-    def _repr_obj(self, as_unicode=False):
-        if as_unicode:
-            name = self.name
-        else:
-            name = _repr_string(self.name)
-
-        return u'<Person(name={name},maze_id={id})>'.format(
-            name=name,
-            id=self.id
-        )
-
     def __repr__(self):
-        return self._repr_obj()
+        return '<Person(name={name},maze_id={id})>'.format(
+            name=self.name.decode('utf-8', 'ignore'),
+            id=self.id
+        ).encode('utf-8', 'ignore')
 
     def __str__(self):
         return self.name
-
-    def __unicode__(self):
-        return self._repr_obj(as_unicode=True)
 
 
 class Character(object):
     def __init__(self, data):
         self.id = data.get('id')
         self.url = data.get('url')
-        self.name = data.get('name')
+        self.name = data.get('name').encode('utf-8', 'ignore')
         self.image = data.get('image')
         self.links = data.get('_links')
         self.person = None
 
-    def _repr_obj(self, as_unicode=False):
-        if as_unicode:
-            name = self.name
-        else:
-            name = _repr_string(self.name)
-
-        return u'<Character(name={name},maze_id={id})>'.format(
-            name=name,
+    def __repr__(self):
+        return '<Character(name={name},maze_id={id})>'.format(
+            name=self.name,
             id=self.id
         )
 
-    def __repr__(self):
-        return self._repr_obj()
-
     def __str__(self):
         return self.name
-
-    def __unicode__(self):
-        return self._repr_obj(as_unicode=True)
 
 
 class Cast(object):
@@ -332,17 +304,6 @@ class AKA(object):
 
 def _remove_tags(text):
     return re.sub(r'<.*?>', '', text)
-
-
-# For Python 2
-def _repr_string(msg):
-    if sys.version_info[0] == 3:
-        return msg
-    else:
-        norm_msg = unicodedata.normalize('NFD', msg).encode('ascii', 'ignore')
-        if norm_msg == '':
-            norm_msg = 'CAN NOT REPRESENT UNICODE'
-        return norm_msg
 
 
 # Query TV Maze endpoints
