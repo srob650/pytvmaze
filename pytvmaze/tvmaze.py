@@ -475,11 +475,11 @@ def _get_show_by_search(show_name, show_year, show_network, show_language, show_
 
 
 def _url_quote(show):
-    return url_quote(show.encode('UTF-8'))
+    return url_quote(show.encode('UTF-8', 'ignore'))
 
 
 def _url_unquote(show):
-    return url_unquote(show).decode('UTF-8')
+    return url_unquote(show).decode('UTF-8', 'ignore')
 
 
 # Return list of Show objects
