@@ -478,10 +478,6 @@ def _url_quote(show):
     return url_quote(show.encode('UTF-8', 'ignore'))
 
 
-def _url_unquote(show):
-    return url_unquote(show).decode('UTF-8', 'ignore')
-
-
 # Return list of Show objects
 def get_show_list(show_name):
     """
@@ -510,26 +506,26 @@ def get_people(name):
 
 # TV Maze Endpoints
 def show_search(show):
-    show = _url_quote(show)
-    url = endpoints.show_search.format(show)
+    _show = _url_quote(show)
+    url = endpoints.show_search.format(_show)
     q = _query_endpoint(url)
     if q:
         return [Show(show['show']) for show in q]
     else:
-        raise ShowNotFound(str(show) + ' not found')
+        raise ShowNotFound('Show {0} not found'.format(show))
 
 
 def show_single_search(show, embed=None):
-    show = _url_quote(show)
+    _show = _url_quote(show)
     if embed:
-        url = endpoints.show_single_search.format(show) + '&embed=' + embed
+        url = endpoints.show_single_search.format(_show) + '&embed=' + embed
     else:
-        url = endpoints.show_single_search.format(show)
+        url = endpoints.show_single_search.format(_show)
     q = _query_endpoint(url)
     if q:
         return Show(q)
     else:
-        raise ShowNotFound('show name ' + '"' + _url_unquote(show) + '"' + ' not found')
+        raise ShowNotFound('show name "{0}" not found'.format(show))
 
 
 def lookup_tvrage(tvrage_id):
@@ -538,7 +534,7 @@ def lookup_tvrage(tvrage_id):
     if q:
         return Show(q)
     else:
-        raise IDNotFound('TVRage id ' + str(tvrage_id) + ' not found')
+        raise IDNotFound('TVRage id {0} not found'.format(tvrage_id))
 
 
 def lookup_tvdb(tvdb_id):
@@ -547,7 +543,7 @@ def lookup_tvdb(tvdb_id):
     if q:
         return Show(q)
     else:
-        raise IDNotFound('TVDB ID ' + str(tvdb_id) + ' not found')
+        raise IDNotFound('TVDB ID {0} not found'.format(tvdb_id))
 
 
 def get_schedule(country='US', date=str(datetime.today().date())):
@@ -556,7 +552,7 @@ def get_schedule(country='US', date=str(datetime.today().date())):
     if q:
         return [Episode(episode) for episode in q]
     else:
-        raise ScheduleNotFound('Schedule for country ' + str(country) + 'at date ' + str(date) + 'not found')
+        raise ScheduleNotFound('Schedule for country {0} at date {1} not found'.format(country, date))
 
 
 # ALL known future episodes, several MB large, cached for 24 hours
@@ -578,7 +574,7 @@ def show_main_info(maze_id, embed=None):
     if q:
         return Show(q)
     else:
-        raise IDNotFound('Maze id ' + str(maze_id) + ' not found')
+        raise IDNotFound('Maze id {0} not found'.format(maze_id))
 
 
 def episode_list(maze_id, specials=None):
@@ -590,7 +586,7 @@ def episode_list(maze_id, specials=None):
     if q:
         return [Episode(episode) for episode in q]
     else:
-        raise IDNotFound('Maze id ' + str(maze_id) + ' not found')
+        raise IDNotFound('Maze id {0} not found'.format(maze_id))
 
 
 def episode_by_number(maze_id, season_number, episode_number):
@@ -602,8 +598,7 @@ def episode_by_number(maze_id, season_number, episode_number):
         return Episode(q)
     else:
         raise EpisodeNotFound(
-            'Couldn\'t find season ' + str(season_number) + ' episode ' + str(episode_number) + ' for TVMaze ID ' + str(
-                maze_id))
+            'Couldn\'t find season {0} episode {1} for TVMaze ID {2}'.format(season_number, episode_number, maze_id))
 
 
 def episodes_by_date(maze_id, airdate):
@@ -616,7 +611,8 @@ def episodes_by_date(maze_id, airdate):
     if q:
         return [Episode(episode) for episode in q]
     else:
-        raise NoEpisodesForAirdate('Couldn\'t find an episode airing ' + str(airdate) + ' for TVMaze ID' + str(maze_id))
+        raise NoEpisodesForAirdate(
+            'Couldn\'t find an episode airing {0} for TVMaze ID {1}'.format(airdate, maze_id))
 
 
 def show_cast(maze_id):
@@ -625,7 +621,7 @@ def show_cast(maze_id):
     if q:
         return Cast(q)
     else:
-        raise CastNotFound('Couldn\'nt find show cast for TVMaze ID' + str(maze_id))
+        raise CastNotFound('Couldn\'nt find show cast for TVMaze ID {0}'.format(maze_id))
 
 
 def show_index(page=1):
@@ -644,7 +640,7 @@ def people_search(person):
     if q:
         return [Person(person) for person in q]
     else:
-        raise PersonNotFound('Couldn\'t find person: ' + str(person))
+        raise PersonNotFound('Couldn\'t find person: {0}'.format(person))
 
 
 def person_main_info(person_id, embed=None):
@@ -656,7 +652,7 @@ def person_main_info(person_id, embed=None):
     if q:
         return Person(q)
     else:
-        raise PersonNotFound('Couldn\'t find person: ' + str(person_id))
+        raise PersonNotFound('Couldn\'t find person: {0}'.format(person_id))
 
 
 def person_cast_credits(person_id, embed=None):
@@ -668,7 +664,7 @@ def person_cast_credits(person_id, embed=None):
     if q:
         return [CastCredit(credit) for credit in q]
     else:
-        raise CreditsNotFound('Couldn\'t find cast credits for person ID: ' + str(person_id))
+        raise CreditsNotFound('Couldn\'t find cast credits for person ID: {0}'.format(person_id))
 
 
 def person_crew_credits(person_id, embed=None):
@@ -680,7 +676,7 @@ def person_crew_credits(person_id, embed=None):
     if q:
         return [CrewCredit(credit) for credit in q]
     else:
-        raise CreditsNotFound('Couldn\'t find crew credits for person ID: ' + str(person_id))
+        raise CreditsNotFound('Couldn\'t find crew credits for person ID: {0}'.format(person_id))
 
 
 def show_updates():
@@ -698,4 +694,4 @@ def show_akas(maze_id):
     if q:
         return [AKA(aka) for aka in q]
     else:
-        raise AKASNotFound('Couldn\'t find AKA\'s for TVMaze ID: ' + str(maze_id))
+        raise AKASNotFound('Couldn\'t find AKA\'s for TVMaze ID: {0}'.format(maze_id))
