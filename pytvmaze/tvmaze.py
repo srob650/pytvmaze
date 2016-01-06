@@ -477,7 +477,7 @@ def _get_show_by_search(show_name, show_year, show_network, show_language, show_
 
 
 def _url_quote(show):
-    return url_quote(show.encode('UTF-8', 'ignore'))
+    return url_quote(show.encode('UTF-8'))
 
 
 def _url_unquote(show):
