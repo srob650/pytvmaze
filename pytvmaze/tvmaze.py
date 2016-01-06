@@ -339,6 +339,8 @@ def _repr_string(msg):
     if sys.version_info[0] == 3:
         return msg
     else:
+        if isinstance(msg, str):
+            msg = unicode(msg)
         norm_msg = unicodedata.normalize('NFD', msg).encode('ascii', 'ignore')
         if norm_msg == '':
             norm_msg = 'CAN NOT REPRESENT UNICODE'
@@ -479,7 +481,7 @@ def _url_quote(show):
 
 
 def _url_unquote(show):
-    return url_unquote(show).decode('UTF-8', 'ignore')
+    return url_unquote(_repr_string(show))
 
 
 # Return list of Show objects
