@@ -416,7 +416,7 @@ def get_show(maze_id=None, tvdb_id=None, tvrage_id=None, show_name=None,
                                        show_web_channel, embed=embed)
             return show
         except ShowNotFound as e:
-            errors.append(e.value)
+            errors.append(unicode(e))
     raise ShowNotFound(' ,'.join(errors))
 
 
@@ -475,7 +475,11 @@ def _get_show_by_search(show_name, show_year, show_network, show_language, show_
 
 
 def _url_quote(show):
-    return url_quote(show.encode('UTF-8'))
+    return url_quote(show.encode('UTF-8', 'ignore'))
+
+
+def _url_unquote(show):
+    return url_unquote(show).decode('UTF-8', 'ignore')
 
 
 # Return list of Show objects
@@ -525,7 +529,7 @@ def show_single_search(show, embed=None):
     if q:
         return Show(q)
     else:
-        raise ShowNotFound('show name ' + '"' + url_unquote(show) + '"' + ' not found')
+        raise ShowNotFound('show name ' + '"' + _url_unquote(show) + '"' + ' not found')
 
 
 def lookup_tvrage(tvrage_id):

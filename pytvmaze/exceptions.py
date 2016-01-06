@@ -2,8 +2,11 @@ class BaseError(Exception):
     def __init__(self, value):
         self.value = value
 
+    def __unicode__(self):
+        return self.value
+
     def __str__(self):
-        return repr(self.value)
+        return unicode(self).encode('utf-8')
 
 
 class ShowNotFound(BaseError):
