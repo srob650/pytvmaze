@@ -87,9 +87,6 @@ class Show(object):
                 network=network)
         )
 
-    def __repr__(self):
-        return self._repr_obj()
-
     def __str__(self):
         return valid_encoding(self.name)
 

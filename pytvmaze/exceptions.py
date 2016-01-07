@@ -1,20 +1,14 @@
 import sys
 
-from builtins import str
-
-
 class BaseError(Exception):
     def __init__(self, value):
         self.value = value
-
-    def __unicode__(self):
-        return self.value
 
     def __str__(self):
         if sys.version_info > (3,):
             return self.value
         else:
-            return str(self).encode('utf-8')
+            return unicode(self.value).encode('utf-8')
 
 
 class ShowNotFound(BaseError):
