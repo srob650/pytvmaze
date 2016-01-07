@@ -87,6 +87,9 @@ class Show(object):
                 network=network)
         )
 
+    def __repr__(self):
+        return self._repr_obj()
+
     def __str__(self):
         return valid_encoding(self.name)
 
@@ -242,6 +245,9 @@ class Character(object):
 
     def __str__(self):
         return self.name
+
+    def __unicode__(self):
+        return self._repr_obj(as_unicode=True)
 
 
 class Cast(object):
@@ -455,7 +461,7 @@ def _get_show_by_search(show_name, show_year, show_network, show_language, show_
 
 
 def _url_quote(show):
-    return url_quote(show.encode('UTF-8', 'ignore'))
+    return url_quote(show.encode('UTF-8'))
 
 
 # Return list of Show objects

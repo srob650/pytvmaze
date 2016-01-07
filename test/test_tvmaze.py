@@ -1,6 +1,9 @@
 #!/usr/bin/python
+ # -*- coding: utf-8 -*-
 
 import unittest
+import datetime
+import sys
 
 from pytvmaze.tvmaze import *
 
@@ -229,6 +232,13 @@ class ObjectTests(unittest.TestCase):
         # Test lookup with bad ID but good name
         show9 = get_show(maze_id=999999999, tvdb_id=999999999, tvrage_id=999999999, show_name='lost')
         self.assertIsInstance(show9, Show)
+
+        # Test foreign language
+        show10 = get_show(show_name=u'\u5170\u9675\u738b', embed='cast')
+        self.assertTrue(show10.maze_id, 8103)
+        if sys.version_info[0] == 3:
+            show11 = get_show(show_name='兰陵王')
+            self.assertTrue(show11.maze_id, 8103)
 
         with self.assertRaises(MissingParameters):
             empty_search = get_show()
