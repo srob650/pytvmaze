@@ -28,15 +28,6 @@ def valid_encoding(text):
         return unicode(text).encode('utf-8')
 
 
-def valid_decoding(text):
-    if not text:
-        return
-    if sys.version_info > (3,):
-        return text
-    else:
-        return text.decode('utf-8', 'replace')
-
-
 class Show(object):
     def __init__(self, data):
         self.status = data.get('status')
