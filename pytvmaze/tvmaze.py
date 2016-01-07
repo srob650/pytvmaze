@@ -19,6 +19,24 @@ except ImportError:
     from urllib import quote as url_quote, unquote as url_unquote
 
 
+def valid_encoding(text):
+    if not text:
+        return
+    if sys.version_info > (3,):
+        return text
+    else:
+        return unicode(text).encode('utf-8')
+
+
+def valid_decoding(text):
+    if not text:
+        return
+    if sys.version_info > (3,):
+        return text
+    else:
+        return text.decode('utf-8', 'replace')
+
+
 class Show(object):
     def __init__(self, data):
         self.status = data.get('status')
@@ -26,14 +44,14 @@ class Show(object):
         self.genres = data.get('genres')
         self.weight = data.get('weight')
         self.updated = data.get('updated')
-        self.name = data.get('name').encode('utf-8', 'ignore')
+        self.name = data.get('name')
         self.language = data.get('language')
         self.schedule = data.get('schedule')
         self.url = data.get('url')
         self.image = data.get('image')
         self.externals = data.get('externals')
         self.premiered = data.get('premiered')
-        self.summary = _remove_tags(data.get('summary')).encode('utf-8', 'ignore')
+        self.summary = _remove_tags(data.get('summary'))
         self.links = data.get('_links')
         self.web_channel = data.get('webChannel')
         self.runtime = data.get('runtime')
@@ -53,24 +71,24 @@ class Show(object):
             year = None
         if self.web_channel:
             platform = ',show_web_channel='
-            network = self.web_channel.get('name').encode('utf-8', 'ignore')
+            network = self.web_channel.get('name')
         elif self.network:
             platform = ',network='
-            network = self.network.get('name').encode('utf-8', 'ignore')
+            network = self.network.get('name')
         else:
             platform = ''
             network = ''
 
-        return '<Show(maze_id={id},name={name},year={year}{platform}{network})>'.format(
-            id=self.maze_id,
-            name=self.name.decode('utf-8', 'ignore'),
-            year=year,
-            platform=platform,
-            network=network.decode('utf-8', 'ignore')
-        ).encode('utf-8', 'ignore')
+        return valid_encoding('<Show(maze_id={id},name={name},year={year}{platform}{network})>'.format(
+                id=self.maze_id,
+                name=self.name,
+                year=year,
+                platform=platform,
+                network=network)
+        )
 
     def __str__(self):
-        return self.name
+        return valid_encoding(self.name)
 
     def __unicode__(self):
         return self.name
@@ -117,13 +135,13 @@ class Season(object):
         self.episodes = dict()
 
     def __repr__(self):
-        return '<Season(showname={name},season_number={number})>'.format(
-            name=self.show.name,
-            number=str(self.season_number).zfill(2)
-        )
+        return valid_encoding('<Season(showname={name},season_number={number})>'.format(
+                name=self.show.name,
+                number=str(self.season_number).zfill(2)
+        ))
 
     def __str__(self):
-        return self.show.name + ' S' + str(self.season_number).zfill(2)
+        return valid_encoding(self.show.name + ' S' + str(self.season_number).zfill(2))
 
     def __iter__(self):
         return iter(self.episodes.values())
@@ -136,7 +154,8 @@ class Season(object):
             return self.episodes[item]
         except KeyError:
             raise EpisodeNotFound(
-                'Episode {0} does not exist for season {1} of show {2}.'.format(item, self.season_number, self.show))
+                    'Episode {0} does not exist for season {1} of show {2}.'.format(item, self.season_number,
+                                                                                    self.show))
 
 
 class Episode(object):
@@ -162,8 +181,8 @@ class Episode(object):
 
     def __repr__(self):
         return '<Episode(season={season},episode_number={number})>'.format(
-            season=str(self.season_number).zfill(2),
-            number=str(self.episode_number).zfill(2)
+                season=str(self.season_number).zfill(2),
+                number=str(self.episode_number).zfill(2)
         )
 
     def __str__(self):
@@ -179,7 +198,7 @@ class Person(object):
         self.links = data.get('_links')
         self.id = data.get('id')
         self.image = data.get('image')
-        self.name = data.get('name').encode('utf-8', 'ignore')
+        self.name = data.get('name')
         self.score = data.get('score')
         self.url = data.get('url')
         self.character = None
@@ -197,29 +216,29 @@ class Person(object):
                                     for credit in data['_embedded']['crewcredits']]
 
     def __repr__(self):
-        return '<Person(name={name},maze_id={id})>'.format(
-            name=self.name.decode('utf-8', 'ignore'),
-            id=self.id
-        ).encode('utf-8', 'ignore')
+        return valid_encoding('<Person(name={name},maze_id={id})>'.format(
+                name=self.name,
+                id=self.id
+        ))
 
     def __str__(self):
-        return self.name
+        return valid_encoding(self.name)
 
 
 class Character(object):
     def __init__(self, data):
         self.id = data.get('id')
         self.url = data.get('url')
-        self.name = data.get('name').encode('utf-8', 'ignore')
+        self.name = data.get('name')
         self.image = data.get('image')
         self.links = data.get('_links')
         self.person = None
 
     def __repr__(self):
-        return '<Character(name={name},maze_id={id})>'.format(
-            name=self.name,
-            id=self.id
-        )
+        return valid_encoding('<Character(name={name},maze_id={id})>'.format(
+                name=self.name,
+                id=self.id
+        ))
 
     def __str__(self):
         return self.name
@@ -291,8 +310,8 @@ class Update(object):
 
     def __repr__(self):
         return '<Update(maze_id={maze_id},time={time})>'.format(
-            maze_id=self.maze_id,
-            time=self.seconds_since_epoch
+                maze_id=self.maze_id,
+                time=self.seconds_since_epoch
         )
 
 
@@ -355,7 +374,7 @@ def get_show(maze_id=None, tvdb_id=None, tvrage_id=None, show_name=None,
     errors = []
     if not (maze_id or tvdb_id or tvrage_id or show_name):
         raise MissingParameters(
-            'Either maze_id, tvdb_id, tvrage_id or show_name are required to get show, none provided,')
+                'Either maze_id, tvdb_id, tvrage_id or show_name are required to get show, none provided,')
     if maze_id:
         try:
             return show_main_info(maze_id, embed=embed)
@@ -377,7 +396,7 @@ def get_show(maze_id=None, tvdb_id=None, tvrage_id=None, show_name=None,
                                        show_web_channel, embed=embed)
             return show
         except ShowNotFound as e:
-            errors.append(unicode(e))
+            errors.append(e.value)
     raise ShowNotFound(' ,'.join(errors))
 
 
@@ -559,7 +578,8 @@ def episode_by_number(maze_id, season_number, episode_number):
         return Episode(q)
     else:
         raise EpisodeNotFound(
-            'Couldn\'t find season {0} episode {1} for TVMaze ID {2}'.format(season_number, episode_number, maze_id))
+                'Couldn\'t find season {0} episode {1} for TVMaze ID {2}'.format(season_number, episode_number,
+                                                                                 maze_id))
 
 
 def episodes_by_date(maze_id, airdate):
@@ -573,7 +593,7 @@ def episodes_by_date(maze_id, airdate):
         return [Episode(episode) for episode in q]
     else:
         raise NoEpisodesForAirdate(
-            'Couldn\'t find an episode airing {0} for TVMaze ID {1}'.format(airdate, maze_id))
+                'Couldn\'t find an episode airing {0} for TVMaze ID {1}'.format(airdate, maze_id))
 
 
 def show_cast(maze_id):

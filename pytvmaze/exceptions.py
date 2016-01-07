@@ -1,3 +1,8 @@
+import sys
+
+from builtins import str
+
+
 class BaseError(Exception):
     def __init__(self, value):
         self.value = value
@@ -6,7 +11,10 @@ class BaseError(Exception):
         return self.value
 
     def __str__(self):
-        return unicode(self).encode('utf-8')
+        if sys.version_info > (3,):
+            return self.value
+        else:
+            return str(self).encode('utf-8')
 
 
 class ShowNotFound(BaseError):
