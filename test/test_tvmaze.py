@@ -269,6 +269,7 @@ class ObjectTests(unittest.TestCase):
     def test_unicode_shows(self):
         show1 = get_show(show_name=u'Unit\xe9 9')
         self.assertTrue(show1.id == 8652)
+        self.assertTrue(show1.network['name'] == u'ICI Radio-Canada T\u00e9l\u00e9')
 
 
 class ExceptionsTests(unittest.TestCase):
