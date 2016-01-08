@@ -19,7 +19,7 @@ except ImportError:
     from urllib import quote as url_quote, unquote as url_unquote
 
 
-def valid_encoding(text):
+def _valid_encoding(text):
     if not text:
         return
     if sys.version_info > (3,):
@@ -70,7 +70,7 @@ class Show(object):
             platform = ''
             network = ''
 
-        return valid_encoding('<Show(maze_id={id},name={name},year={year}{platform}{network})>'.format(
+        return _valid_encoding('<Show(maze_id={id},name={name},year={year}{platform}{network})>'.format(
                 id=self.maze_id,
                 name=self.name,
                 year=year,
@@ -79,7 +79,7 @@ class Show(object):
         )
 
     def __str__(self):
-        return valid_encoding(self.name)
+        return _valid_encoding(self.name)
 
     def __unicode__(self):
         return self.name
@@ -126,13 +126,13 @@ class Season(object):
         self.episodes = dict()
 
     def __repr__(self):
-        return valid_encoding('<Season(showname={name},season_number={number})>'.format(
+        return _valid_encoding('<Season(showname={name},season_number={number})>'.format(
                 name=self.show.name,
                 number=str(self.season_number).zfill(2)
         ))
 
     def __str__(self):
-        return valid_encoding(self.show.name + ' S' + str(self.season_number).zfill(2))
+        return _valid_encoding(self.show.name + ' S' + str(self.season_number).zfill(2))
 
     def __iter__(self):
         return iter(self.episodes.values())
@@ -179,7 +179,7 @@ class Episode(object):
     def __str__(self):
         season = 'S' + str(self.season_number).zfill(2)
         episode = 'E' + str(self.episode_number).zfill(2)
-        return valid_encoding(season + episode + ' ' + self.title)
+        return _valid_encoding(season + episode + ' ' + self.title)
 
 
 class Person(object):
@@ -207,13 +207,13 @@ class Person(object):
                                     for credit in data['_embedded']['crewcredits']]
 
     def __repr__(self):
-        return valid_encoding('<Person(name={name},maze_id={id})>'.format(
+        return _valid_encoding('<Person(name={name},maze_id={id})>'.format(
                 name=self.name,
                 id=self.id
         ))
 
     def __str__(self):
-        return valid_encoding(self.name)
+        return _valid_encoding(self.name)
 
 
 class Character(object):
@@ -226,13 +226,13 @@ class Character(object):
         self.person = None
 
     def __repr__(self):
-        return valid_encoding('<Character(name={name},maze_id={id})>'.format(
+        return _valid_encoding('<Character(name={name},maze_id={id})>'.format(
                 name=self.name,
                 id=self.id
         ))
 
     def __str__(self):
-        return valid_encoding(self.name)
+        return _valid_encoding(self.name)
 
     def __unicode__(self):
         return self._repr_obj(as_unicode=True)
