@@ -3,8 +3,6 @@ from __future__ import unicode_literals
 
 import json
 import re
-import sys
-import unicodedata
 from datetime import datetime
 
 from pytvmaze import endpoints
@@ -19,6 +17,15 @@ except ImportError:
     # Python 2
     from urllib2 import urlopen, URLError, HTTPError
     from urllib import quote as url_quote, unquote as url_unquote
+
+
+def _valid_encoding(text):
+    if not text:
+        return
+    if sys.version_info > (3,):
+        return text
+    else:
+        return unicode(text).encode('utf-8')
 
 
 class Show(object):
@@ -48,12 +55,7 @@ class Show(object):
         self.cast = None
         self.populate(data)
 
-    def _repr_obj(self, as_unicode=False):
-        maze_id = self.maze_id
-        if as_unicode:
-            name = self.name
-        else:
-            name = _repr_string(self.name)
+    def __repr__(self):
         if self.premiered:
             year = str(self.premiered[:4])
         else:
@@ -63,23 +65,24 @@ class Show(object):
             network = self.web_channel.get('name')
         elif self.network:
             platform = ',network='
-            network = str(self.network.get('name'))
+            network = self.network.get('name')
         else:
             platform = ''
             network = ''
 
-        return '<Show(maze_id={id},name={name},year={year}{platform}{network})>'.format(
-            id=maze_id, name=name, year=year, platform=platform, network=network
+        return _valid_encoding('<Show(maze_id={id},name={name},year={year}{platform}{network})>'.format(
+                id=self.maze_id,
+                name=self.name,
+                year=year,
+                platform=platform,
+                network=network)
         )
 
-    def __repr__(self):
-        return self._repr_obj()
-
     def __str__(self):
-        return self.name
+        return _valid_encoding(self.name)
 
     def __unicode__(self):
-        return self._repr_obj(as_unicode=True)
+        return self.name
 
     def __iter__(self):
         return iter(self.seasons.values())
@@ -123,13 +126,13 @@ class Season(object):
         self.episodes = dict()
 
     def __repr__(self):
-        return '<Season(showname={name},season_number={number})>'.format(
-            name=self.show.name,
-            number=str(self.season_number).zfill(2)
-        )
+        return _valid_encoding('<Season(showname={name},season_number={number})>'.format(
+                name=self.show.name,
+                number=str(self.season_number).zfill(2)
+        ))
 
     def __str__(self):
-        return self.show.name + ' S' + str(self.season_number).zfill(2)
+        return _valid_encoding(self.show.name + ' S' + str(self.season_number).zfill(2))
 
     def __iter__(self):
         return iter(self.episodes.values())
@@ -142,7 +145,8 @@ class Season(object):
             return self.episodes[item]
         except KeyError:
             raise EpisodeNotFound(
-                'Episode {0} does not exist for season {1} of show {2}.'.format(item, self.season_number, self.show))
+                    'Episode {0} does not exist for season {1} of show {2}.'.format(item, self.season_number,
+                                                                                    self.show))
 
 
 class Episode(object):
@@ -168,14 +172,14 @@ class Episode(object):
 
     def __repr__(self):
         return '<Episode(season={season},episode_number={number})>'.format(
-            season=str(self.season_number).zfill(2),
-            number=str(self.episode_number).zfill(2)
+                season=str(self.season_number).zfill(2),
+                number=str(self.episode_number).zfill(2)
         )
 
     def __str__(self):
         season = 'S' + str(self.season_number).zfill(2)
         episode = 'E' + str(self.episode_number).zfill(2)
-        return season + episode + ' ' + self.title
+        return _valid_encoding(season + episode + ' ' + self.title)
 
 
 class Person(object):
@@ -202,25 +206,14 @@ class Person(object):
                 self.crewcredits = [CrewCredit(credit)
                                     for credit in data['_embedded']['crewcredits']]
 
-    def _repr_obj(self, as_unicode=False):
-        if as_unicode:
-            name = self.name
-        else:
-            name = _repr_string(self.name)
-
-        return u'<Person(name={name},maze_id={id})>'.format(
-            name=name,
-            id=self.id
-        )
-
     def __repr__(self):
-        return self._repr_obj()
+        return _valid_encoding('<Person(name={name},maze_id={id})>'.format(
+                name=self.name,
+                id=self.id
+        ))
 
     def __str__(self):
-        return self.name
-
-    def __unicode__(self):
-        return self._repr_obj(as_unicode=True)
+        return _valid_encoding(self.name)
 
 
 class Character(object):
@@ -232,22 +225,14 @@ class Character(object):
         self.links = data.get('_links')
         self.person = None
 
-    def _repr_obj(self, as_unicode=False):
-        if as_unicode:
-            name = self.name
-        else:
-            name = _repr_string(self.name)
-
-        return u'<Character(name={name},maze_id={id})>'.format(
-            name=name,
-            id=self.id
-        )
-
     def __repr__(self):
-        return self._repr_obj()
+        return _valid_encoding('<Character(name={name},maze_id={id})>'.format(
+                name=self.name,
+                id=self.id
+        ))
 
     def __str__(self):
-        return self.name
+        return _valid_encoding(self.name)
 
     def __unicode__(self):
         return self._repr_obj(as_unicode=True)
@@ -319,8 +304,8 @@ class Update(object):
 
     def __repr__(self):
         return '<Update(maze_id={maze_id},time={time})>'.format(
-            maze_id=self.maze_id,
-            time=self.seconds_since_epoch
+                maze_id=self.maze_id,
+                time=self.seconds_since_epoch
         )
 
 
@@ -332,17 +317,6 @@ class AKA(object):
 
 def _remove_tags(text):
     return re.sub(r'<.*?>', '', text)
-
-
-# For Python 2
-def _repr_string(msg):
-    if sys.version_info[0] == 3:
-        return msg
-    else:
-        norm_msg = unicodedata.normalize('NFD', msg).encode('ascii', 'ignore')
-        if norm_msg == '':
-            norm_msg = 'CAN NOT REPRESENT UNICODE'
-        return norm_msg
 
 
 # Query TV Maze endpoints
@@ -394,7 +368,7 @@ def get_show(maze_id=None, tvdb_id=None, tvrage_id=None, show_name=None,
     errors = []
     if not (maze_id or tvdb_id or tvrage_id or show_name):
         raise MissingParameters(
-            'Either maze_id, tvdb_id, tvrage_id or show_name are required to get show, none provided,')
+                'Either maze_id, tvdb_id, tvrage_id or show_name are required to get show, none provided,')
     if maze_id:
         try:
             return show_main_info(maze_id, embed=embed)
@@ -506,26 +480,26 @@ def get_people(name):
 
 # TV Maze Endpoints
 def show_search(show):
-    show = _url_quote(show)
-    url = endpoints.show_search.format(show)
+    _show = _url_quote(show)
+    url = endpoints.show_search.format(_show)
     q = _query_endpoint(url)
     if q:
         return [Show(show['show']) for show in q]
     else:
-        raise ShowNotFound(str(show) + ' not found')
+        raise ShowNotFound('Show {0} not found'.format(show))
 
 
 def show_single_search(show, embed=None):
-    show = _url_quote(show)
+    _show = _url_quote(show)
     if embed:
-        url = endpoints.show_single_search.format(show) + '&embed=' + embed
+        url = endpoints.show_single_search.format(_show) + '&embed=' + embed
     else:
-        url = endpoints.show_single_search.format(show)
+        url = endpoints.show_single_search.format(_show)
     q = _query_endpoint(url)
     if q:
         return Show(q)
     else:
-        raise ShowNotFound('show name ' + '"' + url_unquote(show) + '"' + ' not found')
+        raise ShowNotFound('show name "{0}" not found'.format(show))
 
 
 def lookup_tvrage(tvrage_id):
@@ -534,7 +508,7 @@ def lookup_tvrage(tvrage_id):
     if q:
         return Show(q)
     else:
-        raise IDNotFound('TVRage id ' + str(tvrage_id) + ' not found')
+        raise IDNotFound('TVRage id {0} not found'.format(tvrage_id))
 
 
 def lookup_tvdb(tvdb_id):
@@ -543,7 +517,7 @@ def lookup_tvdb(tvdb_id):
     if q:
         return Show(q)
     else:
-        raise IDNotFound('TVDB ID ' + str(tvdb_id) + ' not found')
+        raise IDNotFound('TVDB ID {0} not found'.format(tvdb_id))
 
 
 def get_schedule(country='US', date=str(datetime.today().date())):
@@ -552,7 +526,7 @@ def get_schedule(country='US', date=str(datetime.today().date())):
     if q:
         return [Episode(episode) for episode in q]
     else:
-        raise ScheduleNotFound('Schedule for country ' + str(country) + 'at date ' + str(date) + 'not found')
+        raise ScheduleNotFound('Schedule for country {0} at date {1} not found'.format(country, date))
 
 
 # ALL known future episodes, several MB large, cached for 24 hours
@@ -574,7 +548,7 @@ def show_main_info(maze_id, embed=None):
     if q:
         return Show(q)
     else:
-        raise IDNotFound('Maze id ' + str(maze_id) + ' not found')
+        raise IDNotFound('Maze id {0} not found'.format(maze_id))
 
 
 def episode_list(maze_id, specials=None):
@@ -586,7 +560,7 @@ def episode_list(maze_id, specials=None):
     if q:
         return [Episode(episode) for episode in q]
     else:
-        raise IDNotFound('Maze id ' + str(maze_id) + ' not found')
+        raise IDNotFound('Maze id {0} not found'.format(maze_id))
 
 
 def episode_by_number(maze_id, season_number, episode_number):
@@ -598,8 +572,8 @@ def episode_by_number(maze_id, season_number, episode_number):
         return Episode(q)
     else:
         raise EpisodeNotFound(
-            'Couldn\'t find season ' + str(season_number) + ' episode ' + str(episode_number) + ' for TVMaze ID ' + str(
-                maze_id))
+                'Couldn\'t find season {0} episode {1} for TVMaze ID {2}'.format(season_number, episode_number,
+                                                                                 maze_id))
 
 
 def episodes_by_date(maze_id, airdate):
@@ -612,7 +586,8 @@ def episodes_by_date(maze_id, airdate):
     if q:
         return [Episode(episode) for episode in q]
     else:
-        raise NoEpisodesForAirdate('Couldn\'t find an episode airing ' + str(airdate) + ' for TVMaze ID' + str(maze_id))
+        raise NoEpisodesForAirdate(
+                'Couldn\'t find an episode airing {0} for TVMaze ID {1}'.format(airdate, maze_id))
 
 
 def show_cast(maze_id):
@@ -621,7 +596,7 @@ def show_cast(maze_id):
     if q:
         return Cast(q)
     else:
-        raise CastNotFound('Couldn\'nt find show cast for TVMaze ID' + str(maze_id))
+        raise CastNotFound('Couldn\'nt find show cast for TVMaze ID {0}'.format(maze_id))
 
 
 def show_index(page=1):
@@ -640,7 +615,7 @@ def people_search(person):
     if q:
         return [Person(person) for person in q]
     else:
-        raise PersonNotFound('Couldn\'t find person: ' + str(person))
+        raise PersonNotFound('Couldn\'t find person: {0}'.format(person))
 
 
 def person_main_info(person_id, embed=None):
@@ -652,7 +627,7 @@ def person_main_info(person_id, embed=None):
     if q:
         return Person(q)
     else:
-        raise PersonNotFound('Couldn\'t find person: ' + str(person_id))
+        raise PersonNotFound('Couldn\'t find person: {0}'.format(person_id))
 
 
 def person_cast_credits(person_id, embed=None):
@@ -664,7 +639,7 @@ def person_cast_credits(person_id, embed=None):
     if q:
         return [CastCredit(credit) for credit in q]
     else:
-        raise CreditsNotFound('Couldn\'t find cast credits for person ID: ' + str(person_id))
+        raise CreditsNotFound('Couldn\'t find cast credits for person ID: {0}'.format(person_id))
 
 
 def person_crew_credits(person_id, embed=None):
@@ -676,7 +651,7 @@ def person_crew_credits(person_id, embed=None):
     if q:
         return [CrewCredit(credit) for credit in q]
     else:
-        raise CreditsNotFound('Couldn\'t find crew credits for person ID: ' + str(person_id))
+        raise CreditsNotFound('Couldn\'t find crew credits for person ID: {0}'.format(person_id))
 
 
 def show_updates():
@@ -694,4 +669,4 @@ def show_akas(maze_id):
     if q:
         return [AKA(aka) for aka in q]
     else:
-        raise AKASNotFound('Couldn\'t find AKA\'s for TVMaze ID: ' + str(maze_id))
+        raise AKASNotFound('Couldn\'t find AKA\'s for TVMaze ID: {0}'.format(maze_id))
