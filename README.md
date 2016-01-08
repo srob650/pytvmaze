@@ -1,10 +1,3 @@
-### **Notice**
- - Cast embedding changed with Cast() object, see below **Embed cast in Show object** example
- - ```Show._links``` changed to ```Show.links```
- - ```Show.webChannel``` changed to ```Show.web_channel```
- - Updated unicode handling to better support non-english languages in show/person/character names
- - Added Updates() class with dict of Update() objects
-
 To install:
 
 ```$ pip install pytvmaze```
