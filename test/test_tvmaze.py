@@ -203,6 +203,10 @@ class ObjectTests(unittest.TestCase):
         self.assertIsInstance(show3, Show)
         self.assertTrue(hasattr(show3, 'episodes'))
 
+        show31 = get_show(imdb_id='tt3107288', embed='episodes')
+        self.assertIsInstance(show31, Show)
+        self.assertTrue(hasattr(show31, 'episodes'))
+
         show4 = get_show(show_name='person of interest', embed='episodes')
         self.assertIsInstance(show4, Show)
         self.assertTrue(hasattr(show4, 'episodes'))
