@@ -368,7 +368,7 @@ def get_show(maze_id=None, tvdb_id=None, tvrage_id=None, imdb_id=None, show_name
     errors = []
     if not (maze_id or tvdb_id or tvrage_id or imdb_id or show_name):
         raise MissingParameters(
-                'Either maze_id, tvdb_id, tvrage_id or show_name are required to get show, none provided,')
+                'Either maze_id, tvdb_id, tvrage_id, imdb_id or show_name are required to get show, none provided,')
     if maze_id:
         try:
             return show_main_info(maze_id, embed=embed)
