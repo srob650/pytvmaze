@@ -27,9 +27,10 @@ To install:
     >>> print(show)
     Dexter
 
-    # Get a show object using a shows tvdb or tvrage id
+    # Get a show object using a shows tvdb, tvrage id, or IMDB id
     >>> show = pytvmaze.get_show(tvdb_id=79349)
     >>> show = pytvmaze.get_show(tvrage_id=7926)
+    >>> show = pytvmaze.get_show(tvrage_id='tt3107288')
 
     # Iterate over all episodes (full episode list available at Show() level)
     >>> show = pytvmaze.get_show(maze_id=161, embed='episodes')
