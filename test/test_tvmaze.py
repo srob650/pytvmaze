@@ -238,11 +238,9 @@ class ObjectTests(unittest.TestCase):
         self.assertIsInstance(show9, Show)
 
         # Test foreign language
-        show10 = get_show(show_name=u'\u5170\u9675\u738b', embed='cast')
-        self.assertTrue(show10.maze_id, 8103)
         if sys.version_info[0] == 3:
-            show11 = get_show(show_name='兰陵王')
-            self.assertTrue(show11.maze_id, 8103)
+            show10 = get_show(maze_id=8103, embed='cast')
+            self.assertTrue(show10.cast.people[1].name, '黃心娣')
 
         with self.assertRaises(MissingParameters):
             empty_search = get_show()
