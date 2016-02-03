@@ -343,7 +343,7 @@ def _query_endpoint(url):
 
 
 # Get Show object
-def get_show(maze_id=None, tvdb_id=None, tvrage_id=None, show_name=None,
+def get_show(maze_id=None, tvdb_id=None, tvrage_id=None, imdb_id=None, show_name=None,
              show_year=None, show_network=None, show_language=None,
              show_country=None, show_web_channel=None, embed=None):
     """
@@ -366,9 +366,9 @@ def get_show(maze_id=None, tvdb_id=None, tvrage_id=None, show_name=None,
     :return:
     """
     errors = []
-    if not (maze_id or tvdb_id or tvrage_id or show_name):
+    if not (maze_id or tvdb_id or tvrage_id or imdb_id or show_name):
         raise MissingParameters(
-                'Either maze_id, tvdb_id, tvrage_id or show_name are required to get show, none provided,')
+                'Either maze_id, tvdb_id, tvrage_id, imdb_id or show_name are required to get show, none provided,')
     if maze_id:
         try:
             return show_main_info(maze_id, embed=embed)
@@ -382,6 +382,11 @@ def get_show(maze_id=None, tvdb_id=None, tvrage_id=None, show_name=None,
     if tvrage_id:
         try:
             return show_main_info(lookup_tvrage(tvrage_id).id, embed=embed)
+        except IDNotFound as e:
+            errors.append(e.value)
+    if imdb_id:
+        try:
+            return show_main_info(lookup_imdb(imdb_id).id, embed=embed)
         except IDNotFound as e:
             errors.append(e.value)
     if show_name:
@@ -518,6 +523,15 @@ def lookup_tvdb(tvdb_id):
         return Show(q)
     else:
         raise IDNotFound('TVDB ID {0} not found'.format(tvdb_id))
+
+
+def lookup_imdb(imdb_id):
+    url = endpoints.lookup_imdb.format(imdb_id)
+    q = _query_endpoint(url)
+    if q:
+        return Show(q)
+    else:
+        raise IDNotFound('IMDB ID {0} not found'.format(imdb_id))
 
 
 def get_schedule(country='US', date=str(datetime.today().date())):
