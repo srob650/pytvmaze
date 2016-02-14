@@ -55,6 +55,10 @@ class AKASNotFound(BaseError):
     pass
 
 
+class SeasonNotFound(BaseError):
+    pass
+
+
 class GeneralError(BaseError):
     pass
 
