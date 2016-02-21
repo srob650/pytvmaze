@@ -144,9 +144,6 @@ class Season(object):
                 number=str(self.season_number).zfill(2)
         ))
 
-    def __str__(self):
-        return _valid_encoding('ID: ' + str(self.id) + ' S' + str(self.season_number).zfill(2))
-
     def __iter__(self):
         return iter(self.episodes.values())
 
