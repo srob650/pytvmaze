@@ -108,31 +108,41 @@ class Show(object):
         embedded = data.get('_embedded')
         if embedded:
             if embedded.get('episodes'):
+                seasons = show_seasons(self.maze_id)
                 for episode in embedded.get('episodes'):
                     self.episodes.append(Episode(episode))
                 for episode in self.episodes:
                     season_num = int(episode.season_number)
                     if season_num not in self.seasons:
-                        self.seasons[season_num] = Season(self, season_num)
+                        self.seasons[season_num] = seasons[season_num]
+                        self.seasons[season_num].show = self
                     self.seasons[season_num].episodes[episode.episode_number] = episode
             if embedded.get('cast'):
                 self.cast = Cast(embedded.get('cast'))
 
 
 class Season(object):
-    def __init__(self, show, season_number):
-        self.show = show
-        self.season_number = season_number
+    def __init__(self, data):
+        self.show = None
         self.episodes = dict()
+        self.id = data.get('id')
+        self.url = data.get('url')
+        self.season_number = data.get('number')
+        self.name = data.get('name')
+        self.episode_order = data.get('episodeOrder')
+        self.premier_date = data.get('premierDate')
+        self.end_date = data.get('endDate')
+        self.network = data.get('network')
+        self.web_channel = data.get('webChannel')
+        self.image = data.get('image')
+        self.summary = data.get('summary')
+        self.links = data.get('_links')
 
     def __repr__(self):
-        return _valid_encoding('<Season(showname={name},season_number={number})>'.format(
-                name=self.show.name,
+        return _valid_encoding('<Season(id={id},season_number={number})>'.format(
+                id=self.id,
                 number=str(self.season_number).zfill(2)
         ))
-
-    def __str__(self):
-        return _valid_encoding(self.show.name + ' S' + str(self.season_number).zfill(2))
 
     def __iter__(self):
         return iter(self.episodes.values())
@@ -148,6 +158,13 @@ class Season(object):
                     'Episode {0} does not exist for season {1} of show {2}.'.format(item, self.season_number,
                                                                                     self.show))
 
+    # Python 3 bool evaluation
+    def __bool__(self):
+        return bool(self.id)
+
+    # Python 2 bool evaluation
+    def __nonzero__(self):
+        return bool(self.id)
 
 class Episode(object):
     def __init__(self, data):
@@ -684,3 +701,24 @@ def show_akas(maze_id):
         return [AKA(aka) for aka in q]
     else:
         raise AKASNotFound('Couldn\'t find AKA\'s for TVMaze ID: {0}'.format(maze_id))
+
+
+def show_seasons(maze_id):
+    url = endpoints.show_seasons.format(maze_id)
+    q = _query_endpoint(url)
+    if q:
+        season_dict = dict()
+        for season in q:
+            season_dict[season['number']] = Season(season)
+        return season_dict
+    else:
+        raise SeasonNotFound('Couldn\'t find Season\'s for TVMaze ID: {0}'.format(maze_id))
+
+
+def season_by_id(season_id):
+    url = endpoints.season_by_id.format(season_id)
+    q = _query_endpoint(url)
+    if q:
+        return Season(q)
+    else:
+        raise SeasonNotFound('Couldn\'t find Season with ID: {0}'.format(season_id))

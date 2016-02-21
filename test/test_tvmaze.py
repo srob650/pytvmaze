@@ -293,11 +293,11 @@ class ExceptionsTests(unittest.TestCase):
 
     def test_IDNotFound1_exception(self):
         with self.assertRaises(IDNotFound):
-            result = lookup_tvdb('sdfgsdfgsdfg4t4w3dfg')
+            result = lookup_tvdb(999999999)
 
     def test_IDNotFound2_exception(self):
         with self.assertRaises(IDNotFound):
-            result = lookup_tvrage('sdfgsdfgsdfg4t4w3dfg')
+            result = lookup_tvrage(999999999)
 
     def test_IDNotFound3_exception(self):
         with self.assertRaises(IDNotFound):
