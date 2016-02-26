@@ -128,9 +128,20 @@ There are many possible attributes of the Show class, but since TV Maze is full 
     show.seasons # dict of Season objects
 
     ## Season object attributes ##
-    season.show # the parent show object
+    season.show # parent show object, only present when Season object was created via embedding
+    season.episodes # dict of episodes
+    season.id
+    season.url
     season.season_number
-    season.episodes # dict of episodes within this season
+    season.name
+    season.episode_order
+    season.premier_date
+    season.end_date
+    season.network
+    season.web_channel
+    season.image
+    season.summary
+    season.links
 
     ## Episode object attributes ##
     episode.title
