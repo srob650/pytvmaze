@@ -30,7 +30,7 @@ To install:
     # Get a show object using a shows tvdb, tvrage id, or IMDB id
     >>> show = pytvmaze.get_show(tvdb_id=79349)
     >>> show = pytvmaze.get_show(tvrage_id=7926)
-    >>> show = pytvmaze.get_show(tvrage_id='tt3107288')
+    >>> show = pytvmaze.get_show(imdb_id='tt3107288')
 
     # Iterate over all episodes (full episode list available at Show() level)
     >>> show = pytvmaze.get_show(maze_id=161, embed='episodes')
@@ -128,9 +128,20 @@ There are many possible attributes of the Show class, but since TV Maze is full 
     show.seasons # dict of Season objects
 
     ## Season object attributes ##
-    season.show # the parent show object
+    season.show # parent show object, only present when Season object was created via embedding
+    season.episodes # dict of episodes
+    season.id
+    season.url
     season.season_number
-    season.episodes # dict of episodes within this season
+    season.name
+    season.episode_order
+    season.premier_date
+    season.end_date
+    season.network
+    season.web_channel
+    season.image
+    season.summary
+    season.links
 
     ## Episode object attributes ##
     episode.title
