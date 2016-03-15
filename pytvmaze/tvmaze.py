@@ -458,7 +458,7 @@ def _get_show_with_qualifiers(show_name, qualifiers):
 def _get_show_by_search(show_name, show_year, show_network, show_language, show_country, show_web_channel, embed):
     if show_year:
         show_year = str(show_year)
-    qualifiers = filter(None, [show_year, show_network, show_language, show_country, show_web_channel])
+    qualifiers = list(filter(None, [show_year, show_network, show_language, show_country, show_web_channel]))
     if qualifiers:
         qualifiers = [q.lower() for q in qualifiers if q]
         show = _get_show_with_qualifiers(show_name, qualifiers)
