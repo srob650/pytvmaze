@@ -1,5 +1,6 @@
 import sys
 
+
 class BaseError(Exception):
     def __init__(self, value):
         self.value = value
@@ -64,10 +65,6 @@ class GeneralError(BaseError):
 
 
 class MissingParameters(BaseError):
-    pass
-
-
-class SeasonNotFound(BaseError):
     pass
 
 

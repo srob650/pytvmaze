@@ -20,5 +20,5 @@ setup(
 
     keywords = 'python tv television tvmaze',
     packages=['pytvmaze']
-
+    requires = ['requests'] 
 )
