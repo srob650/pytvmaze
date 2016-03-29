@@ -1,7 +1,6 @@
 #!/usr/bin/python
 from __future__ import unicode_literals
 
-import json
 import re
 from datetime import datetime
 import requests
@@ -11,7 +10,7 @@ import time
 from pytvmaze import endpoints
 from pytvmaze.exceptions import *
 
-from requests.compat import (quote as url_quote)
+from requests.compat import quote
 
 
 def _remove_tags(text):
@@ -51,7 +50,7 @@ def retry(ExceptionToCheck, tries=4, delay=3, backoff=2, logger=None):
                     if logger:
                         logger.warning(msg)
                     else:
-                        print msg
+                        print(msg)
                     time.sleep(mdelay)
                     mtries -= 1
                     mdelay *= backoff
@@ -512,9 +511,8 @@ class API(object):
         else:
             return show
 
-
     def _url_quote(self, show):
-        return url_quote(show.encode('UTF-8'))
+        return quote(show.encode('UTF-8'))
 
     # Return list of Show objects
     def get_show_list(self, show_name):
@@ -528,7 +526,6 @@ class API(object):
         """
         shows = self.show_search(show_name)
         return shows
-
 
     # Get list of Person objects
     def get_people(self, name):
