@@ -3,14 +3,14 @@ from __future__ import unicode_literals
 
 import re
 from datetime import datetime
-import requests
-from functools import wraps
 import time
+from functools import wraps
+
+import requests
+from requests.compat import quote
 
 from pytvmaze import endpoints
 from pytvmaze.exceptions import *
-
-from requests.compat import quote
 
 
 def _remove_tags(text):
@@ -298,9 +298,6 @@ class Character(object):
     def __str__(self):
         return _valid_encoding(self.name)
 
-    def __unicode__(self):
-        return self._repr_obj(as_unicode=True)
-
 
 class Cast(object):
     def __init__(self, tvmaze_api, data):
@@ -312,7 +309,7 @@ class Cast(object):
     def populate(self, data):
         for cast_member in data:
             self.people.append(Person(self.tvmaze_api, cast_member['person']))
-            self.characters.append(Character(self.tvmaze_api, cast_member['character']))
+            self.characters.append(Character(cast_member['character']))
             self.people[-1].character = self.characters[-1]  # add reference to character
             self.characters[-1].person = self.people[-1]  # add reference to cast member
 
@@ -386,7 +383,7 @@ class API(object):
     def __init__(self, session=None):
         self.session = session or requests.Session()
 
-    @retry(requests.exceptions.RequestException)
+    @retry(requests.RequestException)
     def _query_endpoint(self, url):
         """
         Query TV Maze endpoints
@@ -745,3 +742,99 @@ class API(object):
             return Season(self, q)
         else:
             raise SeasonNotFound('Couldn\'t find Season with ID: {0}'.format(season_id))
+
+
+def get_show(*args, **kwargs):
+    return API().get_show(*args, **kwargs)
+
+
+def get_show_list(*args, **kwargs):
+    return API().get_show_list(*args, **kwargs)
+
+
+def get_people(*args, **kwargs):
+    return API().get_people(*args, **kwargs)
+
+
+def show_search(*args, **kwargs):
+    return API().show_search(*args, **kwargs)
+
+
+def show_single_search(*args, **kwargs):
+    return API().show_single_search(*args, **kwargs)
+
+
+def lookup_tvrage(*args, **kwargs):
+    return API().lookup_tvrage(*args, **kwargs)
+
+
+def lookup_tvdb(*args, **kwargs):
+    return API().lookup_tvdb(*args, **kwargs)
+
+
+def lookup_imdb(*args, **kwargs):
+    return API().lookup_imdb(*args, **kwargs)
+
+
+def get_schedule(*args, **kwargs):
+    return API().get_schedule(*args, **kwargs)
+
+
+def get_full_schedule(*args, **kwargs):
+    return API().get_full_schedule(*args, **kwargs)
+
+
+def show_main_info(*args, **kwargs):
+    return API().show_main_info(*args, **kwargs)
+
+
+def episode_list(*args, **kwargs):
+    return API().episode_list(*args, **kwargs)
+
+
+def episode_by_number(*args, **kwargs):
+    return API().episode_by_number(*args, **kwargs)
+
+
+def episodes_by_date(*args, **kwargs):
+    return API().episodes_by_date(*args, **kwargs)
+
+
+def show_cast(*args, **kwargs):
+    return API().show_cast(*args, **kwargs)
+
+
+def show_index(*args, **kwargs):
+    return API().show_index(*args, **kwargs)
+
+
+def people_search(*args, **kwargs):
+    return API().people_search(*args, **kwargs)
+
+
+def person_main_info(*args, **kwargs):
+    return API().person_main_info(*args, **kwargs)
+
+
+def person_cast_credits(*args, **kwargs):
+    return API().person_cast_credits(*args, **kwargs)
+
+
+def person_crew_credits(*args, **kwargs):
+    return API().person_crew_credits(*args, **kwargs)
+
+
+def show_updates(*args, **kwargs):
+    return API().show_updates(*args, **kwargs)
+
+
+def show_akas(*args, **kwargs):
+    return API().show_akas(*args, **kwargs)
+
+
+def show_seasons(*args, **kwargs):
+    return API().show_seasons(*args, **kwargs)
+
+
+def season_by_id(*args, **kwargs):
+    return API().season_by_id(*args, **kwargs)
