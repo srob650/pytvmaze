@@ -252,7 +252,7 @@ class Character(object):
         return _valid_encoding(self.name)
 
     def __unicode__(self):
-        return self._repr_obj(as_unicode=True)
+        return self.name
 
 
 class Cast(object):
@@ -506,7 +506,12 @@ def show_search(show):
     url = endpoints.show_search.format(_show)
     q = _query_endpoint(url)
     if q:
-        return [Show(show['show']) for show in q]
+        shows = []
+        for result in q:
+            show = Show(result['show'])
+            show.score = result['score']
+            shows.append(show)
+        return shows
     else:
         raise ShowNotFound('Show {0} not found'.format(show))
 
