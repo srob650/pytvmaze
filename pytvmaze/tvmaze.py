@@ -252,7 +252,7 @@ class Character(object):
         return _valid_encoding(self.name)
 
     def __unicode__(self):
-        return self._repr_obj(as_unicode=True)
+        return self.name
 
 
 class Cast(object):
