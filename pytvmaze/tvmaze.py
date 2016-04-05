@@ -312,6 +312,9 @@ class Updates(object):
         except KeyError:
             raise UpdateNotFound('No update found for Maze id {}.'.format(item))
 
+    def __iter__(self):
+        return iter(self.updates.values())
+
 
 class Update(object):
     def __init__(self, maze_id, time):
