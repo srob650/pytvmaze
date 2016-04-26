@@ -114,12 +114,12 @@ class Show(object):
         return self.nextepisode
 
     def previous_episode(self):
-        if self.previousepisode is None and 'nextepisode' in self.links and 'href' in self.links['previousepisode']:
+        if self.previousepisode is None and 'previousepisode' in self.links and 'href' in self.links['previousepisode']:
            episode_id = self.links['previousepisode']['href'].rsplit('/',1)[1]
            if episode_id.isdigit():
             self.previousepisode = episode_by_id(episode_id)
         return self.previousepisode
-            
+
     def populate(self, data):
         embedded = data.get('_embedded')
         if embedded:
