@@ -184,6 +184,19 @@ class EndpointTests(unittest.TestCase):
         self.assertIsInstance(akas, list)
         self.assertIsInstance(akas[0], AKA)
 
+    def test_show_seasons(self):
+        seasons = show_seasons(1)
+        self.assertIsInstance(seasons, dict)
+        self.assertIsInstance(seasons[1], Season)
+
+    def test_season_by_id(self):
+        season = season_by_id(1)
+        self.assertIsInstance(season, Season)
+
+    def test_episode_by_id(self):
+        episode = episode_by_id(1)
+        self.assertIsInstance(episode, Episode)
+
 
 class ObjectTests(unittest.TestCase):
     def test_get_show(self):
