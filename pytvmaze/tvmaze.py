@@ -53,9 +53,9 @@ class Show(object):
         self.episodes = list()
         self.seasons = dict()
         self.cast = None
-        self.populate(data)
         self.nextepisode = None
         self.previousepisode = None
+        self.populate(data)
 
     def __repr__(self):
         if self.premiered:
