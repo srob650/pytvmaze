@@ -106,6 +106,7 @@ class Show(object):
         except KeyError:
             raise SeasonNotFound('Season {0} does not exist for show {1}.'.format(item, self.name))
 
+    @property
     def next_episode(self):
         if self.nextepisode is None and 'nextepisode' in self.links and 'href' in self.links['nextepisode']:
             episode_id = self.links['nextepisode']['href'].rsplit('/',1)[1]
@@ -113,6 +114,7 @@ class Show(object):
                 self.nextepisode = episode_by_id(episode_id)
         return self.nextepisode
 
+    @property
     def previous_episode(self):
         if self.previousepisode is None and 'previousepisode' in self.links and 'href' in self.links['previousepisode']:
             episode_id = self.links['previousepisode']['href'].rsplit('/',1)[1]
