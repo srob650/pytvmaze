@@ -53,6 +53,8 @@ class Show(object):
         self.episodes = list()
         self.seasons = dict()
         self.cast = None
+        self.__nextepisode = None
+        self.__previousepisode = None
         self.populate(data)
 
     def __repr__(self):
@@ -103,6 +105,22 @@ class Show(object):
             return self.seasons[item]
         except KeyError:
             raise SeasonNotFound('Season {0} does not exist for show {1}.'.format(item, self.name))
+
+    @property
+    def next_episode(self):
+        if self.__nextepisode is None and 'nextepisode' in self.links and 'href' in self.links['nextepisode']:
+            episode_id = self.links['nextepisode']['href'].rsplit('/',1)[1]
+            if episode_id.isdigit():
+                self.__nextepisode = episode_by_id(episode_id)
+        return self.__nextepisode
+
+    @property
+    def previous_episode(self):
+        if self.__previousepisode is None and 'previousepisode' in self.links and 'href' in self.links['previousepisode']:
+            episode_id = self.links['previousepisode']['href'].rsplit('/',1)[1]
+            if episode_id.isdigit():
+                self.__previousepisode = episode_by_id(episode_id)
+        return self.__previousepisode
 
     def populate(self, data):
         embedded = data.get('_embedded')
@@ -429,18 +447,18 @@ def _get_show_with_qualifiers(show_name, qualifiers):
             premiered = show.premiered[:-6].lower()
         else:
             premiered = None
-        if show.network:
+        if show.network and show.network.get('name'):
             network = show.network['name'].lower()
         else:
             network = None
-        if show.web_channel:
+        if show.web_channel and show.web_channel.get('name'):
             web_channel = show.web_channel['name'].lower()
         else:
             web_channel = None
-        if show.network:
+        if show.network and show.network.get('country') and show.network['country'].get('code'):
             country = show.network['country']['code'].lower()
         else:
-            if show.web_channel:
+            if show.web_channel and show.web_channel.get('country') and show.web_channel['country'].get('code'):
                 country = show.web_channel['country']['code'].lower()
             else:
                 country = None
@@ -730,3 +748,12 @@ def season_by_id(season_id):
         return Season(q)
     else:
         raise SeasonNotFound('Couldn\'t find Season with ID: {0}'.format(season_id))
+
+
+def episode_by_id(episode_id):
+    url = endpoints.episode_by_id.format(episode_id)
+    q = _query_endpoint(url)
+    if q:
+        return Episode(q)
+    else:
+        raise EpisodeNotFound('Couldn\'t find Episode with ID: {0}'.format(episode_id))
