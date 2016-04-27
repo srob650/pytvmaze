@@ -53,8 +53,8 @@ class Show(object):
         self.episodes = list()
         self.seasons = dict()
         self.cast = None
-        self.nextepisode = None
-        self.previousepisode = None
+        self.__nextepisode = None
+        self.__previousepisode = None
         self.populate(data)
 
     def __repr__(self):
@@ -108,19 +108,19 @@ class Show(object):
 
     @property
     def next_episode(self):
-        if self.nextepisode is None and 'nextepisode' in self.links and 'href' in self.links['nextepisode']:
+        if self.__nextepisode is None and 'nextepisode' in self.links and 'href' in self.links['nextepisode']:
             episode_id = self.links['nextepisode']['href'].rsplit('/',1)[1]
             if episode_id.isdigit():
-                self.nextepisode = episode_by_id(episode_id)
-        return self.nextepisode
+                self.__nextepisode = episode_by_id(episode_id)
+        return self.__nextepisode
 
     @property
     def previous_episode(self):
-        if self.previousepisode is None and 'previousepisode' in self.links and 'href' in self.links['previousepisode']:
+        if self.__previousepisode is None and 'previousepisode' in self.links and 'href' in self.links['previousepisode']:
             episode_id = self.links['previousepisode']['href'].rsplit('/',1)[1]
             if episode_id.isdigit():
-                self.previousepisode = episode_by_id(episode_id)
-        return self.previousepisode
+                self.__previousepisode = episode_by_id(episode_id)
+        return self.__previousepisode
 
     def populate(self, data):
         embedded = data.get('_embedded')
