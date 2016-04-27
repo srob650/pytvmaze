@@ -447,18 +447,18 @@ def _get_show_with_qualifiers(show_name, qualifiers):
             premiered = show.premiered[:-6].lower()
         else:
             premiered = None
-        if show.network:
+        if show.network and show.network.get('name'):
             network = show.network['name'].lower()
         else:
             network = None
-        if show.web_channel:
+        if show.web_channel and show.web_channel.get('name'):
             web_channel = show.web_channel['name'].lower()
         else:
             web_channel = None
-        if show.network:
+        if show.network and show.network.get('country') and show.network['country'].get('code'):
             country = show.network['country']['code'].lower()
         else:
-            if show.web_channel:
+            if show.web_channel and show.web_channel.get('country') and show.web_channel['country'].get('code'):
                 country = show.web_channel['country']['code'].lower()
             else:
                 country = None
