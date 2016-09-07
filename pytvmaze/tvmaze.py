@@ -197,6 +197,7 @@ class Episode(object):
         self.runtime = data.get('runtime')
         self.summary = _remove_tags(data.get('summary'))
         self.maze_id = data.get('id')
+        self.special = self.is_special()
         # Reference to show for when using get_schedule()
         if data.get('show'):
             self.show = Show(data.get('show'))
@@ -215,6 +216,11 @@ class Episode(object):
         season = 'S' + str(self.season_number).zfill(2)
         episode = 'E' + str(self.episode_number).zfill(2)
         return _valid_encoding(season + episode + ' ' + self.title)
+
+    def is_special(self):
+        if self.episode_number:
+            return False
+        return True
 
 
 class Person(object):
