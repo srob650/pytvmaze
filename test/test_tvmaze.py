@@ -85,6 +85,7 @@ class EndpointTests(unittest.TestCase):
         specials = episode_list(4, specials=True)
         self.assertIsInstance(specials, list)
         self.assertIsInstance(specials[0], Episode)
+        self.assertTrue(specials[0].special, True)
 
         with self.assertRaises(IDNotFound):
             episode_list(9999999999)
