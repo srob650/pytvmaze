@@ -749,3 +749,150 @@ def episode_by_id(episode_id):
         return Episode(q)
     else:
         raise EpisodeNotFound('Couldn\'t find Episode with ID: {0}'.format(episode_id))
+
+# TVMaze Premium Endpoints
+class TVMazePremium(object):
+    def __init__(self, username, api_key):
+        self.username = username
+        self.api_key = api_key
+
+    def _endpoint_get(url):
+        try:
+            r = requests.get(url, auth=(self.username, self.api_key))
+        except requests.exceptions.ConnectionError as e:
+            raise ConnectionError(repr(e))
+
+        if r.status_code in [404, 422]:
+            return None
+
+        if r.status_code == 400:
+            raise BadRequest('Bad Request for url: {}'.format(url))
+
+        results = r.json()
+        if results:
+            return results
+        else:
+            return None
+
+    def _endpoint_delete(url):
+        try:
+            r = requests.delete(url, auth=(self.username, self.api_key))
+        except requests.exceptions.ConnectionError as e:
+            raise ConnectionError(repr(e))
+
+        if r.status_code == 400:
+            raise BadRequest('Bad Request for url: {}'.format(url))
+
+        if r.status_code == 200:
+            return True
+
+        if r.status_code == 404:
+            return False
+
+    def _endpoint_put(url):
+        try:
+            r = requests.put(url, auth=(self.username, self.api_key))
+        except requests.exceptions.ConnectionError as e:
+            raise ConnectionError(repr(e))
+
+        if r.status_code == 400:
+            raise BadRequest('Bad Request for url: {}'.format(url))
+
+        if r.status_code == 200:
+            return True
+
+        if r.status_code == 404:
+            return False
+
+    def get_followed_shows():
+        url = endpointds.followed_shows.format('?embed=show', '')
+        q = self._endpoint_get(url)
+        if q and q.get('_embedded') and q['_embedded'].get('show'):
+            return [Show(show) for show in q['_embedded']['show']]
+        else:
+            raise NoFollowedShows('You have not followed any shows yet')
+
+    def unfollow_show(maze_id):
+        url = endpoints.followed_shows.format('', maze_id)
+        q = self._endpoint_delete(url)
+        if not q:
+            raise ShowNotFollowed('Show with ID {} was not followed'.format(maze_id))
+
+    def follow_show(maze_id):
+        url = endpoints.followed_shows.format('', maze_id)
+        q = self._endpoint_put(url)
+        if not q:
+            raise ShowNotFound('Show with ID {} does not exist'.format(maze_id))
+
+    def get_followed_show(maze_id):
+        url = endpoints.followed_shows.format('', maze_id)
+        q = self._endpoint_get(url)
+        if q and q.get('_embedded') and q['_embedded'].get('show'):
+            return Show(q['_embedded']['show'])
+        else:
+            raise ShowNotFollowed('Show with ID {} is not followed'.format(maze_id))
+
+    def get_followed_people():
+        url = endpoints.followed_people.format('?embed=person', '')
+        q = self._endpoint_get(url)
+        if q and q.get('_embedded') and q['_embedded'].get('person'):
+            return [Person(person) for person in q['_embedded']['person']]
+        else:
+            raise NoFollowedPeople('You have not followed any people yet')
+
+    def unfollow_person(person_id):
+        url = endpoints.followed_people.format('', person_id)
+        q = self._endpoint_delete(url)
+        if not q:
+            raise PersonNotFollowed('Person with ID {} was not followed'.format(person_id))
+
+    def follow_person(person_id):
+        url = endpoints.followed_people.format('', person_id)
+        q = self._endpoint_put(url)
+        if not q:
+            raise PersonNotFound('Person with ID {} does not exist'.format(person_id))
+
+    def get_followed_person(person_id):
+        url = endpoints.followed_people.format('', person_id)
+        q = self._endpoint_get(url)
+        if q and q.get('_embedded') and q['_embedded'].get('person'):
+            return Person(q['_embedded']['person'])
+        else:
+            raise PersonNotFound('Person with ID {} is not followed'.format(person_id))
+
+    def get_marked_episodes():
+        url = endpoints.marked_episodes.format('')
+        q = self._endpoint_get(url)
+        if q and q.get('episode_id'):
+            episodes = []
+            for result in q:
+                episode = episode_by_id(result['episode_id'])
+                episode.__dict__().update(result)
+            return episodes
+            # return [episode_by_id(q['episode_id']) for episode in q]
+        else:
+            raise NoMarkedEpisodes('You have not marked any episodes yet')
+
+    def unmark_episode(episode_id):
+        url = endpoinds.marked_episodes.format(episode_id)
+        q = self._endpoint_delete(url)
+        if not q:
+            raise EpisodeNotMarked('Episode with ID {} was not marked'.format(episode_id))
+
+    def mark_episode(episode_id, type):
+        url = endpoints.marked_episodes.format(episode_id)
+        q = self._endpoint_put(episode_id)
+        if not q:
+            raise EpisodeNotFound('Episode with ID {} does not exist')
+
+    def get_marked_episode(episode_id):
+        url = endpoints.marked_episodes.format(episode_id)
+        q = self._endpoint_put(url)
+        if not q:
+            raise EpisodeNotMarked('Episode with ID {} is not marked')
+
+class Marked_Episode(Episode):
+    def __init__(self, episode_id, created_at, type):
+        self.episode_id = episode_id
+        self.created_at = created_at
+        self.type = type
