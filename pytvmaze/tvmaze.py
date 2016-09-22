@@ -1,22 +1,11 @@
 #!/usr/bin/python
 from __future__ import unicode_literals
 
-import json
 import re
 from datetime import datetime
-
+import requests
 from pytvmaze import endpoints
 from pytvmaze.exceptions import *
-
-try:
-    # Python 3 and later
-    from urllib.request import urlopen
-    from urllib.parse import quote as url_quote, unquote as url_unquote
-    from urllib.error import URLError, HTTPError
-except ImportError:
-    # Python 2
-    from urllib2 import urlopen, URLError, HTTPError
-    from urllib import quote as url_quote, unquote as url_unquote
 
 
 def _valid_encoding(text):
@@ -366,20 +355,17 @@ def _remove_tags(text):
 # Query TV Maze endpoints
 def _query_endpoint(url):
     try:
-        data = urlopen(url).read()
-    except HTTPError as e:
-        if e.code in [404, 422]:
-            return None
-        elif e.code == 400:
-            raise BadRequest(e.reason + ' ' + str(e.code) + ' ' + e.url)
-    except URLError as e:
+        r = requests.get(url)
+    except requests.exceptions.ConnectionError as e:
         raise ConnectionError(repr(e))
 
-    try:
-        results = json.loads(data)
-    except:
-        results = json.loads(data.decode('utf8'))
+    if r.status_code in [404, 422]:
+        return None
 
+    if r.status_code == 400:
+        raise BadRequest('Bad Request for url: {}'.format(url))
+
+    results = r.json()
     if results:
         return results
     else:
@@ -498,7 +484,7 @@ def _get_show_by_search(show_name, show_year, show_network, show_language, show_
 
 
 def _url_quote(show):
-    return url_quote(show.encode('UTF-8'))
+    return requests.compat.quote(show.encode('UTF-8'))
 
 
 # Return list of Show objects
