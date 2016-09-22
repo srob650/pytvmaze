@@ -19,6 +19,7 @@ setup(
     ],
 
     keywords = 'python tv television tvmaze',
-    packages=['pytvmaze']
+    packages=['pytvmaze'],
+    install_requires=['requests']
 
 )
