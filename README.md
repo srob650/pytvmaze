@@ -1,3 +1,13 @@
+## **Notice: pytvmaze 1.x is being deprecated and 2.x is being developed.**
+**If you make use of the `get_show()` function you will need to modify your code for 2.x.  There will
+be a new class `TVMaze()` which `get_show()` will be a method of.  This new class will also enable
+the [new premium features that TVMaze is rolling out](http://www.tvmaze.com/blogs/14/announcing-tvmaze-premium)
+by allowing you to create an authenticated `TVMaze()` instance with your username and api key to
+access premium features.  Please see the new 2.x branch for more info.  Note that the premium
+features are not yet available so any code in 2.x does not yet work and has not been tested, and
+therefore is subject to change once we see how the new features work.  Once 2.x is stable I will
+create a new 1.x branch and merge 2.x into master.**
+
 To install:
 
 ```$ pip install pytvmaze```
