@@ -105,3 +105,6 @@ class NoMarkedEpisodes(BaseError):
 
 class EpisodeNotMarked(BaseError):
     pass
+
+class InvalidMarkedEpisodeType(BaseError):
+    pass

@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 
 import re
 from datetime import datetime
+import time
 import requests
 from pytvmaze import endpoints
 from pytvmaze.exceptions import *
@@ -339,6 +340,13 @@ class AKA(object):
         self.name = data.get('name')
 
 
+class MarkedEpisode(object):
+    def __init__(self, data):
+        self.episode_id = data.get('episode_id')
+        self.created_at = data.get('created_at')
+        self.type = data.get('type')
+
+
 def _valid_encoding(text):
     if not text:
         return
@@ -424,9 +432,9 @@ class TVMaze(object):
         if r.status_code == 404:
             return False
 
-    def _endpoint_premium_put(self, url):
+    def _endpoint_premium_put(self, url, data=None):
         try:
-            r = requests.put(url, auth=(self.username, self.api_key))
+            r = requests.put(url, data=data, auth=(self.username, self.api_key))
         except requests.exceptions.ConnectionError as e:
             raise ConnectionError(repr(e))
 
@@ -850,13 +858,8 @@ def get_followed_person(person_id):
 def get_marked_episodes():
     url = endpoints.marked_episodes.format('')
     q = _endpoint_premium_get(url)
-    if q and q.get('episode_id'):
-        episodes = []
-        for result in q:
-            episode = episode_by_id(result['episode_id'])
-            episode.__dict__().update(result)
-        return episodes
-        # return [episode_by_id(q['episode_id']) for episode in q]
+    if q:
+        [MarkedEpisode(episode) for episode in q]
     else:
         raise NoMarkedEpisodes('You have not marked any episodes yet')
 
@@ -867,13 +870,21 @@ def unmark_episode(episode_id):
         raise EpisodeNotMarked('Episode with ID {} was not marked'.format(episode_id))
 
 def mark_episode(episode_id, type):
+    types = {'watched': 0, 'acquired': 1, 'skipped': 2}
+    try:
+        status = types[type]
+    except IndexError:
+        raise InvalidMarkedEpisodeType('Episode must be marked as "watched", "acquired", or "skipped"')
+    data = {'episode_id': episode_id, 'created_at': time.time(), 'type': status}
     url = endpoints.marked_episodes.format(episode_id)
-    q = _endpoint_premium_put(episode_id)
+    q = _endpoint_premium_put(episode_id, data=data)
     if not q:
         raise EpisodeNotFound('Episode with ID {} does not exist')
 
 def get_marked_episode(episode_id):
     url = endpoints.marked_episodes.format(episode_id)
-    q = _endpoint_premium_put(url)
-    if not q:
+    q = _endpoint_premium_get(url)
+    if q:
+        MarkedEpisode(q[0])
+    else:
         raise EpisodeNotMarked('Episode with ID {} is not marked')
