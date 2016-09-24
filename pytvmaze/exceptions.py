@@ -108,3 +108,6 @@ class EpisodeNotMarked(BaseError):
 
 class InvalidMarkedEpisodeType(BaseError):
     pass
+
+class InvalidEmbedValue(BaseError):
+    pass

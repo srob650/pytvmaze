@@ -340,6 +340,22 @@ class AKA(object):
         self.name = data.get('name')
 
 
+class FollowedShow(object):
+    def __init__(self, data):
+        self.maze_id = data.get('show_id')
+        self.show = None
+        if data.get('_embedded'):
+            self.show = Show(data['_embedded'].get('show'))
+
+
+class FollowedPerson(object):
+    def __init__(self, data):
+        self.person_id = data.get('person_id')
+        self.person = None
+        if data.get('_embedded'):
+            self.person = Person(data['_embedded'].get('person'))
+
+
 class MarkedEpisode(object):
     def __init__(self, data):
         self.episode_id = data.get('episode_id')
@@ -799,11 +815,15 @@ def episode_by_id(episode_id):
 
 # TVMaze Premium Endpoints
 # NOT DONE OR TESTED
-def get_followed_shows():
-    url = endpointds.followed_shows.format('?embed=show', '')
+def get_followed_shows(embed=None):
+    if not embed in [None, 'show']:
+        raise InvalidEmbedValue('Value for embed must be "show" or "None"')
+    url = endpointds.followed_shows.format('', '')
+    if embed == 'show':
+        url = endpointds.followed_shows.format('?embed=show', '')
     q = _endpoint_premium_get(url)
-    if q and q.get('_embedded') and q['_embedded'].get('show'):
-        return [Show(show) for show in q['_embedded']['show']]
+    if q:
+        return [FollowedShow(show) for show in q]
     else:
         raise NoFollowedShows('You have not followed any shows yet')
 
@@ -822,16 +842,20 @@ def follow_show(maze_id):
 def get_followed_show(maze_id):
     url = endpoints.followed_shows.format('', maze_id)
     q = _endpoint_premium_get(url)
-    if q and q.get('_embedded') and q['_embedded'].get('show'):
-        return Show(q['_embedded']['show'])
+    if q:
+        return FollowedShow(q[0])
     else:
         raise ShowNotFollowed('Show with ID {} is not followed'.format(maze_id))
 
-def get_followed_people():
-    url = endpoints.followed_people.format('?embed=person', '')
+def get_followed_people(embed=None):
+    if not embed in [None, 'person']:
+        raise InvalidEmbedValue('Value for embed must be "person" or "None"')
+    url = endpoints.followed_people.format('', '')
+    if embed == 'person':
+        url = endpoints.followed_people.format('?embed=person', '')
     q = _endpoint_premium_get(url)
-    if q and q.get('_embedded') and q['_embedded'].get('person'):
-        return [Person(person) for person in q['_embedded']['person']]
+    if q:
+        return [FollowedPerson(person) for person in q]
     else:
         raise NoFollowedPeople('You have not followed any people yet')
 
@@ -850,8 +874,8 @@ def follow_person(person_id):
 def get_followed_person(person_id):
     url = endpoints.followed_people.format('', person_id)
     q = _endpoint_premium_get(url)
-    if q and q.get('_embedded') and q['_embedded'].get('person'):
-        return Person(q['_embedded']['person'])
+    if q:
+        return FollowedPerson(q[0])
     else:
         raise PersonNotFound('Person with ID {} is not followed'.format(person_id))
 
@@ -869,10 +893,10 @@ def unmark_episode(episode_id):
     if not q:
         raise EpisodeNotMarked('Episode with ID {} was not marked'.format(episode_id))
 
-def mark_episode(episode_id, type):
+def mark_episode(episode_id, mark_type):
     types = {'watched': 0, 'acquired': 1, 'skipped': 2}
     try:
-        status = types[type]
+        status = types[mark_type]
     except IndexError:
         raise InvalidMarkedEpisodeType('Episode must be marked as "watched", "acquired", or "skipped"')
     data = {'episode_id': episode_id, 'created_at': time.time(), 'type': status}
