@@ -292,9 +292,9 @@ class ObjectTests(unittest.TestCase):
 
 
 class ExceptionsTests(unittest.TestCase):
-    def test_BadRequest_exception(self):
+    def test_InvalidEmbedValue_exception(self):
         tvm = TVMaze()
-        with self.assertRaises(BadRequest):
+        with self.assertRaises(InvalidEmbedValue):
             result = tvm.get_show(maze_id=13, embed='sdfgsdfgs')
 
     def test_MissingParameters_exception(self):

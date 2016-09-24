@@ -611,6 +611,8 @@ def show_search(show):
         raise ShowNotFound('Show {0} not found'.format(show))
 
 def show_single_search(show, embed=None):
+    if not embed in [None, 'episodes', 'cast', 'previousepisode', 'nextepisode']:
+        raise InvalidEmbedValue('Value for embed must be "episodes", "cast", "previousepisode", "nextepisode", or None')
     _show = _url_quote(show)
     if embed:
         url = endpoints.show_single_search.format(_show) + '&embed=' + embed
@@ -664,6 +666,8 @@ def get_full_schedule():
         raise GeneralError('Something went wrong, www.tvmaze.com may be down')
 
 def show_main_info(maze_id, embed=None):
+    if not embed in [None, 'episodes', 'cast', 'previousepisode', 'nextepisode']:
+        raise InvalidEmbedValue('Value for embed must be "episodes", "cast", "previousepisode", "nextepisode", or None')
     if embed:
         url = endpoints.show_main_info.format(maze_id) + '?embed=' + embed
     else:
@@ -737,6 +741,8 @@ def people_search(person):
         raise PersonNotFound('Couldn\'t find person: {0}'.format(person))
 
 def person_main_info(person_id, embed=None):
+    if not embed in [None, 'castcredits', 'crewcredits']:
+        raise InvalidEmbedValue('Value for embed must be "castcredits" or None')
     if embed:
         url = endpoints.person_main_info.format(person_id) + '?embed=' + embed
     else:
@@ -748,6 +754,8 @@ def person_main_info(person_id, embed=None):
         raise PersonNotFound('Couldn\'t find person: {0}'.format(person_id))
 
 def person_cast_credits(person_id, embed=None):
+    if not embed in [None, 'show', 'character']:
+        raise InvalidEmbedValue('Value for embed must be "show", "character" or None')
     if embed:
         url = endpoints.person_cast_credits.format(person_id) + '?embed=' + embed
     else:
@@ -759,6 +767,8 @@ def person_cast_credits(person_id, embed=None):
         raise CreditsNotFound('Couldn\'t find cast credits for person ID: {0}'.format(person_id))
 
 def person_crew_credits(person_id, embed=None):
+    if not embed in [None, 'show']:
+        raise InvalidEmbedValue('Value for embed must be "show" or None')
     if embed:
         url = endpoints.person_crew_credits.format(person_id) + '?embed=' + embed
     else:
@@ -817,7 +827,7 @@ def episode_by_id(episode_id):
 # NOT DONE OR TESTED
 def get_followed_shows(embed=None):
     if not embed in [None, 'show']:
-        raise InvalidEmbedValue('Value for embed must be "show" or "None"')
+        raise InvalidEmbedValue('Value for embed must be "show" or None')
     url = endpointds.followed_shows.format('', '')
     if embed == 'show':
         url = endpointds.followed_shows.format('?embed=show', '')
@@ -849,7 +859,7 @@ def get_followed_show(maze_id):
 
 def get_followed_people(embed=None):
     if not embed in [None, 'person']:
-        raise InvalidEmbedValue('Value for embed must be "person" or "None"')
+        raise InvalidEmbedValue('Value for embed must be "person" or None')
     url = endpoints.followed_people.format('', '')
     if embed == 'person':
         url = endpoints.followed_people.format('?embed=person', '')
