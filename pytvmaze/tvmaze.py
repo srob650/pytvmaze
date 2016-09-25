@@ -25,12 +25,18 @@ class Show(object):
         self.premiered = data.get('premiered')
         self.summary = _remove_tags(data.get('summary'))
         self.links = data.get('_links')
-        self.web_channel = data.get('webChannel')
+        if data.get('webChannel'):
+            self.web_channel = WebChannel(data.get('webChannel'))
+        else:
+            self.web_channel = None
         self.runtime = data.get('runtime')
         self.type = data.get('type')
         self.id = data.get('id')
         self.maze_id = self.id
-        self.network = data.get('network')
+        if data.get('network'):
+            self.network = Network(data.get('network'))
+        else:
+            self.network = None
         self.episodes = list()
         self.seasons = dict()
         self.cast = None
@@ -45,10 +51,10 @@ class Show(object):
             year = None
         if self.web_channel:
             platform = ',show_web_channel='
-            network = self.web_channel.get('name')
+            network = self.web_channel.name
         elif self.network:
             platform = ',network='
-            network = self.network.get('name')
+            network = self.network.name
         else:
             platform = ''
             network = ''
@@ -131,8 +137,14 @@ class Season(object):
         self.episode_order = data.get('episodeOrder')
         self.premier_date = data.get('premierDate')
         self.end_date = data.get('endDate')
-        self.network = data.get('network')
-        self.web_channel = data.get('webChannel')
+        if data.get('network'):
+            self.network = Network(data.get('network'))
+        else:
+            self.network = None
+        if data.get('webChannel'):
+            self.web_channel = WebChannel(data.get('webChannel'))
+        else:
+            self.web_channel = None
         self.image = data.get('image')
         self.summary = data.get('summary')
         self.links = data.get('_links')
@@ -349,6 +361,9 @@ class Network(object):
             self.timezone = data['country'].get('timezone')
             self.code = data['country'].get('code')
 
+    def __repr__(self):
+        return '<Network(name={name},country={country})>'.format(name=self.name, country=self.country)
+
 
 class WebChannel(object):
     def __init__(self, data):
@@ -358,6 +373,9 @@ class WebChannel(object):
             self.country = data['country'].get('name')
             self.timezone = data['country'].get('timezone')
             self.code = data['country'].get('code')
+
+    def __repr__(self):
+        return '<WebChannel(name={name},country={country})>'.format(name=self.name, country=self.country)
 
 
 class FollowedShow(object):
@@ -565,19 +583,19 @@ class TVMaze(object):
                 premiered = show.premiered[:-6].lower()
             else:
                 premiered = None
-            if show.network and show.network.get('name'):
-                network = show.network['name'].lower()
+            if show.network and show.network.name:
+                network = show.network.name.lower()
             else:
                 network = None
-            if show.web_channel and show.web_channel.get('name'):
-                web_channel = show.web_channel['name'].lower()
+            if show.web_channel and show.web_channel.name:
+                web_channel = show.web_channel.name.lower()
             else:
                 web_channel = None
-            if show.network and show.network.get('country') and show.network['country'].get('code'):
-                country = show.network['country']['code'].lower()
+            if show.network and show.network.code:
+                country = show.network.code.lower()
             else:
-                if show.web_channel and show.web_channel.get('country') and show.web_channel['country'].get('code'):
-                    country = show.web_channel['country']['code'].lower()
+                if show.web_channel and show.web_channel.code:
+                    country = show.web_channel.code.lower()
                 else:
                     country = None
             if show.language:
