@@ -572,6 +572,106 @@ class TVMaze(object):
         else:
             return show
 
+    # TVMaze Premium Endpoints
+    # NOT DONE OR TESTED
+    def get_followed_shows(self, embed=None):
+        if not embed in [None, 'show']:
+            raise InvalidEmbedValue('Value for embed must be "show" or None')
+        url = endpointds.followed_shows.format('', '')
+        if embed == 'show':
+            url = endpointds.followed_shows.format('?embed=show', '')
+        q = _endpoint_premium_get(url)
+        if q:
+            return [FollowedShow(show) for show in q]
+        else:
+            raise NoFollowedShows('You have not followed any shows yet')
+
+    def get_followed_show(self, maze_id):
+        url = endpoints.followed_shows.format('', maze_id)
+        q = _endpoint_premium_get(url)
+        if q:
+            return FollowedShow(q[0])
+        else:
+            raise ShowNotFollowed('Show with ID {} is not followed'.format(maze_id))
+
+    def follow_show(self, maze_id):
+        url = endpoints.followed_shows.format('', maze_id)
+        q = _endpoint_premium_put(url)
+        if not q:
+            raise ShowNotFound('Show with ID {} does not exist'.format(maze_id))
+
+    def unfollow_show(self, maze_id):
+        url = endpoints.followed_shows.format('', maze_id)
+        q = _endpoint_premium_delete(url)
+        if not q:
+            raise ShowNotFollowed('Show with ID {} was not followed'.format(maze_id))
+
+    def get_followed_people(self, embed=None):
+        if not embed in [None, 'person']:
+            raise InvalidEmbedValue('Value for embed must be "person" or None')
+        url = endpoints.followed_people.format('', '')
+        if embed == 'person':
+            url = endpoints.followed_people.format('?embed=person', '')
+        q = _endpoint_premium_get(url)
+        if q:
+            return [FollowedPerson(person) for person in q]
+        else:
+            raise NoFollowedPeople('You have not followed any people yet')
+
+    def get_followed_person(self, person_id):
+        url = endpoints.followed_people.format('', person_id)
+        q = _endpoint_premium_get(url)
+        if q:
+            return FollowedPerson(q[0])
+        else:
+            raise PersonNotFound('Person with ID {} is not followed'.format(person_id)
+
+    def follow_person(self, person_id):
+        url = endpoints.followed_people.format('', person_id)
+        q = _endpoint_premium_put(url)
+        if not q:
+            raise PersonNotFound('Person with ID {} does not exist'.format(person_id))
+
+    def unfollow_person(self, person_id):
+        url = endpoints.followed_people.format('', person_id)
+        q = _endpoint_premium_delete(url)
+        if not q:
+            raise PersonNotFollowed('Person with ID {} was not followed'.format(person_id))
+
+    def get_marked_episodes(self):
+        url = endpoints.marked_episodes.format('')
+        q = _endpoint_premium_get(url)
+        if q:
+            [MarkedEpisode(episode) for episode in q]
+        else:
+            raise NoMarkedEpisodes('You have not marked any episodes yet')
+
+    def get_marked_episode(self, episode_id):
+        url = endpoints.marked_episodes.format(episode_id)
+        q = _endpoint_premium_get(url)
+        if q:
+            MarkedEpisode(q[0])
+        else:
+            raise EpisodeNotMarked('Episode with ID {} is not marked')
+
+    def mark_episode(self, episode_id, mark_type):
+        types = {'watched': 0, 'acquired': 1, 'skipped': 2}
+        try:
+            status = types[mark_type]
+        except IndexError:
+            raise InvalidMarkedEpisodeType('Episode must be marked as "watched", "acquired", or "skipped"')
+        data = {'episode_id': episode_id, 'created_at': time.time(), 'type': status}
+        url = endpoints.marked_episodes.format(episode_id)
+        q = _endpoint_premium_put(episode_id, data=data)
+        if not q:
+            raise EpisodeNotFound('Episode with ID {} does not exist')
+
+    def unmark_episode(self, episode_id):
+        url = endpoinds.marked_episodes.format(episode_id)
+        q = _endpoint_premium_delete(url)
+        if not q:
+            raise EpisodeNotMarked('Episode with ID {} was not marked'.format(episode_id))
+
 # Return list of Show objects
 def get_show_list(show_name):
     """
@@ -821,104 +921,3 @@ def episode_by_id(episode_id):
         return Episode(q)
     else:
         raise EpisodeNotFound('Couldn\'t find Episode with ID: {0}'.format(episode_id))
-
-
-# TVMaze Premium Endpoints
-# NOT DONE OR TESTED
-def get_followed_shows(embed=None):
-    if not embed in [None, 'show']:
-        raise InvalidEmbedValue('Value for embed must be "show" or None')
-    url = endpointds.followed_shows.format('', '')
-    if embed == 'show':
-        url = endpointds.followed_shows.format('?embed=show', '')
-    q = _endpoint_premium_get(url)
-    if q:
-        return [FollowedShow(show) for show in q]
-    else:
-        raise NoFollowedShows('You have not followed any shows yet')
-
-def get_followed_show(maze_id):
-    url = endpoints.followed_shows.format('', maze_id)
-    q = _endpoint_premium_get(url)
-    if q:
-        return FollowedShow(q[0])
-    else:
-        raise ShowNotFollowed('Show with ID {} is not followed'.format(maze_id))
-
-def follow_show(maze_id):
-    url = endpoints.followed_shows.format('', maze_id)
-    q = _endpoint_premium_put(url)
-    if not q:
-        raise ShowNotFound('Show with ID {} does not exist'.format(maze_id))
-
-def unfollow_show(maze_id):
-    url = endpoints.followed_shows.format('', maze_id)
-    q = _endpoint_premium_delete(url)
-    if not q:
-        raise ShowNotFollowed('Show with ID {} was not followed'.format(maze_id))
-
-def get_followed_people(embed=None):
-    if not embed in [None, 'person']:
-        raise InvalidEmbedValue('Value for embed must be "person" or None')
-    url = endpoints.followed_people.format('', '')
-    if embed == 'person':
-        url = endpoints.followed_people.format('?embed=person', '')
-    q = _endpoint_premium_get(url)
-    if q:
-        return [FollowedPerson(person) for person in q]
-    else:
-        raise NoFollowedPeople('You have not followed any people yet')
-
-def get_followed_person(person_id):
-    url = endpoints.followed_people.format('', person_id)
-    q = _endpoint_premium_get(url)
-    if q:
-        return FollowedPerson(q[0])
-    else:
-        raise PersonNotFound('Person with ID {} is not followed'.format(person_id)
-
-def follow_person(person_id):
-    url = endpoints.followed_people.format('', person_id)
-    q = _endpoint_premium_put(url)
-    if not q:
-        raise PersonNotFound('Person with ID {} does not exist'.format(person_id))
-
-def unfollow_person(person_id):
-    url = endpoints.followed_people.format('', person_id)
-    q = _endpoint_premium_delete(url)
-    if not q:
-        raise PersonNotFollowed('Person with ID {} was not followed'.format(person_id))
-
-def get_marked_episodes():
-    url = endpoints.marked_episodes.format('')
-    q = _endpoint_premium_get(url)
-    if q:
-        [MarkedEpisode(episode) for episode in q]
-    else:
-        raise NoMarkedEpisodes('You have not marked any episodes yet')
-
-def get_marked_episode(episode_id):
-    url = endpoints.marked_episodes.format(episode_id)
-    q = _endpoint_premium_get(url)
-    if q:
-        MarkedEpisode(q[0])
-    else:
-        raise EpisodeNotMarked('Episode with ID {} is not marked')
-
-def mark_episode(episode_id, mark_type):
-    types = {'watched': 0, 'acquired': 1, 'skipped': 2}
-    try:
-        status = types[mark_type]
-    except IndexError:
-        raise InvalidMarkedEpisodeType('Episode must be marked as "watched", "acquired", or "skipped"')
-    data = {'episode_id': episode_id, 'created_at': time.time(), 'type': status}
-    url = endpoints.marked_episodes.format(episode_id)
-    q = _endpoint_premium_put(episode_id, data=data)
-    if not q:
-        raise EpisodeNotFound('Episode with ID {} does not exist')
-
-def unmark_episode(episode_id):
-    url = endpoinds.marked_episodes.format(episode_id)
-    q = _endpoint_premium_delete(url)
-    if not q:
-        raise EpisodeNotMarked('Episode with ID {} was not marked'.format(episode_id))
