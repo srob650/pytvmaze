@@ -229,8 +229,9 @@ class ObjectTests(unittest.TestCase):
         show5 = tvm.get_show(show_name='utopia', show_country='au', show_network='abc', embed='episodes')
         self.assertIsInstance(show5, Show)
         self.assertTrue(hasattr(show5, 'episodes'))
-        self.assertTrue(show5.network['country']['code'] == 'AU')
-        self.assertTrue(show5.network['name'] == 'ABC')
+        self.assertTrue(show5.network.code == 'AU')
+        self.assertTrue(show5.network.name == 'ABC')
+        self.assertIsInstance(show5.network, Network)
 
         show6 = tvm.get_show(show_name='the flash', show_year='1967', embed='episodes')
         self.assertIsInstance(show6, Show)
@@ -246,7 +247,8 @@ class ObjectTests(unittest.TestCase):
         self.assertIsInstance(show8, Show)
         self.assertTrue(hasattr(show8, 'episodes'))
         self.assertTrue(show8.language == 'English')
-        self.assertTrue(show8.web_channel['name'] == 'Netflix')
+        self.assertTrue(show8.web_channel.name == 'Netflix')
+        self.assertIsInstance(show8.web_channel, WebChannel)
 
         # Test lookup with bad ID but good name
         show9 = tvm.get_show(maze_id=999999999, tvdb_id=999999999, tvrage_id=999999999, show_name='lost')
@@ -288,7 +290,7 @@ class ObjectTests(unittest.TestCase):
         tvm = TVMaze()
         show1 = tvm.get_show(show_name=u'Unit\xe9 9')
         self.assertTrue(show1.id == 8652)
-        self.assertTrue(show1.network['name'] == u'ICI Radio-Canada T\u00e9l\u00e9')
+        self.assertTrue(show1.network.name == u'ICI Radio-Canada T\u00e9l\u00e9')
 
 
 class ExceptionsTests(unittest.TestCase):
