@@ -1,3 +1,7 @@
+# Migrating from 1.x to 2.x
+1. To use `get_show` you must create a TVMaze() instance with optional username and api_key.  See examples below.
+2. `show.network`, `show.web_channel`, `season.network`, and `season.web_channel` now return new `Network` or `WebChannel` objects instead of dictionaries.
+
 To install:
 
 ```$ pip install pytvmaze```
@@ -105,64 +109,5 @@ These qualifiers will be matched against the following show attributes: premier 
     >>> show = tvm.get_show(show_name='utopia', show_year='2014', show_country='au', show_network='abc')
     >>> show.premiered
     2014-08-13
-    >>> show.network['name']
+    >>> show.network.name
     ABC
-
-**Show() Season() and Episode() class attributes**
-
-There are many possible attributes of the Show class, but since TV Maze is full of user contributions and always being updated, shows will have different available attributes.  Possible attributes are:
-
-    ## Show object attributes ##
-    show.status
-    show.rating
-    show.genres
-    show.weight
-    show.updated
-    show.name
-    show.language
-    show.schedule
-    show.url
-    show.image
-    show.externals # dict of tvdb and tvrage id's if available
-    show.premiered
-    show.summary
-    show.links # dict of previousepisode and nextepisode keys for their links
-    show.web_channel
-    show.runtime
-    show.type
-    show.id
-    show.maze_id # same as show.id
-    show.network # dict of network properties
-    show.episodes # list of Episode objects
-    show.seasons # dict of Season objects
-    show.cast
-    show.next_episode
-    show.previous_episode
-
-    ## Season object attributes ##
-    season.show # parent show object, only present when Season object was created via embedding
-    season.episodes # dict of episodes
-    season.id
-    season.url
-    season.season_number
-    season.name
-    season.episode_order
-    season.premier_date
-    season.end_date
-    season.network
-    season.web_channel
-    season.image
-    season.summary
-    season.links
-
-    ## Episode object attributes ##
-    episode.title
-    episode.airdate
-    episode.url
-    episode.season_number
-    episode.episode_number
-    episode.image
-    episode.airstamp
-    episode.runtime
-    episode.maze_id
-    episode.summary
