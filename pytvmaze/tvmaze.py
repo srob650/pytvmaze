@@ -626,7 +626,7 @@ class TVMaze(object):
         url = endpoints.followed_shows.format('', maze_id)
         q = _endpoint_premium_get(url)
         if q:
-            return FollowedShow(q[0])
+            return FollowedShow(q)
         else:
             raise ShowNotFollowed('Show with ID {} is not followed'.format(maze_id))
 
@@ -658,7 +658,7 @@ class TVMaze(object):
         url = endpoints.followed_people.format('', person_id)
         q = _endpoint_premium_get(url)
         if q:
-            return FollowedPerson(q[0])
+            return FollowedPerson(q)
         else:
             raise PersonNotFound('Person with ID {} is not followed'.format(person_id))
 
@@ -690,7 +690,7 @@ class TVMaze(object):
         url = endpoints.followed_networks.format('', network_id)
         q = _endpoint_premium_get(url)
         if q:
-            return FollowedNetwork(q[0])
+            return FollowedNetwork(q)
         else:
             raise NetworkNotFound('Network with ID {} is not followed'.format(network_id))
 
@@ -722,7 +722,7 @@ class TVMaze(object):
         url = endpoints.followed_web_channels.format('', webchannel_id)
         q = _endpoint_premium_get(url)
         if q:
-            return FollowedWebChannel(q[0])
+            return FollowedWebChannel(q)
         else:
             raise NetworkNotFound('Web Channel with ID {} is not followed'.format(webchannel_id))
 
@@ -750,7 +750,7 @@ class TVMaze(object):
         url = endpoints.marked_episodes.format(episode_id)
         q = _endpoint_premium_get(url)
         if q:
-            MarkedEpisode(q[0])
+            MarkedEpisode(q)
         else:
             raise EpisodeNotMarked('Episode with ID {} is not marked')
 
