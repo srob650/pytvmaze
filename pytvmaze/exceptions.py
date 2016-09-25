@@ -111,3 +111,9 @@ class InvalidMarkedEpisodeType(BaseError):
 
 class InvalidEmbedValue(BaseError):
     pass
+
+class NetworkNotFollowed(BaseError):
+    pass
+
+class NoFollowedWebChannels(BaseError):
+    pass

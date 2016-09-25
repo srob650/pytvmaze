@@ -340,6 +340,26 @@ class AKA(object):
         self.name = data.get('name')
 
 
+class Network(object):
+    def __init__(self, data):
+        self.name = data.get('name')
+        self.maze_id = data.get('id')
+        if data.get('country'):
+            self.country = data['country'].get('name')
+            self.timezone = data['country'].get('timezone')
+            self.code = data['country'].get('code')
+
+
+class WebChannel(object):
+    def __init__(self, data):
+        self.name = data.get('name')
+        self.maze_id = data.get('id')
+        if data.get('country'):
+            self.country = data['country'].get('name')
+            self.timezone = data['country'].get('timezone')
+            self.code = data['country'].get('code')
+
+
 class FollowedShow(object):
     def __init__(self, data):
         self.maze_id = data.get('show_id')
@@ -354,6 +374,22 @@ class FollowedPerson(object):
         self.person = None
         if data.get('_embedded'):
             self.person = Person(data['_embedded'].get('person'))
+
+
+class FollowedNetwork(object):
+    def __init__(self, data):
+        self.network_id = data.get('network_id')
+        self.network = None
+        if data.get('_embedded'):
+            self.network = Network(data['_embedded'].get('network'))
+
+
+class FollowedWebChannel(object):
+    def __init__(self, data):
+        self.network_id = data.get('webchannel_id')
+        self.network = None
+        if data.get('_embedded'):
+            self.network = WebChannel(data['_embedded'].get('webchannel'))
 
 
 class MarkedEpisode(object):
@@ -624,7 +660,7 @@ class TVMaze(object):
         if q:
             return FollowedPerson(q[0])
         else:
-            raise PersonNotFound('Person with ID {} is not followed'.format(person_id)
+            raise PersonNotFound('Person with ID {} is not followed'.format(person_id))
 
     def follow_person(self, person_id):
         url = endpoints.followed_people.format('', person_id)
@@ -637,6 +673,70 @@ class TVMaze(object):
         q = _endpoint_premium_delete(url)
         if not q:
             raise PersonNotFollowed('Person with ID {} was not followed'.format(person_id))
+
+    def get_followed_networks(self, embed=None):
+        if not embed in [None, 'network']:
+            raise InvalidEmbedValue('Value for embed must be "network" or None')
+        url = endpoints.followed_networks.format('', '')
+        if embed == 'network':
+            url = endpoints.followed_networks.format('?embed=network', '')
+        q = _endpoint_premium_get(url)
+        if q:
+            return [FollowedNetwork(network) for network in q]
+        else:
+            raise NoFollowedNetworks('You have not followed any networks yet')
+
+    def get_followed_network(self, network_id):
+        url = endpoints.followed_networks.format('', network_id)
+        q = _endpoint_premium_get(url)
+        if q:
+            return FollowedNetwork(q[0])
+        else:
+            raise NetworkNotFound('Network with ID {} is not followed'.format(network_id))
+
+    def follow_network(self, network_id):
+        url = endpoints.followed_networks.format('', network_id)
+        q = _endpoint_premium_put(url)
+        if not q:
+            raise NetworkNotFound('Network with ID {} does not exist'.format(network_id))
+
+    def unfollow_network(self, network_id):
+        url = endpoints.followed_networks.format('', network_id)
+        q = _endpoint_premium_delete(url)
+        if not q:
+            raise NetworkNotFollowed('Network with ID {} was not followed'.format(network_id))
+
+    def get_followed_web_channels(self, embed=None):
+        if not embed in [None, 'webchannel']:
+            raise InvalidEmbedValue('Value for embed must be "webchannel" or None')
+        url = endpoints.followed_web_channels.format('', '')
+        if embed == 'webchannel':
+            url = endpoints.followed_web_channels.format('?embed=webchannel', '')
+        q = _endpoint_premium_get(url)
+        if q:
+            return [FollowedWebChannel(webchannel) for webchannel in q]
+        else:
+            raise NoFollowedWebChannels('You have not followed any Web Channels yet')
+
+    def get_followed_web_channel(self, webchannel_id):
+        url = endpoints.followed_web_channels.format('', webchannel_id)
+        q = _endpoint_premium_get(url)
+        if q:
+            return FollowedWebChannel(q[0])
+        else:
+            raise NetworkNotFound('Web Channel with ID {} is not followed'.format(webchannel_id))
+
+    def follow_web_channel(self, webchannel_id):
+        url = endpoints.followed_web_channels.format('', webchannel_id)
+        q = _endpoint_premium_put(url)
+        if not q:
+            raise WebChannelNotFound('Web Channel with ID {} does not exist'.format(webchannel_id))
+
+    def unfollow_web_channel(self, webchannel_id):
+        url = endpoints.followed_web_channels.format('', webchannel_id)
+        q = _endpoint_premium_delete(url)
+        if not q:
+            raise WebChannelNotFollowed('Web Channel with ID {} was not followed'.format(webchannel_id))
 
     def get_marked_episodes(self):
         url = endpoints.marked_episodes.format('')
@@ -671,6 +771,7 @@ class TVMaze(object):
         q = _endpoint_premium_delete(url)
         if not q:
             raise EpisodeNotMarked('Episode with ID {} was not marked'.format(episode_id))
+
 
 # Return list of Show objects
 def get_show_list(show_name):

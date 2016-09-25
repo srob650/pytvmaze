@@ -27,4 +27,6 @@ episode_by_id = 'http://api.tvmaze.com/episodes/{0}'
 # TVMaze Premium endpoints
 followed_shows = 'http://tvmazecdn.com/v1/user/follows/shows{0}/{1}'
 followed_people = 'http://tvmazecdn.com/v1/user/follows/people{0}/{1}'
+followed_networks = 'https://tvmazecdn.com/v1/user/follows/networks{0}/{1}'
+followed_web_channels = 'https://tvmazecdn.com/v1/user/follows/webchannels{0}/{1}'
 marked_episodes = 'http://tvmazecdn.com/v1/user/episodes/{0}'
