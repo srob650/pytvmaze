@@ -837,18 +837,6 @@ def get_followed_shows(embed=None):
     else:
         raise NoFollowedShows('You have not followed any shows yet')
 
-def unfollow_show(maze_id):
-    url = endpoints.followed_shows.format('', maze_id)
-    q = _endpoint_premium_delete(url)
-    if not q:
-        raise ShowNotFollowed('Show with ID {} was not followed'.format(maze_id))
-
-def follow_show(maze_id):
-    url = endpoints.followed_shows.format('', maze_id)
-    q = _endpoint_premium_put(url)
-    if not q:
-        raise ShowNotFound('Show with ID {} does not exist'.format(maze_id))
-
 def get_followed_show(maze_id):
     url = endpoints.followed_shows.format('', maze_id)
     q = _endpoint_premium_get(url)
@@ -856,6 +844,18 @@ def get_followed_show(maze_id):
         return FollowedShow(q[0])
     else:
         raise ShowNotFollowed('Show with ID {} is not followed'.format(maze_id))
+
+def follow_show(maze_id):
+    url = endpoints.followed_shows.format('', maze_id)
+    q = _endpoint_premium_put(url)
+    if not q:
+        raise ShowNotFound('Show with ID {} does not exist'.format(maze_id))
+
+def unfollow_show(maze_id):
+    url = endpoints.followed_shows.format('', maze_id)
+    q = _endpoint_premium_delete(url)
+    if not q:
+        raise ShowNotFollowed('Show with ID {} was not followed'.format(maze_id))
 
 def get_followed_people(embed=None):
     if not embed in [None, 'person']:
@@ -869,11 +869,13 @@ def get_followed_people(embed=None):
     else:
         raise NoFollowedPeople('You have not followed any people yet')
 
-def unfollow_person(person_id):
+def get_followed_person(person_id):
     url = endpoints.followed_people.format('', person_id)
-    q = _endpoint_premium_delete(url)
-    if not q:
-        raise PersonNotFollowed('Person with ID {} was not followed'.format(person_id))
+    q = _endpoint_premium_get(url)
+    if q:
+        return FollowedPerson(q[0])
+    else:
+        raise PersonNotFound('Person with ID {} is not followed'.format(person_id)
 
 def follow_person(person_id):
     url = endpoints.followed_people.format('', person_id)
@@ -881,13 +883,11 @@ def follow_person(person_id):
     if not q:
         raise PersonNotFound('Person with ID {} does not exist'.format(person_id))
 
-def get_followed_person(person_id):
+def unfollow_person(person_id):
     url = endpoints.followed_people.format('', person_id)
-    q = _endpoint_premium_get(url)
-    if q:
-        return FollowedPerson(q[0])
-    else:
-        raise PersonNotFound('Person with ID {} is not followed'.format(person_id))
+    q = _endpoint_premium_delete(url)
+    if not q:
+        raise PersonNotFollowed('Person with ID {} was not followed'.format(person_id))
 
 def get_marked_episodes():
     url = endpoints.marked_episodes.format('')
@@ -897,11 +897,13 @@ def get_marked_episodes():
     else:
         raise NoMarkedEpisodes('You have not marked any episodes yet')
 
-def unmark_episode(episode_id):
-    url = endpoinds.marked_episodes.format(episode_id)
-    q = _endpoint_premium_delete(url)
-    if not q:
-        raise EpisodeNotMarked('Episode with ID {} was not marked'.format(episode_id))
+def get_marked_episode(episode_id):
+    url = endpoints.marked_episodes.format(episode_id)
+    q = _endpoint_premium_get(url)
+    if q:
+        MarkedEpisode(q[0])
+    else:
+        raise EpisodeNotMarked('Episode with ID {} is not marked')
 
 def mark_episode(episode_id, mark_type):
     types = {'watched': 0, 'acquired': 1, 'skipped': 2}
@@ -915,10 +917,8 @@ def mark_episode(episode_id, mark_type):
     if not q:
         raise EpisodeNotFound('Episode with ID {} does not exist')
 
-def get_marked_episode(episode_id):
-    url = endpoints.marked_episodes.format(episode_id)
-    q = _endpoint_premium_get(url)
-    if q:
-        MarkedEpisode(q[0])
-    else:
-        raise EpisodeNotMarked('Episode with ID {} is not marked')
+def unmark_episode(episode_id):
+    url = endpoinds.marked_episodes.format(episode_id)
+    q = _endpoint_premium_delete(url)
+    if not q:
+        raise EpisodeNotMarked('Episode with ID {} was not marked'.format(episode_id))
