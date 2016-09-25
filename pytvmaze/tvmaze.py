@@ -634,7 +634,7 @@ class TVMaze(object):
         url = endpointds.followed_shows.format('', '')
         if embed == 'show':
             url = endpointds.followed_shows.format('?embed=show', '')
-        q = _endpoint_premium_get(url)
+        q = self._endpoint_premium_get(url)
         if q:
             return [FollowedShow(show) for show in q]
         else:
@@ -642,7 +642,7 @@ class TVMaze(object):
 
     def get_followed_show(self, maze_id):
         url = endpoints.followed_shows.format('', maze_id)
-        q = _endpoint_premium_get(url)
+        q = self._endpoint_premium_get(url)
         if q:
             return FollowedShow(q)
         else:
@@ -650,13 +650,13 @@ class TVMaze(object):
 
     def follow_show(self, maze_id):
         url = endpoints.followed_shows.format('', maze_id)
-        q = _endpoint_premium_put(url)
+        q = self._endpoint_premium_put(url)
         if not q:
             raise ShowNotFound('Show with ID {} does not exist'.format(maze_id))
 
     def unfollow_show(self, maze_id):
         url = endpoints.followed_shows.format('', maze_id)
-        q = _endpoint_premium_delete(url)
+        q = self._endpoint_premium_delete(url)
         if not q:
             raise ShowNotFollowed('Show with ID {} was not followed'.format(maze_id))
 
@@ -666,7 +666,7 @@ class TVMaze(object):
         url = endpoints.followed_people.format('', '')
         if embed == 'person':
             url = endpoints.followed_people.format('?embed=person', '')
-        q = _endpoint_premium_get(url)
+        q = self._endpoint_premium_get(url)
         if q:
             return [FollowedPerson(person) for person in q]
         else:
@@ -674,7 +674,7 @@ class TVMaze(object):
 
     def get_followed_person(self, person_id):
         url = endpoints.followed_people.format('', person_id)
-        q = _endpoint_premium_get(url)
+        q = self._endpoint_premium_get(url)
         if q:
             return FollowedPerson(q)
         else:
@@ -682,13 +682,13 @@ class TVMaze(object):
 
     def follow_person(self, person_id):
         url = endpoints.followed_people.format('', person_id)
-        q = _endpoint_premium_put(url)
+        q = self._endpoint_premium_put(url)
         if not q:
             raise PersonNotFound('Person with ID {} does not exist'.format(person_id))
 
     def unfollow_person(self, person_id):
         url = endpoints.followed_people.format('', person_id)
-        q = _endpoint_premium_delete(url)
+        q = self._endpoint_premium_delete(url)
         if not q:
             raise PersonNotFollowed('Person with ID {} was not followed'.format(person_id))
 
@@ -698,7 +698,7 @@ class TVMaze(object):
         url = endpoints.followed_networks.format('', '')
         if embed == 'network':
             url = endpoints.followed_networks.format('?embed=network', '')
-        q = _endpoint_premium_get(url)
+        q = self._endpoint_premium_get(url)
         if q:
             return [FollowedNetwork(network) for network in q]
         else:
@@ -706,7 +706,7 @@ class TVMaze(object):
 
     def get_followed_network(self, network_id):
         url = endpoints.followed_networks.format('', network_id)
-        q = _endpoint_premium_get(url)
+        q = self._endpoint_premium_get(url)
         if q:
             return FollowedNetwork(q)
         else:
@@ -714,13 +714,13 @@ class TVMaze(object):
 
     def follow_network(self, network_id):
         url = endpoints.followed_networks.format('', network_id)
-        q = _endpoint_premium_put(url)
+        q = self._endpoint_premium_put(url)
         if not q:
             raise NetworkNotFound('Network with ID {} does not exist'.format(network_id))
 
     def unfollow_network(self, network_id):
         url = endpoints.followed_networks.format('', network_id)
-        q = _endpoint_premium_delete(url)
+        q = self._endpoint_premium_delete(url)
         if not q:
             raise NetworkNotFollowed('Network with ID {} was not followed'.format(network_id))
 
@@ -730,7 +730,7 @@ class TVMaze(object):
         url = endpoints.followed_web_channels.format('', '')
         if embed == 'webchannel':
             url = endpoints.followed_web_channels.format('?embed=webchannel', '')
-        q = _endpoint_premium_get(url)
+        q = self._endpoint_premium_get(url)
         if q:
             return [FollowedWebChannel(webchannel) for webchannel in q]
         else:
@@ -738,7 +738,7 @@ class TVMaze(object):
 
     def get_followed_web_channel(self, webchannel_id):
         url = endpoints.followed_web_channels.format('', webchannel_id)
-        q = _endpoint_premium_get(url)
+        q = self._endpoint_premium_get(url)
         if q:
             return FollowedWebChannel(q)
         else:
@@ -746,19 +746,19 @@ class TVMaze(object):
 
     def follow_web_channel(self, webchannel_id):
         url = endpoints.followed_web_channels.format('', webchannel_id)
-        q = _endpoint_premium_put(url)
+        q = self._endpoint_premium_put(url)
         if not q:
             raise WebChannelNotFound('Web Channel with ID {} does not exist'.format(webchannel_id))
 
     def unfollow_web_channel(self, webchannel_id):
         url = endpoints.followed_web_channels.format('', webchannel_id)
-        q = _endpoint_premium_delete(url)
+        q = self._endpoint_premium_delete(url)
         if not q:
             raise WebChannelNotFollowed('Web Channel with ID {} was not followed'.format(webchannel_id))
 
     def get_marked_episodes(self):
         url = endpoints.marked_episodes.format('')
-        q = _endpoint_premium_get(url)
+        q = self._endpoint_premium_get(url)
         if q:
             [MarkedEpisode(episode) for episode in q]
         else:
@@ -766,7 +766,7 @@ class TVMaze(object):
 
     def get_marked_episode(self, episode_id):
         url = endpoints.marked_episodes.format(episode_id)
-        q = _endpoint_premium_get(url)
+        q = self._endpoint_premium_get(url)
         if q:
             MarkedEpisode(q)
         else:
@@ -780,13 +780,13 @@ class TVMaze(object):
             raise InvalidMarkedEpisodeType('Episode must be marked as "watched", "acquired", or "skipped"')
         data = {'episode_id': episode_id, 'created_at': time.time(), 'type': status}
         url = endpoints.marked_episodes.format(episode_id)
-        q = _endpoint_premium_put(episode_id, data=data)
+        q = self._endpoint_premium_put(episode_id, data=data)
         if not q:
             raise EpisodeNotFound('Episode with ID {} does not exist')
 
     def unmark_episode(self, episode_id):
         url = endpoinds.marked_episodes.format(episode_id)
-        q = _endpoint_premium_delete(url)
+        q = self._endpoint_premium_delete(url)
         if not q:
             raise EpisodeNotMarked('Episode with ID {} was not marked'.format(episode_id))
 
