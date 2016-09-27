@@ -428,7 +428,9 @@ class MarkedEpisode(object):
     def __init__(self, data):
         self.episode_id = data.get('episode_id')
         self.marked_at = data.get('marked_at')
-        self.type = data.get('type')
+        type_ = data.get('type')
+        types = {0: 'watched', 1: 'acquired', 2: 'skipped'}
+        self.type = types[type_]
 
     def __repr__(self):
         return '<MarkedEpisode(episode_id={id},marked_at={marked_at},type={type})>'.format(id=self.episode_id,
