@@ -3,7 +3,6 @@ from __future__ import unicode_literals
 
 import re
 from datetime import datetime
-import time
 import requests
 from pytvmaze import endpoints
 from pytvmaze.exceptions import *
@@ -348,8 +347,11 @@ class Update(object):
 
 class AKA(object):
     def __init__(self, data):
-        self.country = data.get('country')
         self.name = data.get('name')
+        self.country = data.get('country')
+
+    def __repr__(self):
+        return '<AKA(name={name},country={country})>'.format(name=name, country=country)
 
 
 class Network(object):
@@ -385,6 +387,9 @@ class FollowedShow(object):
         if data.get('_embedded'):
             self.show = Show(data['_embedded'].get('show'))
 
+    def __repr__(self):
+        return '<FollowedShow(maze_id={})>'.format(self.maze_id)
+
 
 class FollowedPerson(object):
     def __init__(self, data):
@@ -392,6 +397,9 @@ class FollowedPerson(object):
         self.person = None
         if data.get('_embedded'):
             self.person = Person(data['_embedded'].get('person'))
+
+    def __repr__(self):
+        return '<FollowedPerson(person_id={id})>'.format(id=self.person_id)
 
 
 class FollowedNetwork(object):
@@ -401,20 +409,31 @@ class FollowedNetwork(object):
         if data.get('_embedded'):
             self.network = Network(data['_embedded'].get('network'))
 
+    def __repr__(self):
+        return '<FollowedNetwork(network_id={id})>'.format(id=self.network_id)
+
 
 class FollowedWebChannel(object):
     def __init__(self, data):
-        self.network_id = data.get('webchannel_id')
-        self.network = None
+        self.web_channel_id = data.get('webchannel_id')
+        self.web_channel = None
         if data.get('_embedded'):
-            self.network = WebChannel(data['_embedded'].get('webchannel'))
+            self.web_channel = WebChannel(data['_embedded'].get('webchannel'))
+
+    def __repr__(self):
+        return '<FollowedWebChannel(web_channel_id={id})>'.format(id=self.web_channel_id)
 
 
 class MarkedEpisode(object):
     def __init__(self, data):
         self.episode_id = data.get('episode_id')
-        self.created_at = data.get('created_at')
+        self.marked_at = data.get('marked_at')
         self.type = data.get('type')
+
+    def __repr__(self):
+        return '<MarkedEpisode(episode_id={id},marked_at={marked_at},type={type})>'.format(id=self.episode_id,
+                                                                                           marked_at=self.marked_at,
+                                                                                           type=self.type)
 
 
 def _valid_encoding(text):
@@ -500,11 +519,11 @@ class TVMaze(object):
             return True
 
         if r.status_code == 404:
-            return False
+            return None
 
-    def _endpoint_premium_put(self, url, data=None):
+    def _endpoint_premium_put(self, url, payload=None):
         try:
-            r = requests.put(url, data=data, auth=(self.username, self.api_key))
+            r = requests.put(url, data=payload, auth=(self.username, self.api_key))
         except requests.exceptions.ConnectionError as e:
             raise ConnectionError(repr(e))
 
@@ -514,8 +533,8 @@ class TVMaze(object):
         if r.status_code == 200:
             return True
 
-        if r.status_code == 404:
-            return False
+        if r.status_code in [404, 422]:
+            return None
 
     # Get Show object
     def get_show(self, maze_id=None, tvdb_id=None, tvrage_id=None, imdb_id=None, show_name=None,
@@ -760,7 +779,7 @@ class TVMaze(object):
         url = endpoints.marked_episodes.format('')
         q = self._endpoint_premium_get(url)
         if q:
-            [MarkedEpisode(episode) for episode in q]
+            return [MarkedEpisode(episode) for episode in q]
         else:
             raise NoMarkedEpisodes('You have not marked any episodes yet')
 
@@ -768,7 +787,7 @@ class TVMaze(object):
         url = endpoints.marked_episodes.format(episode_id)
         q = self._endpoint_premium_get(url)
         if q:
-            MarkedEpisode(q)
+            return MarkedEpisode(q)
         else:
             raise EpisodeNotMarked('Episode with ID {} is not marked')
 
@@ -778,14 +797,14 @@ class TVMaze(object):
             status = types[mark_type]
         except IndexError:
             raise InvalidMarkedEpisodeType('Episode must be marked as "watched", "acquired", or "skipped"')
-        data = {'episode_id': episode_id, 'created_at': time.time(), 'type': status}
+        payload = {'type': str(status)}
         url = endpoints.marked_episodes.format(episode_id)
-        q = self._endpoint_premium_put(episode_id, data=data)
+        q = self._endpoint_premium_put(url, payload=payload)
         if not q:
             raise EpisodeNotFound('Episode with ID {} does not exist')
 
     def unmark_episode(self, episode_id):
-        url = endpoinds.marked_episodes.format(episode_id)
+        url = endpoints.marked_episodes.format(episode_id)
         q = self._endpoint_premium_delete(url)
         if not q:
             raise EpisodeNotMarked('Episode with ID {} was not marked'.format(episode_id))
