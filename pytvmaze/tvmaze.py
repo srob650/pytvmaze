@@ -631,9 +631,9 @@ class TVMaze(object):
     def get_followed_shows(self, embed=None):
         if not embed in [None, 'show']:
             raise InvalidEmbedValue('Value for embed must be "show" or None')
-        url = endpointds.followed_shows.format('', '')
+        url = endpoints.followed_shows.format('', '')
         if embed == 'show':
-            url = endpointds.followed_shows.format('?embed=show', '')
+            url = endpoints.followed_shows.format('?embed=show', '')
         q = self._endpoint_premium_get(url)
         if q:
             return [FollowedShow(show) for show in q]
