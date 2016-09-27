@@ -201,7 +201,8 @@ class EndpointTests(unittest.TestCase):
 
 class ObjectTests(unittest.TestCase):
     def test_get_show(self):
-        show1 = get_show(maze_id=163, embed='episodes')
+        tvm = TVMaze()
+        show1 = tvm.get_show(maze_id=163, embed='episodes')
         self.assertIsInstance(show1, Show)
         self.assertTrue(hasattr(show1, 'episodes'))
         with self.assertRaises(SeasonNotFound):
@@ -209,55 +210,57 @@ class ObjectTests(unittest.TestCase):
         with self.assertRaises(EpisodeNotFound):
             show1[1][999]
 
-        show2 = get_show(tvdb_id=81189, embed='episodes')
+        show2 = tvm.get_show(tvdb_id=81189, embed='episodes')
         self.assertIsInstance(show2, Show)
         self.assertTrue(hasattr(show2, 'episodes'))
 
-        show3 = get_show(tvrage_id=24493, embed='episodes')
+        show3 = tvm.get_show(tvrage_id=24493, embed='episodes')
         self.assertIsInstance(show3, Show)
         self.assertTrue(hasattr(show3, 'episodes'))
 
-        show31 = get_show(imdb_id='tt3107288', embed='episodes')
+        show31 = tvm.get_show(imdb_id='tt3107288', embed='episodes')
         self.assertIsInstance(show31, Show)
         self.assertTrue(hasattr(show31, 'episodes'))
 
-        show4 = get_show(show_name='person of interest', embed='episodes')
+        show4 = tvm.get_show(show_name='person of interest', embed='episodes')
         self.assertIsInstance(show4, Show)
         self.assertTrue(hasattr(show4, 'episodes'))
 
-        show5 = get_show(show_name='utopia', show_country='au', show_network='abc', embed='episodes')
+        show5 = tvm.get_show(show_name='utopia', show_country='au', show_network='abc', embed='episodes')
         self.assertIsInstance(show5, Show)
         self.assertTrue(hasattr(show5, 'episodes'))
-        self.assertTrue(show5.network['country']['code'] == 'AU')
-        self.assertTrue(show5.network['name'] == 'ABC')
+        self.assertTrue(show5.network.code == 'AU')
+        self.assertTrue(show5.network.name == 'ABC')
+        self.assertIsInstance(show5.network, Network)
 
-        show6 = get_show(show_name='the flash', show_year='1967', embed='episodes')
+        show6 = tvm.get_show(show_name='the flash', show_year='1967', embed='episodes')
         self.assertIsInstance(show6, Show)
         self.assertTrue(hasattr(show6, 'episodes'))
         self.assertTrue(show6.premiered == '1967-11-11')
 
-        show7 = get_show(show_name='drunk history', show_language='english', embed='episodes')
+        show7 = tvm.get_show(show_name='drunk history', show_language='english', embed='episodes')
         self.assertIsInstance(show7, Show)
         self.assertTrue(hasattr(show7, 'episodes'))
         self.assertTrue(show7.language == 'English')
 
-        show8 = get_show(show_name='jessica jones', show_web_channel='netflix', embed='episodes')
+        show8 = tvm.get_show(show_name='jessica jones', show_web_channel='netflix', embed='episodes')
         self.assertIsInstance(show8, Show)
         self.assertTrue(hasattr(show8, 'episodes'))
         self.assertTrue(show8.language == 'English')
-        self.assertTrue(show8.web_channel['name'] == 'Netflix')
+        self.assertTrue(show8.web_channel.name == 'Netflix')
+        self.assertIsInstance(show8.web_channel, WebChannel)
 
         # Test lookup with bad ID but good name
-        show9 = get_show(maze_id=999999999, tvdb_id=999999999, tvrage_id=999999999, show_name='lost')
+        show9 = tvm.get_show(maze_id=999999999, tvdb_id=999999999, tvrage_id=999999999, show_name='lost')
         self.assertIsInstance(show9, Show)
 
         # Test foreign language
         if sys.version_info[0] == 3:
-            show10 = get_show(maze_id=8103, embed='cast')
+            show10 = tvm.get_show(maze_id=8103, embed='cast')
             self.assertTrue(show10.cast.people[1].name, '黃心娣')
 
         with self.assertRaises(MissingParameters):
-            empty_search = get_show()
+            empty_search = tvm.get_show()
 
     def test_get_show_list(self):
         shows = get_show_list('utopia')
@@ -276,26 +279,30 @@ class ObjectTests(unittest.TestCase):
             get_people('person that doesnt exist')
 
     def test_cast_embed(self):
-        show = get_show(maze_id=161, embed='cast')
+        tvm = TVMaze()
+        show = tvm.get_show(maze_id=161, embed='cast')
         self.assertIsInstance(show.cast.people[0], Person)
         self.assertIsInstance(show.cast.characters[0], Character)
         self.assertIsInstance(show.cast.characters[0].person, Person)
         self.assertIsInstance(show.cast.people[0].character, Character)
 
     def test_unicode_shows(self):
-        show1 = get_show(show_name=u'Unit\xe9 9')
+        tvm = TVMaze()
+        show1 = tvm.get_show(show_name=u'Unit\xe9 9')
         self.assertTrue(show1.id == 8652)
-        self.assertTrue(show1.network['name'] == u'ICI Radio-Canada T\u00e9l\u00e9')
+        self.assertTrue(show1.network.name == u'ICI Radio-Canada T\u00e9l\u00e9')
 
 
 class ExceptionsTests(unittest.TestCase):
-    def test_BadRequest_exception(self):
-        with self.assertRaises(BadRequest):
-            result = get_show(maze_id=13, embed='sdfgsdfgs')
+    def test_InvalidEmbedValue_exception(self):
+        tvm = TVMaze()
+        with self.assertRaises(InvalidEmbedValue):
+            result = tvm.get_show(maze_id=13, embed='sdfgsdfgs')
 
     def test_MissingParameters_exception(self):
+        tvm = TVMaze()
         with self.assertRaises(MissingParameters):
-            result = get_show()
+            result = tvm.get_show()
 
     def test_ShowNotFound1_exception(self):
         with self.assertRaises(ShowNotFound):

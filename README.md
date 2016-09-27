@@ -1,12 +1,6 @@
-## **Notice: pytvmaze 1.x is being deprecated and 2.x is being developed.**
-**If you make use of the `get_show()` function you will need to modify your code for 2.x.  There will
-be a new class `TVMaze()` which `get_show()` will be a method of.  This new class will also enable
-the [new premium features that TVMaze is rolling out](http://www.tvmaze.com/blogs/14/announcing-tvmaze-premium)
-by allowing you to create an authenticated `TVMaze()` instance with your username and api key to
-access premium features.  Please see the new 2.x branch for more info.  Note that the premium
-features are not yet available so any code in 2.x does not yet work and has not been tested, and
-therefore is subject to change once we see how the new features work.  Once 2.x is stable I will
-create a new 1.x branch and merge 2.x into master.**
+# Migrating from 1.x to 2.x
+1. To use `get_show` you must create a TVMaze() instance with optional username and api_key.  See examples below.
+2. `show.network`, `show.web_channel`, `season.network`, and `season.web_channel` now return new `Network` or `WebChannel` objects instead of dictionaries.
 
 To install:
 
@@ -16,34 +10,34 @@ To install:
 
     >>> import pytvmaze
 
-    # Return list of Show objects from the TVMaze "Show Search" endpoint
-    >>> shows = pytvmaze.get_show_list('stargate')
-    >>> for show in shows:
-    ...     print(show)
-    Stargate Atlantis
-    Stargate Universe
-    Stargate: Infinity
-    Stargate SG-1
+    # Get a list of show objects of your followed shows
+    >>> tvm = pytvmaze.TVMaze(username, api_key)
+    >>> followed_shows = tvm.get_followed_shows
+    >>> followed_shows
+    [<Show(maze_id=161,name=Dexter,year=2006,network=Showtime)>,
+    <Show(maze_id=163,name=Human Target,year=2010,network=FOX)>,
+    etc.]
 
     # Get the best match as a show object using the name of a show
-    >>> show = pytvmaze.get_show(show_name='dexter')
+    >>> tvm = pytvmaze.TVMaze()
+    >>> show = tvm.get_show(show_name='dexter')
     >>> print(show)
     Dexter
     >>> print(show.name, show.status, show.maze_id)
     Dexter Ended 161
 
     # Get a show object using a shows tvmaze id
-    >>> show = pytvmaze.get_show(maze_id=161)
+    >>> show = tvm.get_show(maze_id=161)
     >>> print(show)
     Dexter
 
     # Get a show object using a shows tvdb, tvrage id, or IMDB id
-    >>> show = pytvmaze.get_show(tvdb_id=79349)
-    >>> show = pytvmaze.get_show(tvrage_id=7926)
-    >>> show = pytvmaze.get_show(imdb_id='tt3107288')
+    >>> show = tvm.get_show(tvdb_id=79349)
+    >>> show = tvm.get_show(tvrage_id=7926)
+    >>> show = tvm.get_show(imdb_id='tt3107288')
 
     # Iterate over all episodes (full episode list available at Show() level)
-    >>> show = pytvmaze.get_show(maze_id=161, embed='episodes')
+    >>> show = tvm.get_show(maze_id=161, embed='episodes')
     >>> for episode in show.episodes:
     ...     print(episode.title)
     Dexter
@@ -72,7 +66,7 @@ To install:
     Shrink Wrap
 
     # Embed cast in Show object
-    >>> show = pytvmaze.get_show(maze_id=161, embed='cast')
+    >>> show = tvm.get_show(maze_id=161, embed='cast')
     >>> show.cast.people
     [<Person(name=Michael C. Hall,maze_id=29740)>,
     <Person(name=Jennifer Carpenter,maze_id=20504)>,
@@ -82,6 +76,15 @@ To install:
     [<Character(name=Dexter Morgan,maze_id=41784)>,
     <Character(name=Debra Morgan,maze_id=41786)>,
     etc.]
+
+    # Return list of Show objects from the TVMaze "Show Search" endpoint
+    >>> shows = pytvmaze.get_show_list('stargate')
+    >>> for show in shows:
+    ...     print(show)
+    Stargate Atlantis
+    Stargate Universe
+    Stargate: Infinity
+    Stargate SG-1
 
     # Show updates
     >>> updates = pytvmaze.show_updates()
@@ -103,67 +106,8 @@ show_web_channel
 ```
 These qualifiers will be matched against the following show attributes: premier year, country, network name, and language.
 
-    >>> show = pytvmaze.get_show(show_name='utopia', show_year='2014', show_country='au', show_network='abc')
+    >>> show = tvm.get_show(show_name='utopia', show_year='2014', show_country='au', show_network='abc')
     >>> show.premiered
     2014-08-13
-    >>> show.network['name']
+    >>> show.network.name
     ABC
-
-**Show() Season() and Episode() class attributes**
-
-There are many possible attributes of the Show class, but since TV Maze is full of user contributions and always being updated, shows will have different available attributes.  Possible attributes are:
-
-    ## Show object attributes ##
-    show.status
-    show.rating
-    show.genres
-    show.weight
-    show.updated
-    show.name
-    show.language
-    show.schedule
-    show.url
-    show.image
-    show.externals # dict of tvdb and tvrage id's if available
-    show.premiered
-    show.summary
-    show.links # dict of previousepisode and nextepisode keys for their links
-    show.web_channel
-    show.runtime
-    show.type
-    show.id
-    show.maze_id # same as show.id
-    show.network # dict of network properties
-    show.episodes # list of Episode objects
-    show.seasons # dict of Season objects
-    show.cast
-    show.next_episode
-    show.previous_episode
-
-    ## Season object attributes ##
-    season.show # parent show object, only present when Season object was created via embedding
-    season.episodes # dict of episodes
-    season.id
-    season.url
-    season.season_number
-    season.name
-    season.episode_order
-    season.premier_date
-    season.end_date
-    season.network
-    season.web_channel
-    season.image
-    season.summary
-    season.links
-
-    ## Episode object attributes ##
-    episode.title
-    episode.airdate
-    episode.url
-    episode.season_number
-    episode.episode_number
-    episode.image
-    episode.airstamp
-    episode.runtime
-    episode.maze_id
-    episode.summary

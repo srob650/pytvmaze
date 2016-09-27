@@ -8,15 +8,6 @@ from pytvmaze import endpoints
 from pytvmaze.exceptions import *
 
 
-def _valid_encoding(text):
-    if not text:
-        return
-    if sys.version_info > (3,):
-        return text
-    else:
-        return unicode(text).encode('utf-8')
-
-
 class Show(object):
     def __init__(self, data):
         self.status = data.get('status')
@@ -33,12 +24,18 @@ class Show(object):
         self.premiered = data.get('premiered')
         self.summary = _remove_tags(data.get('summary'))
         self.links = data.get('_links')
-        self.web_channel = data.get('webChannel')
+        if data.get('webChannel'):
+            self.web_channel = WebChannel(data.get('webChannel'))
+        else:
+            self.web_channel = None
         self.runtime = data.get('runtime')
         self.type = data.get('type')
         self.id = data.get('id')
         self.maze_id = self.id
-        self.network = data.get('network')
+        if data.get('network'):
+            self.network = Network(data.get('network'))
+        else:
+            self.network = None
         self.episodes = list()
         self.seasons = dict()
         self.cast = None
@@ -53,10 +50,10 @@ class Show(object):
             year = None
         if self.web_channel:
             platform = ',show_web_channel='
-            network = self.web_channel.get('name')
+            network = self.web_channel.name
         elif self.network:
             platform = ',network='
-            network = self.network.get('name')
+            network = self.network.name
         else:
             platform = ''
             network = ''
@@ -139,8 +136,14 @@ class Season(object):
         self.episode_order = data.get('episodeOrder')
         self.premier_date = data.get('premierDate')
         self.end_date = data.get('endDate')
-        self.network = data.get('network')
-        self.web_channel = data.get('webChannel')
+        if data.get('network'):
+            self.network = Network(data.get('network'))
+        else:
+            self.network = None
+        if data.get('webChannel'):
+            self.web_channel = WebChannel(data.get('webChannel'))
+        else:
+            self.web_channel = None
         self.image = data.get('image')
         self.summary = data.get('summary')
         self.links = data.get('_links')
@@ -344,147 +347,467 @@ class Update(object):
 
 class AKA(object):
     def __init__(self, data):
-        self.country = data.get('country')
         self.name = data.get('name')
+        self.country = data.get('country')
+
+    def __repr__(self):
+        return '<AKA(name={name},country={country})>'.format(name=name, country=country)
+
+
+class Network(object):
+    def __init__(self, data):
+        self.name = data.get('name')
+        self.maze_id = data.get('id')
+        if data.get('country'):
+            self.country = data['country'].get('name')
+            self.timezone = data['country'].get('timezone')
+            self.code = data['country'].get('code')
+
+    def __repr__(self):
+        return '<Network(name={name},country={country})>'.format(name=self.name, country=self.country)
+
+
+class WebChannel(object):
+    def __init__(self, data):
+        self.name = data.get('name')
+        self.maze_id = data.get('id')
+        if data.get('country'):
+            self.country = data['country'].get('name')
+            self.timezone = data['country'].get('timezone')
+            self.code = data['country'].get('code')
+
+    def __repr__(self):
+        return '<WebChannel(name={name},country={country})>'.format(name=self.name, country=self.country)
+
+
+class FollowedShow(object):
+    def __init__(self, data):
+        self.maze_id = data.get('show_id')
+        self.show = None
+        if data.get('_embedded'):
+            self.show = Show(data['_embedded'].get('show'))
+
+    def __repr__(self):
+        return '<FollowedShow(maze_id={})>'.format(self.maze_id)
+
+
+class FollowedPerson(object):
+    def __init__(self, data):
+        self.person_id = data.get('person_id')
+        self.person = None
+        if data.get('_embedded'):
+            self.person = Person(data['_embedded'].get('person'))
+
+    def __repr__(self):
+        return '<FollowedPerson(person_id={id})>'.format(id=self.person_id)
+
+
+class FollowedNetwork(object):
+    def __init__(self, data):
+        self.network_id = data.get('network_id')
+        self.network = None
+        if data.get('_embedded'):
+            self.network = Network(data['_embedded'].get('network'))
+
+    def __repr__(self):
+        return '<FollowedNetwork(network_id={id})>'.format(id=self.network_id)
+
+
+class FollowedWebChannel(object):
+    def __init__(self, data):
+        self.web_channel_id = data.get('webchannel_id')
+        self.web_channel = None
+        if data.get('_embedded'):
+            self.web_channel = WebChannel(data['_embedded'].get('webchannel'))
+
+    def __repr__(self):
+        return '<FollowedWebChannel(web_channel_id={id})>'.format(id=self.web_channel_id)
+
+
+class MarkedEpisode(object):
+    def __init__(self, data):
+        self.episode_id = data.get('episode_id')
+        self.marked_at = data.get('marked_at')
+        self.type = data.get('type')
+
+    def __repr__(self):
+        return '<MarkedEpisode(episode_id={id},marked_at={marked_at},type={type})>'.format(id=self.episode_id,
+                                                                                           marked_at=self.marked_at,
+                                                                                           type=self.type)
+
+
+def _valid_encoding(text):
+    if not text:
+        return
+    if sys.version_info > (3,):
+        return text
+    else:
+        return unicode(text).encode('utf-8')
+
+
+def _url_quote(show):
+    return requests.compat.quote(show.encode('UTF-8'))
 
 
 def _remove_tags(text):
     return re.sub(r'<.*?>', '', text)
 
 
-# Query TV Maze endpoints
-def _query_endpoint(url):
-    try:
-        r = requests.get(url)
-    except requests.exceptions.ConnectionError as e:
-        raise ConnectionError(repr(e))
+class TVMaze(object):
+    '''This is the main class of the module enabling interaction with both free and Premium
+    TVMaze features.
 
-    if r.status_code in [404, 422]:
-        return None
+    Attributes:
+        username (str): Username for http://www.tvmaze.com
+        api_key (str): TVMaze api key.  Find your key at http://www.tvmaze.com/dashboard
 
-    if r.status_code == 400:
-        raise BadRequest('Bad Request for url: {}'.format(url))
+    '''
 
-    results = r.json()
-    if results:
-        return results
-    else:
-        return None
+    def __init__(self, username=None, api_key=None):
+        self.username = username
+        self.api_key = api_key
 
-
-# Get Show object
-def get_show(maze_id=None, tvdb_id=None, tvrage_id=None, imdb_id=None, show_name=None,
-             show_year=None, show_network=None, show_language=None,
-             show_country=None, show_web_channel=None, embed=None):
-    """
-    Get Show object directly via id or indirectly via name + optional qualifiers
-
-    If only a show_name is given, the show with the highest score using the
-    tvmaze algorithm will be returned.
-    If you provide extra qualifiers such as network or language they will be
-    used for a more specific match, if one exists.
-    :param maze_id: Show maze_id
-    :param tvdb_id: Show tvdb_id
-    :param tvrage_id: Show tvrage_id
-    :param show_name: Show name to be searched
-    :param show_year: Show premiere year
-    :param show_network: Show TV Network (like ABC, NBC, etc.)
-    :param show_web_channel: Show Web Channel (like Netflix, Amazon, etc.)
-    :param show_language: Show language
-    :param show_country: Show country
-    :param embed: embed parameter to include additional data. Currently 'episodes' and 'cast' are supported
-    :return:
-    """
-    errors = []
-    if not (maze_id or tvdb_id or tvrage_id or imdb_id or show_name):
-        raise MissingParameters(
-                'Either maze_id, tvdb_id, tvrage_id, imdb_id or show_name are required to get show, none provided,')
-    if maze_id:
+    # Query TVMaze free endpoints
+    @staticmethod
+    def _endpoint_standard_get(url):
         try:
-            return show_main_info(maze_id, embed=embed)
-        except IDNotFound as e:
-            errors.append(e.value)
-    if tvdb_id:
-        try:
-            return show_main_info(lookup_tvdb(tvdb_id).id, embed=embed)
-        except IDNotFound as e:
-            errors.append(e.value)
-    if tvrage_id:
-        try:
-            return show_main_info(lookup_tvrage(tvrage_id).id, embed=embed)
-        except IDNotFound as e:
-            errors.append(e.value)
-    if imdb_id:
-        try:
-            return show_main_info(lookup_imdb(imdb_id).id, embed=embed)
-        except IDNotFound as e:
-            errors.append(e.value)
-    if show_name:
-        try:
-            show = _get_show_by_search(show_name, show_year, show_network, show_language, show_country,
-                                       show_web_channel, embed=embed)
-            return show
-        except ShowNotFound as e:
-            errors.append(e.value)
-    raise ShowNotFound(' ,'.join(errors))
+            r = requests.get(url)
+        except requests.exceptions.ConnectionError as e:
+            raise ConnectionError(repr(e))
 
+        if r.status_code in [404, 422]:
+            return None
 
-def _get_show_with_qualifiers(show_name, qualifiers):
-    shows = get_show_list(show_name)
-    best_match = -1  # Initialize match value score
-    show_match = None
+        if r.status_code == 400:
+            raise BadRequest('Bad Request for url: {}'.format(url))
 
-    for show in shows:
-        if show.premiered:
-            premiered = show.premiered[:-6].lower()
+        results = r.json()
+        if results:
+            return results
         else:
-            premiered = None
-        if show.network and show.network.get('name'):
-            network = show.network['name'].lower()
+            return None
+
+    # Query TVMaze Premium endpoints
+    def _endpoint_premium_get(self, url):
+        try:
+            r = requests.get(url, auth=(self.username, self.api_key))
+        except requests.exceptions.ConnectionError as e:
+            raise ConnectionError(repr(e))
+
+        if r.status_code in [404, 422]:
+            return None
+
+        if r.status_code == 400:
+            raise BadRequest('Bad Request for url: {}'.format(url))
+
+        results = r.json()
+        if results:
+            return results
         else:
-            network = None
-        if show.web_channel and show.web_channel.get('name'):
-            web_channel = show.web_channel['name'].lower()
-        else:
-            web_channel = None
-        if show.network and show.network.get('country') and show.network['country'].get('code'):
-            country = show.network['country']['code'].lower()
-        else:
-            if show.web_channel and show.web_channel.get('country') and show.web_channel['country'].get('code'):
-                country = show.web_channel['country']['code'].lower()
+            return None
+
+    def _endpoint_premium_delete(self, url):
+        try:
+            r = requests.delete(url, auth=(self.username, self.api_key))
+        except requests.exceptions.ConnectionError as e:
+            raise ConnectionError(repr(e))
+
+        if r.status_code == 400:
+            raise BadRequest('Bad Request for url: {}'.format(url))
+
+        if r.status_code == 200:
+            return True
+
+        if r.status_code == 404:
+            return None
+
+    def _endpoint_premium_put(self, url, payload=None):
+        try:
+            r = requests.put(url, data=payload, auth=(self.username, self.api_key))
+        except requests.exceptions.ConnectionError as e:
+            raise ConnectionError(repr(e))
+
+        if r.status_code == 400:
+            raise BadRequest('Bad Request for url: {}'.format(url))
+
+        if r.status_code == 200:
+            return True
+
+        if r.status_code in [404, 422]:
+            return None
+
+    # Get Show object
+    def get_show(self, maze_id=None, tvdb_id=None, tvrage_id=None, imdb_id=None, show_name=None,
+                 show_year=None, show_network=None, show_language=None, show_country=None,
+                 show_web_channel=None, embed=None):
+        """
+        Get Show object directly via id or indirectly via name + optional qualifiers
+
+        If only a show_name is given, the show with the highest score using the
+        tvmaze algorithm will be returned.
+        If you provide extra qualifiers such as network or language they will be
+        used for a more specific match, if one exists.
+        Args:
+            maze_id: Show maze_id
+            tvdb_id: Show tvdb_id
+            tvrage_id: Show tvrage_id
+            show_name: Show name to be searched
+            show_year: Show premiere year
+            show_network: Show TV Network (like ABC, NBC, etc.)
+            show_web_channel: Show Web Channel (like Netflix, Amazon, etc.)
+            show_language: Show language
+            show_country: Show country
+            embed: embed parameter to include additional data. Currently 'episodes' and 'cast' are supported
+        """
+        errors = []
+        if not (maze_id or tvdb_id or tvrage_id or imdb_id or show_name):
+            raise MissingParameters(
+                    'Either maze_id, tvdb_id, tvrage_id, imdb_id or show_name are required to get show, none provided,')
+        if maze_id:
+            try:
+                return show_main_info(maze_id, embed=embed)
+            except IDNotFound as e:
+                errors.append(e.value)
+        if tvdb_id:
+            try:
+                return show_main_info(lookup_tvdb(tvdb_id).id, embed=embed)
+            except IDNotFound as e:
+                errors.append(e.value)
+        if tvrage_id:
+            try:
+                return show_main_info(lookup_tvrage(tvrage_id).id, embed=embed)
+            except IDNotFound as e:
+                errors.append(e.value)
+        if imdb_id:
+            try:
+                return show_main_info(lookup_imdb(imdb_id).id, embed=embed)
+            except IDNotFound as e:
+                errors.append(e.value)
+        if show_name:
+            try:
+                show = self._get_show_by_search(show_name, show_year, show_network, show_language,
+                                                show_country, show_web_channel, embed=embed)
+                return show
+            except ShowNotFound as e:
+                errors.append(e.value)
+        raise ShowNotFound(' ,'.join(errors))
+
+    def _get_show_with_qualifiers(self, show_name, qualifiers):
+        shows = get_show_list(show_name)
+        best_match = -1  # Initialize match value score
+        show_match = None
+
+        for show in shows:
+            if show.premiered:
+                premiered = show.premiered[:-6].lower()
             else:
-                country = None
-        if show.language:
-            language = show.language.lower()
+                premiered = None
+            if show.network and show.network.name:
+                network = show.network.name.lower()
+            else:
+                network = None
+            if show.web_channel and show.web_channel.name:
+                web_channel = show.web_channel.name.lower()
+            else:
+                web_channel = None
+            if show.network and show.network.code:
+                country = show.network.code.lower()
+            else:
+                if show.web_channel and show.web_channel.code:
+                    country = show.web_channel.code.lower()
+                else:
+                    country = None
+            if show.language:
+                language = show.language.lower()
+            else:
+                language = None
+
+            attributes = [premiered, country, network, language, web_channel]
+            show_score = len(set(qualifiers) & set(attributes))
+            if show_score > best_match:
+                best_match = show_score
+                show_match = show
+        return show_match
+
+    # Search with user-defined qualifiers, used by get_show() method
+    def _get_show_by_search(self, show_name, show_year, show_network, show_language, show_country,
+                            show_web_channel, embed):
+        if show_year:
+            show_year = str(show_year)
+        qualifiers = list(filter(None, [show_year, show_network, show_language, show_country, show_web_channel]))
+        if qualifiers:
+            qualifiers = [q.lower() for q in qualifiers if q]
+            show = self._get_show_with_qualifiers(show_name, qualifiers)
         else:
-            language = None
+            return show_single_search(show=show_name, embed=embed)
+        if embed:
+            return show_main_info(maze_id=show.id, embed=embed)
+        else:
+            return show
 
-        attributes = [premiered, country, network, language, web_channel]
-        show_score = len(set(qualifiers) & set(attributes))
-        if show_score > best_match:
-            best_match = show_score
-            show_match = show
-    return show_match
+    # TVMaze Premium Endpoints
+    # NOT DONE OR TESTED
+    def get_followed_shows(self, embed=None):
+        if not embed in [None, 'show']:
+            raise InvalidEmbedValue('Value for embed must be "show" or None')
+        url = endpoints.followed_shows.format('/')
+        if embed == 'show':
+            url = endpoints.followed_shows.format('?embed=show')
+        q = self._endpoint_premium_get(url)
+        if q:
+            return [FollowedShow(show) for show in q]
+        else:
+            raise NoFollowedShows('You have not followed any shows yet')
 
+    def get_followed_show(self, maze_id):
+        url = endpoints.followed_shows.format('/' + str(maze_id))
+        q = self._endpoint_premium_get(url)
+        if q:
+            return FollowedShow(q)
+        else:
+            raise ShowNotFollowed('Show with ID {} is not followed'.format(maze_id))
 
-# Search with user-defined qualifiers, used by get_show() method
-def _get_show_by_search(show_name, show_year, show_network, show_language, show_country, show_web_channel, embed):
-    if show_year:
-        show_year = str(show_year)
-    qualifiers = list(filter(None, [show_year, show_network, show_language, show_country, show_web_channel]))
-    if qualifiers:
-        qualifiers = [q.lower() for q in qualifiers if q]
-        show = _get_show_with_qualifiers(show_name, qualifiers)
-    else:
-        return show_single_search(show=show_name, embed=embed)
-    if embed:
-        return show_main_info(maze_id=show.id, embed=embed)
-    else:
-        return show
+    def follow_show(self, maze_id):
+        url = endpoints.followed_shows.format('/' + str(maze_id))
+        q = self._endpoint_premium_put(url)
+        if not q:
+            raise ShowNotFound('Show with ID {} does not exist'.format(maze_id))
 
+    def unfollow_show(self, maze_id):
+        url = endpoints.followed_shows.format('/' + str(maze_id))
+        q = self._endpoint_premium_delete(url)
+        if not q:
+            raise ShowNotFollowed('Show with ID {} was not followed'.format(maze_id))
 
-def _url_quote(show):
-    return requests.compat.quote(show.encode('UTF-8'))
+    def get_followed_people(self, embed=None):
+        if not embed in [None, 'person']:
+            raise InvalidEmbedValue('Value for embed must be "person" or None')
+        url = endpoints.followed_people.format('/')
+        if embed == 'person':
+            url = endpoints.followed_people.format('?embed=person')
+        q = self._endpoint_premium_get(url)
+        if q:
+            return [FollowedPerson(person) for person in q]
+        else:
+            raise NoFollowedPeople('You have not followed any people yet')
+
+    def get_followed_person(self, person_id):
+        url = endpoints.followed_people.format('/' + str(person_id))
+        q = self._endpoint_premium_get(url)
+        if q:
+            return FollowedPerson(q)
+        else:
+            raise PersonNotFound('Person with ID {} is not followed'.format(person_id))
+
+    def follow_person(self, person_id):
+        url = endpoints.followed_people.format('/' + str(person_id))
+        q = self._endpoint_premium_put(url)
+        if not q:
+            raise PersonNotFound('Person with ID {} does not exist'.format(person_id))
+
+    def unfollow_person(self, person_id):
+        url = endpoints.followed_people.format('/' + str(person_id))
+        q = self._endpoint_premium_delete(url)
+        if not q:
+            raise PersonNotFollowed('Person with ID {} was not followed'.format(person_id))
+
+    def get_followed_networks(self, embed=None):
+        if not embed in [None, 'network']:
+            raise InvalidEmbedValue('Value for embed must be "network" or None')
+        url = endpoints.followed_networks.format('/')
+        if embed == 'network':
+            url = endpoints.followed_networks.format('?embed=network')
+        q = self._endpoint_premium_get(url)
+        if q:
+            return [FollowedNetwork(network) for network in q]
+        else:
+            raise NoFollowedNetworks('You have not followed any networks yet')
+
+    def get_followed_network(self, network_id):
+        url = endpoints.followed_networks.format('/' + str(network_id))
+        q = self._endpoint_premium_get(url)
+        if q:
+            return FollowedNetwork(q)
+        else:
+            raise NetworkNotFound('Network with ID {} is not followed'.format(network_id))
+
+    def follow_network(self, network_id):
+        url = endpoints.followed_networks.format('/' + str(network_id))
+        q = self._endpoint_premium_put(url)
+        if not q:
+            raise NetworkNotFound('Network with ID {} does not exist'.format(network_id))
+
+    def unfollow_network(self, network_id):
+        url = endpoints.followed_networks.format('/' + str(network_id))
+        q = self._endpoint_premium_delete(url)
+        if not q:
+            raise NetworkNotFollowed('Network with ID {} was not followed'.format(network_id))
+
+    def get_followed_web_channels(self, embed=None):
+        if not embed in [None, 'webchannel']:
+            raise InvalidEmbedValue('Value for embed must be "webchannel" or None')
+        url = endpoints.followed_web_channels.format('/')
+        if embed == 'webchannel':
+            url = endpoints.followed_web_channels.format('?embed=webchannel')
+        q = self._endpoint_premium_get(url)
+        if q:
+            return [FollowedWebChannel(webchannel) for webchannel in q]
+        else:
+            raise NoFollowedWebChannels('You have not followed any Web Channels yet')
+
+    def get_followed_web_channel(self, webchannel_id):
+        url = endpoints.followed_web_channels.format('/' + str(webchannel_id))
+        q = self._endpoint_premium_get(url)
+        if q:
+            return FollowedWebChannel(q)
+        else:
+            raise NetworkNotFound('Web Channel with ID {} is not followed'.format(webchannel_id))
+
+    def follow_web_channel(self, webchannel_id):
+        url = endpoints.followed_web_channels.format('/' + str(webchannel_id))
+        q = self._endpoint_premium_put(url)
+        if not q:
+            raise WebChannelNotFound('Web Channel with ID {} does not exist'.format(webchannel_id))
+
+    def unfollow_web_channel(self, webchannel_id):
+        url = endpoints.followed_web_channels.format('/' + str(webchannel_id))
+        q = self._endpoint_premium_delete(url)
+        if not q:
+            raise WebChannelNotFollowed('Web Channel with ID {} was not followed'.format(webchannel_id))
+
+    def get_marked_episodes(self):
+        url = endpoints.marked_episodes.format('')
+        q = self._endpoint_premium_get(url)
+        if q:
+            return [MarkedEpisode(episode) for episode in q]
+        else:
+            raise NoMarkedEpisodes('You have not marked any episodes yet')
+
+    def get_marked_episode(self, episode_id):
+        url = endpoints.marked_episodes.format(episode_id)
+        q = self._endpoint_premium_get(url)
+        if q:
+            return MarkedEpisode(q)
+        else:
+            raise EpisodeNotMarked('Episode with ID {} is not marked')
+
+    def mark_episode(self, episode_id, mark_type):
+        types = {'watched': 0, 'acquired': 1, 'skipped': 2}
+        try:
+            status = types[mark_type]
+        except IndexError:
+            raise InvalidMarkedEpisodeType('Episode must be marked as "watched", "acquired", or "skipped"')
+        payload = {'type': str(status)}
+        url = endpoints.marked_episodes.format(episode_id)
+        q = self._endpoint_premium_put(url, payload=payload)
+        if not q:
+            raise EpisodeNotFound('Episode with ID {} does not exist')
+
+    def unmark_episode(self, episode_id):
+        url = endpoints.marked_episodes.format(episode_id)
+        q = self._endpoint_premium_delete(url)
+        if not q:
+            raise EpisodeNotMarked('Episode with ID {} was not marked'.format(episode_id))
 
 
 # Return list of Show objects
@@ -500,7 +823,6 @@ def get_show_list(show_name):
     shows = show_search(show_name)
     return shows
 
-
 # Get list of Person objects
 def get_people(name):
     """
@@ -512,12 +834,10 @@ def get_people(name):
     if people:
         return people
 
-
-# TV Maze Endpoints
 def show_search(show):
     _show = _url_quote(show)
     url = endpoints.show_search.format(_show)
-    q = _query_endpoint(url)
+    q = TVMaze._endpoint_standard_get(url)
     if q:
         shows = []
         for result in q:
@@ -528,102 +848,97 @@ def show_search(show):
     else:
         raise ShowNotFound('Show {0} not found'.format(show))
 
-
 def show_single_search(show, embed=None):
+    if not embed in [None, 'episodes', 'cast', 'previousepisode', 'nextepisode']:
+        raise InvalidEmbedValue('Value for embed must be "episodes", "cast", "previousepisode", "nextepisode", or None')
     _show = _url_quote(show)
     if embed:
         url = endpoints.show_single_search.format(_show) + '&embed=' + embed
     else:
         url = endpoints.show_single_search.format(_show)
-    q = _query_endpoint(url)
+    q = TVMaze._endpoint_standard_get(url)
     if q:
         return Show(q)
     else:
         raise ShowNotFound('show name "{0}" not found'.format(show))
 
-
 def lookup_tvrage(tvrage_id):
     url = endpoints.lookup_tvrage.format(tvrage_id)
-    q = _query_endpoint(url)
+    q = TVMaze._endpoint_standard_get(url)
     if q:
         return Show(q)
     else:
         raise IDNotFound('TVRage id {0} not found'.format(tvrage_id))
 
-
 def lookup_tvdb(tvdb_id):
     url = endpoints.lookup_tvdb.format(tvdb_id)
-    q = _query_endpoint(url)
+    q = TVMaze._endpoint_standard_get(url)
     if q:
         return Show(q)
     else:
         raise IDNotFound('TVDB ID {0} not found'.format(tvdb_id))
 
-
 def lookup_imdb(imdb_id):
     url = endpoints.lookup_imdb.format(imdb_id)
-    q = _query_endpoint(url)
+    q = TVMaze._endpoint_standard_get(url)
     if q:
         return Show(q)
     else:
         raise IDNotFound('IMDB ID {0} not found'.format(imdb_id))
 
-
 def get_schedule(country='US', date=str(datetime.today().date())):
     url = endpoints.get_schedule.format(country, date)
-    q = _query_endpoint(url)
+    q = TVMaze._endpoint_standard_get(url)
     if q:
         return [Episode(episode) for episode in q]
     else:
         raise ScheduleNotFound('Schedule for country {0} at date {1} not found'.format(country, date))
 
-
 # ALL known future episodes, several MB large, cached for 24 hours
 def get_full_schedule():
     url = endpoints.get_full_schedule
-    q = _query_endpoint(url)
+    q = TVMaze._endpoint_standard_get(url)
     if q:
         return [Episode(episode) for episode in q]
     else:
         raise GeneralError('Something went wrong, www.tvmaze.com may be down')
 
-
 def show_main_info(maze_id, embed=None):
+    if not embed in [None, 'episodes', 'cast', 'previousepisode', 'nextepisode']:
+        raise InvalidEmbedValue('Value for embed must be "episodes", "cast", "previousepisode", "nextepisode", or None')
     if embed:
         url = endpoints.show_main_info.format(maze_id) + '?embed=' + embed
     else:
         url = endpoints.show_main_info.format(maze_id)
-    q = _query_endpoint(url)
+    q = TVMaze._endpoint_standard_get(url)
     if q:
         return Show(q)
     else:
         raise IDNotFound('Maze id {0} not found'.format(maze_id))
-
 
 def episode_list(maze_id, specials=None):
     if specials:
         url = endpoints.episode_list.format(maze_id) + '&specials=1'
     else:
         url = endpoints.episode_list.format(maze_id)
-    q = _query_endpoint(url)
+    q = TVMaze._endpoint_standard_get(url)
     if q:
         return [Episode(episode) for episode in q]
     else:
         raise IDNotFound('Maze id {0} not found'.format(maze_id))
 
-
 def episode_by_number(maze_id, season_number, episode_number):
     url = endpoints.episode_by_number.format(maze_id,
                                              season_number,
                                              episode_number)
-    q = _query_endpoint(url)
+    q = TVMaze._endpoint_standard_get(url)
     if q:
         return Episode(q)
     else:
         raise EpisodeNotFound(
-                'Couldn\'t find season {0} episode {1} for TVMaze ID {2}'.format(season_number, episode_number,
+                'Couldn\'t find season {0} episode {1} for TVMaze ID {2}'.format(season_number,
+                                                                                 episode_number,
                                                                                  maze_id))
-
 
 def episodes_by_date(maze_id, airdate):
     try:
@@ -631,99 +946,96 @@ def episodes_by_date(maze_id, airdate):
     except ValueError:
         raise IllegalAirDate('Airdate must be string formatted as \"YYYY-MM-DD\"')
     url = endpoints.episodes_by_date.format(maze_id, airdate)
-    q = _query_endpoint(url)
+    q = TVMaze._endpoint_standard_get(url)
     if q:
         return [Episode(episode) for episode in q]
     else:
         raise NoEpisodesForAirdate(
                 'Couldn\'t find an episode airing {0} for TVMaze ID {1}'.format(airdate, maze_id))
 
-
 def show_cast(maze_id):
     url = endpoints.show_cast.format(maze_id)
-    q = _query_endpoint(url)
+    q = TVMaze._endpoint_standard_get(url)
     if q:
         return Cast(q)
     else:
         raise CastNotFound('Couldn\'nt find show cast for TVMaze ID {0}'.format(maze_id))
 
-
 def show_index(page=1):
     url = endpoints.show_index.format(page)
-    q = _query_endpoint(url)
+    q = TVMaze._endpoint_standard_get(url)
     if q:
         return [Show(show) for show in q]
     else:
         raise ShowIndexError('Error getting show index, www.tvmaze.com may be down')
 
-
 def people_search(person):
     person = _url_quote(person)
     url = endpoints.people_search.format(person)
-    q = _query_endpoint(url)
+    q = TVMaze._endpoint_standard_get(url)
     if q:
         return [Person(person) for person in q]
     else:
         raise PersonNotFound('Couldn\'t find person: {0}'.format(person))
 
-
 def person_main_info(person_id, embed=None):
+    if not embed in [None, 'castcredits', 'crewcredits']:
+        raise InvalidEmbedValue('Value for embed must be "castcredits" or None')
     if embed:
         url = endpoints.person_main_info.format(person_id) + '?embed=' + embed
     else:
         url = endpoints.person_main_info.format(person_id)
-    q = _query_endpoint(url)
+    q = TVMaze._endpoint_standard_get(url)
     if q:
         return Person(q)
     else:
         raise PersonNotFound('Couldn\'t find person: {0}'.format(person_id))
 
-
 def person_cast_credits(person_id, embed=None):
+    if not embed in [None, 'show', 'character']:
+        raise InvalidEmbedValue('Value for embed must be "show", "character" or None')
     if embed:
         url = endpoints.person_cast_credits.format(person_id) + '?embed=' + embed
     else:
         url = endpoints.person_cast_credits.format(person_id)
-    q = _query_endpoint(url)
+    q = TVMaze._endpoint_standard_get(url)
     if q:
         return [CastCredit(credit) for credit in q]
     else:
         raise CreditsNotFound('Couldn\'t find cast credits for person ID: {0}'.format(person_id))
 
-
 def person_crew_credits(person_id, embed=None):
+    if not embed in [None, 'show']:
+        raise InvalidEmbedValue('Value for embed must be "show" or None')
     if embed:
         url = endpoints.person_crew_credits.format(person_id) + '?embed=' + embed
     else:
         url = endpoints.person_crew_credits.format(person_id)
-    q = _query_endpoint(url)
+    q = TVMaze._endpoint_standard_get(url)
     if q:
         return [CrewCredit(credit) for credit in q]
     else:
         raise CreditsNotFound('Couldn\'t find crew credits for person ID: {0}'.format(person_id))
 
-
 def show_updates():
     url = endpoints.show_updates
-    q = _query_endpoint(url)
+    q = TVMaze._endpoint_standard_get(url)
     if q:
         return Updates(q)
     else:
         raise ShowIndexError('Error getting show updates, www.tvmaze.com may be down')
 
-
 def show_akas(maze_id):
     url = endpoints.show_akas.format(maze_id)
-    q = _query_endpoint(url)
+    q = TVMaze._endpoint_standard_get(url)
     if q:
         return [AKA(aka) for aka in q]
     else:
         raise AKASNotFound('Couldn\'t find AKA\'s for TVMaze ID: {0}'.format(maze_id))
 
-
 def show_seasons(maze_id):
     url = endpoints.show_seasons.format(maze_id)
-    q = _query_endpoint(url)
+    q = TVMaze._endpoint_standard_get(url)
     if q:
         season_dict = dict()
         for season in q:
@@ -732,19 +1044,17 @@ def show_seasons(maze_id):
     else:
         raise SeasonNotFound('Couldn\'t find Season\'s for TVMaze ID: {0}'.format(maze_id))
 
-
 def season_by_id(season_id):
     url = endpoints.season_by_id.format(season_id)
-    q = _query_endpoint(url)
+    q = TVMaze._endpoint_standard_get(url)
     if q:
         return Season(q)
     else:
         raise SeasonNotFound('Couldn\'t find Season with ID: {0}'.format(season_id))
 
-
 def episode_by_id(episode_id):
     url = endpoints.episode_by_id.format(episode_id)
-    q = _query_endpoint(url)
+    q = TVMaze._endpoint_standard_get(url)
     if q:
         return Episode(q)
     else:
