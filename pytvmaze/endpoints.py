@@ -25,8 +25,8 @@ season_by_id = 'http://api.tvmaze.com/seasons/{0}'
 episode_by_id = 'http://api.tvmaze.com/episodes/{0}'
 
 # TVMaze Premium endpoints
-followed_shows = 'http://tvmazecdn.com/v1/user/follows/shows{0}/{1}'
-followed_people = 'http://tvmazecdn.com/v1/user/follows/people{0}/{1}'
-followed_networks = 'https://tvmazecdn.com/v1/user/follows/networks{0}/{1}'
-followed_web_channels = 'https://tvmazecdn.com/v1/user/follows/webchannels{0}/{1}'
-marked_episodes = 'http://tvmazecdn.com/v1/user/episodes/{0}'
+followed_shows = 'http://api.tvmaze.com/v1/user/follows/shows{0}/{1}'
+followed_people = 'http://api.tvmaze.com/v1/user/follows/people{0}/{1}'
+followed_networks = 'https://api.tvmaze.com/v1/user/follows/networks{0}/{1}'
+followed_web_channels = 'https://api.tvmaze.com/v1/user/follows/webchannels{0}/{1}'
+marked_episodes = 'http://api.tvmaze.com/v1/user/episodes/{0}'
