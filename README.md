@@ -10,12 +10,12 @@ To install:
 
     >>> import pytvmaze
 
-    # Get a list of show objects of your followed shows
+    # Get a list of your followed shows
     >>> tvm = pytvmaze.TVMaze(username, api_key)
     >>> followed_shows = tvm.get_followed_shows
     >>> followed_shows
-    [<Show(maze_id=161,name=Dexter,year=2006,network=Showtime)>,
-    <Show(maze_id=163,name=Human Target,year=2010,network=FOX)>,
+    [<FollowedShow(maze_id=161),
+    <FollowedShow(maze_id=14157),
     etc.]
 
     # Get the best match as a show object using the name of a show
