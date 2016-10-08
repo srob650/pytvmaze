@@ -438,6 +438,32 @@ class MarkedEpisode(object):
                                                                                            type=self.type)
 
 
+class VotedShow(object):
+    def __init__(self, data):
+        self.maze_id = data.get('show_id')
+        self.voted_at = data.get('voted_at')
+        self.vote = data.get('vote')
+        if data.get('_embedded'):
+            self.show = Show(data['_embedded'].get('show'))
+
+    def __repr__(self):
+        return '<VotedShow(maze_id={id},voted_at={voted_at},vote={vote})>'.format(id=self.maze_id,
+                                                                                  voted_at=self.voted_at,
+                                                                                  vote=self.vote)
+
+
+class VotedEpisode(object):
+    def __init__(self, data):
+        self.episode_id = data.get('episode_id')
+        self.voted_at = data.get('voted_at')
+        self.vote = data.get('vote')
+
+    def __repr__(self):
+        return '<VotedEpisode(episode_id={id},voted_at={voted_at},vote={vote})>'.format(id=self.episode_id,
+                                                                                        voted_at=self.voted_at,
+                                                                                        vote=self.vote)
+
+
 def _valid_encoding(text):
     if not text:
         return
@@ -810,6 +836,72 @@ class TVMaze(object):
         q = self._endpoint_premium_delete(url)
         if not q:
             raise EpisodeNotMarked('Episode with ID {} was not marked'.format(episode_id))
+
+    def get_voted_shows(self, embed=None):
+        if not embed in [None, 'show']:
+            raise InvalidEmbedValue('Value for embed must be "show" or None')
+        url = endpoints.voted_shows.format('/')
+        if embed == 'show':
+            url = endpoints.voted_shows.format('?embed=show')
+        q = self._endpoint_premium_get(url)
+        if q:
+            return [VotedShow(show) for show in q]
+        else:
+            raise NoVotedShows('You have not voted for any shows yet')
+
+    def get_voted_show(self, maze_id):
+        url = endpoints.voted_shows.format('/' + str(maze_id))
+        q = self._endpoint_premium_get(url)
+        if q:
+            return VotedShow(q)
+        else:
+            raise ShowNotVotedFor('Show with ID {} not voted for'.format(maze_id))
+
+    def remove_show_vote(self, maze_id):
+        url = endpoints.voted_shows.format('/' + str(maze_id))
+        q = self._endpoint_premium_delete(url)
+        if not q:
+            raise ShowNotVotedFor('Show with ID {} was not voted for'.format(maze_id))
+
+    def vote_show(self, maze_id, vote):
+        if not 1 <= vote <= 10:
+            raise InvalidVoteValue('Vote must be an integer between 1 and 10')
+        payload = {'vote': int(vote)}
+        url = endpoints.voted_shows.format('/' + str(maze_id))
+        q = self._endpoint_premium_put(url, payload=payload)
+        if not q:
+            raise ShowNotFound('Show with ID {} does not exist'.format(maze_id))
+
+    def get_voted_episodes(self):
+        url = endpoints.voted_episodes.format('')
+        q = self._endpoint_premium_get(url)
+        if q:
+            return [VotedEpisode(episode) for episode in q]
+        else:
+            raise NoVotedEpisodes('You have not voted for any episodes yet')
+
+    def get_voted_episode(self, episode_id):
+        url = endpoints.voted_episodes.format(episode_id)
+        q = self._endpoint_premium_get(url)
+        if q:
+            return VotedEpisode(q)
+        else:
+            raise EpisodeNotVotedFor('Episode with ID {} not voted for'.format(episode_id))
+
+    def remove_episode_vote(self, episode_id):
+        url = endpoints.voted_episodes.format(episode_id)
+        q = self._endpoint_premium_delete(url)
+        if not q:
+            raise EpisodeNotVotedFor('Episode with ID {} was not voted for'.format(episode_id))
+
+    def vote_episode(self, episode_id, vote):
+        if not 1 <= vote <= 10:
+            raise InvalidVoteValue('Vote must be an integer between 1 and 10')
+        payload = {'vote': int(vote)}
+        url = endpoints.voted_episodes.format(episode_id)
+        q = self._endpoint_premium_put(url, payload=payload)
+        if not q:
+            raise EpisodeNotFound('Episode with ID {} does not exist'.format(episode_id))
 
 
 # Return list of Show objects

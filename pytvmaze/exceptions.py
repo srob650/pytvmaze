@@ -117,3 +117,18 @@ class NetworkNotFollowed(BaseError):
 
 class NoFollowedWebChannels(BaseError):
     pass
+
+class NoVotedShows(BaseError):
+    pass
+
+class ShowNotVotedFor(BaseError):
+    pass
+
+class InvalidVoteValue(BaseError):
+    pass
+
+class NoVotedEpisodes(BaseError):
+    pass
+
+class EpisodeNotVotedFor(BaseError):
+    pass
