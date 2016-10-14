@@ -478,6 +478,8 @@ def _url_quote(show):
 
 
 def _remove_tags(text):
+    if not text:
+        return None
     return re.sub(r'<.*?>', '', text)
 
 
