@@ -36,7 +36,7 @@ class Show(object):
             self.network = Network(data.get('network'))
         else:
             self.network = None
-        self.episodes = list()
+        self.__episodes = None
         self.seasons = dict()
         self.cast = None
         self.__nextepisode = None
@@ -107,6 +107,13 @@ class Show(object):
             if episode_id.isdigit():
                 self.__previousepisode = episode_by_id(episode_id)
         return self.__previousepisode
+
+    @property
+    def episodes(self):
+        if self.__episodes is None:
+            self.__episodes = episode_list(self.maze_id, specials=True)
+        return self.__episodes
+
 
     def populate(self, data):
         embedded = data.get('_embedded')
