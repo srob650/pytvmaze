@@ -110,7 +110,7 @@ class Show(object):
 
     @property
     def episodes(self):
-        if self.__episodes is None:
+        if not self.__episodes:
             self.__episodes = episode_list(self.maze_id, specials=True)
         return self.__episodes
 
