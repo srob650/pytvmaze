@@ -206,14 +206,21 @@ class Episode(object):
                 self.show = Show(data['_embedded']['show'])
 
     def __repr__(self):
+        if self.special:
+            epnum = 'Special'
+        else:
+            epnum = self.episode_number
         return '<Episode(season={season},episode_number={number})>'.format(
                 season=str(self.season_number).zfill(2),
-                number=str(self.episode_number).zfill(2)
+                number=str(epnum).zfill(2)
         )
 
     def __str__(self):
         season = 'S' + str(self.season_number).zfill(2)
-        episode = 'E' + str(self.episode_number).zfill(2)
+        if self.special:
+            episode = ' Special'
+        else:
+            episode = 'E' + str(self.episode_number).zfill(2)
         return _valid_encoding(season + episode + ' ' + self.title)
 
     def is_special(self):
