@@ -522,7 +522,7 @@ class TVMaze(object):
             return None
 
         if r.status_code == 400:
-            raise BadRequest('Bad Request for url: {}'.format(url))
+            raise BadRequest('Bad Request for url {}'.format(url))
 
         results = r.json()
         if results:
@@ -541,7 +541,7 @@ class TVMaze(object):
             return None
 
         if r.status_code == 400:
-            raise BadRequest('Bad Request for url: {}'.format(url))
+            raise BadRequest('Bad Request for url {}'.format(url))
 
         results = r.json()
         if results:
@@ -556,7 +556,7 @@ class TVMaze(object):
             raise ConnectionError(repr(e))
 
         if r.status_code == 400:
-            raise BadRequest('Bad Request for url: {}'.format(url))
+            raise BadRequest('Bad Request for url {}'.format(url))
 
         if r.status_code == 200:
             return True
@@ -571,7 +571,7 @@ class TVMaze(object):
             raise ConnectionError(repr(e))
 
         if r.status_code == 400:
-            raise BadRequest('Bad Request for url: {}'.format(url))
+            raise BadRequest('Bad Request for url {}'.format(url))
 
         if r.status_code == 200:
             return True
@@ -1085,7 +1085,7 @@ def people_search(person):
     if q:
         return [Person(person) for person in q]
     else:
-        raise PersonNotFound('Couldn\'t find person: {0}'.format(person))
+        raise PersonNotFound('Couldn\'t find person {0}'.format(person))
 
 def person_main_info(person_id, embed=None):
     if not embed in [None, 'castcredits', 'crewcredits']:
@@ -1098,7 +1098,7 @@ def person_main_info(person_id, embed=None):
     if q:
         return Person(q)
     else:
-        raise PersonNotFound('Couldn\'t find person: {0}'.format(person_id))
+        raise PersonNotFound('Couldn\'t find person {0}'.format(person_id))
 
 def person_cast_credits(person_id, embed=None):
     if not embed in [None, 'show', 'character']:
@@ -1111,7 +1111,7 @@ def person_cast_credits(person_id, embed=None):
     if q:
         return [CastCredit(credit) for credit in q]
     else:
-        raise CreditsNotFound('Couldn\'t find cast credits for person ID: {0}'.format(person_id))
+        raise CreditsNotFound('Couldn\'t find cast credits for person ID {0}'.format(person_id))
 
 def person_crew_credits(person_id, embed=None):
     if not embed in [None, 'show']:
@@ -1124,7 +1124,7 @@ def person_crew_credits(person_id, embed=None):
     if q:
         return [CrewCredit(credit) for credit in q]
     else:
-        raise CreditsNotFound('Couldn\'t find crew credits for person ID: {0}'.format(person_id))
+        raise CreditsNotFound('Couldn\'t find crew credits for person ID {0}'.format(person_id))
 
 
 def get_show_crew(maze_id):
@@ -1150,7 +1150,7 @@ def show_akas(maze_id):
     if q:
         return [AKA(aka) for aka in q]
     else:
-        raise AKASNotFound('Couldn\'t find AKA\'s for TVMaze ID: {0}'.format(maze_id))
+        raise AKASNotFound('Couldn\'t find AKA\'s for TVMaze ID {0}'.format(maze_id))
 
 def show_seasons(maze_id):
     url = endpoints.show_seasons.format(maze_id)
@@ -1161,7 +1161,7 @@ def show_seasons(maze_id):
             season_dict[season['number']] = Season(season)
         return season_dict
     else:
-        raise SeasonNotFound('Couldn\'t find Season\'s for TVMaze ID: {0}'.format(maze_id))
+        raise SeasonNotFound('Couldn\'t find Season\'s for TVMaze ID {0}'.format(maze_id))
 
 def season_by_id(season_id):
     url = endpoints.season_by_id.format(season_id)
@@ -1169,7 +1169,7 @@ def season_by_id(season_id):
     if q:
         return Season(q)
     else:
-        raise SeasonNotFound('Couldn\'t find Season with ID: {0}'.format(season_id))
+        raise SeasonNotFound('Couldn\'t find Season with ID {0}'.format(season_id))
 
 def episode_by_id(episode_id):
     url = endpoints.episode_by_id.format(episode_id)
@@ -1177,4 +1177,4 @@ def episode_by_id(episode_id):
     if q:
         return Episode(q)
     else:
-        raise EpisodeNotFound('Couldn\'t find Episode with ID: {0}'.format(episode_id))
+        raise EpisodeNotFound('Couldn\'t find Episode with ID {0}'.format(episode_id))
