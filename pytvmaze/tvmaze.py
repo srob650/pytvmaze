@@ -313,6 +313,19 @@ class CrewCredit(object):
                 self.show = Show(data['_embedded']['show'])
 
 
+class Crew(object):
+    def __init__(self, data):
+        self.person = Person(data.get('person'))
+        self.type = data.get('type')
+
+    def __repr__(self):
+        return _valid_encoding('<Crew(name={name},maze_id={id},type={type})>'.format(
+                name=self.person.name,
+                id=self.person.id,
+                type=self.type
+        ))
+
+
 class Updates(object):
     def __init__(self, data):
         self.updates = dict()
@@ -1112,6 +1125,16 @@ def person_crew_credits(person_id, embed=None):
         return [CrewCredit(credit) for credit in q]
     else:
         raise CreditsNotFound('Couldn\'t find crew credits for person ID: {0}'.format(person_id))
+
+
+def get_show_crew(maze_id):
+    url = endpoints.show_crew.format(maze_id)
+    q = TVMaze._endpoint_standard_get(url)
+    if q:
+        return [Crew(crew) for crew in q]
+    else:
+        raise CrewNotFound('Couldn\'t find crew for TVMaze ID {}'.format(maze_id))
+
 
 def show_updates():
     url = endpoints.show_updates

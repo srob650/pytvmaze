@@ -132,3 +132,6 @@ class NoVotedEpisodes(BaseError):
 
 class EpisodeNotVotedFor(BaseError):
     pass
+
+class CrewNotFound(BaseError):
+    pass
