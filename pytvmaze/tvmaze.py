@@ -36,7 +36,7 @@ class Show(object):
             self.network = Network(data.get('network'))
         else:
             self.network = None
-        self.__episodes = None
+        self.__episodes = list()
         self.seasons = dict()
         self.cast = None
         self.__nextepisode = None
@@ -121,8 +121,8 @@ class Show(object):
             if embedded.get('episodes'):
                 seasons = show_seasons(self.maze_id)
                 for episode in embedded.get('episodes'):
-                    self.episodes.append(Episode(episode))
-                for episode in self.episodes:
+                    self.__episodes.append(Episode(episode))
+                for episode in self.__episodes:
                     season_num = int(episode.season_number)
                     if season_num not in self.seasons:
                         self.seasons[season_num] = seasons[season_num]
