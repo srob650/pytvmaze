@@ -113,6 +113,11 @@ class EndpointTests(unittest.TestCase):
         with self.assertRaises(CastNotFound):
             show_cast(9999999999)
 
+    def test_show_crew(self):
+        crew = get_show_crew(161)
+        self.assertIsInstance(crew[0], Crew)
+        self.assertIsInstance(crew[0].person, Person)
+
     def test_show_index(self):
         index = show_index()
         self.assertIsInstance(index, list)
