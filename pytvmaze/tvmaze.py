@@ -36,7 +36,7 @@ class Show(object):
             self.network = Network(data.get('network'))
         else:
             self.network = None
-        self.episodes = list()
+        self.__episodes = list()
         self.seasons = dict()
         self.cast = None
         self.__nextepisode = None
@@ -108,14 +108,21 @@ class Show(object):
                 self.__previousepisode = episode_by_id(episode_id)
         return self.__previousepisode
 
+    @property
+    def episodes(self):
+        if self.__episodes is None:
+            self.__episodes = episode_list(self.maze_id, specials=True)
+        return self.__episodes
+
+
     def populate(self, data):
         embedded = data.get('_embedded')
         if embedded:
             if embedded.get('episodes'):
                 seasons = show_seasons(self.maze_id)
                 for episode in embedded.get('episodes'):
-                    self.episodes.append(Episode(episode))
-                for episode in self.episodes:
+                    self.__episodes.append(Episode(episode))
+                for episode in self.__episodes:
                     season_num = int(episode.season_number)
                     if season_num not in self.seasons:
                         self.seasons[season_num] = seasons[season_num]
@@ -199,14 +206,21 @@ class Episode(object):
                 self.show = Show(data['_embedded']['show'])
 
     def __repr__(self):
+        if self.special:
+            epnum = 'Special'
+        else:
+            epnum = self.episode_number
         return '<Episode(season={season},episode_number={number})>'.format(
                 season=str(self.season_number).zfill(2),
-                number=str(self.episode_number).zfill(2)
+                number=str(epnum).zfill(2)
         )
 
     def __str__(self):
         season = 'S' + str(self.season_number).zfill(2)
-        episode = 'E' + str(self.episode_number).zfill(2)
+        if self.special:
+            episode = ' Special'
+        else:
+            episode = 'E' + str(self.episode_number).zfill(2)
         return _valid_encoding(season + episode + ' ' + self.title)
 
     def is_special(self):
