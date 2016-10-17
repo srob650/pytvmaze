@@ -4,6 +4,8 @@ from __future__ import unicode_literals
 import re
 from datetime import datetime
 import requests
+from requests.packages.urllib3.util.retry import Retry
+from requests.adapters import HTTPAdapter
 from pytvmaze import endpoints
 from pytvmaze.exceptions import *
 
@@ -527,10 +529,17 @@ class TVMaze(object):
     # Query TVMaze free endpoints
     @staticmethod
     def _endpoint_standard_get(url):
+        s = requests.Session()
+        retries = Retry(total=5,
+                        backoff_factor=0.1,
+                        status_forcelist=[429])
+        s.mount('http://', HTTPAdapter(max_retries=retries))
         try:
-            r = requests.get(url)
+            r = s.get(url)
         except requests.exceptions.ConnectionError as e:
             raise ConnectionError(repr(e))
+
+        s.close()
 
         if r.status_code in [404, 422]:
             return None
@@ -546,10 +555,17 @@ class TVMaze(object):
 
     # Query TVMaze Premium endpoints
     def _endpoint_premium_get(self, url):
+        s = requests.Session()
+        retries = Retry(total=5,
+                        backoff_factor=0.1,
+                        status_forcelist=[429])
+        s.mount('http://', HTTPAdapter(max_retries=retries))
         try:
-            r = requests.get(url, auth=(self.username, self.api_key))
+            r = s.get(url, auth=(self.username, self.api_key))
         except requests.exceptions.ConnectionError as e:
             raise ConnectionError(repr(e))
+
+        s.close()
 
         if r.status_code in [404, 422]:
             return None
@@ -564,10 +580,17 @@ class TVMaze(object):
             return None
 
     def _endpoint_premium_delete(self, url):
+        s = requests.Session()
+        retries = Retry(total=5,
+                        backoff_factor=0.1,
+                        status_forcelist=[429])
+        s.mount('http://', HTTPAdapter(max_retries=retries))
         try:
-            r = requests.delete(url, auth=(self.username, self.api_key))
+            r = s.delete(url, auth=(self.username, self.api_key))
         except requests.exceptions.ConnectionError as e:
             raise ConnectionError(repr(e))
+
+        s.close()
 
         if r.status_code == 400:
             raise BadRequest('Bad Request for url {}'.format(url))
@@ -579,10 +602,17 @@ class TVMaze(object):
             return None
 
     def _endpoint_premium_put(self, url, payload=None):
+        s = requests.Session()
+        retries = Retry(total=5,
+                        backoff_factor=0.1,
+                        status_forcelist=[429])
+        s.mount('http://', HTTPAdapter(max_retries=retries))
         try:
-            r = requests.put(url, data=payload, auth=(self.username, self.api_key))
+            r = s.put(url, data=payload, auth=(self.username, self.api_key))
         except requests.exceptions.ConnectionError as e:
             raise ConnectionError(repr(e))
+
+        s.close()
 
         if r.status_code == 400:
             raise BadRequest('Bad Request for url {}'.format(url))
