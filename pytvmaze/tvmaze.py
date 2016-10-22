@@ -4,6 +4,8 @@ from __future__ import unicode_literals
 import re
 from datetime import datetime
 import requests
+from requests.packages.urllib3.util.retry import Retry
+from requests.adapters import HTTPAdapter
 from pytvmaze import endpoints
 from pytvmaze.exceptions import *
 
@@ -527,10 +529,17 @@ class TVMaze(object):
     # Query TVMaze free endpoints
     @staticmethod
     def _endpoint_standard_get(url):
+        s = requests.Session()
+        retries = Retry(total=5,
+                        backoff_factor=0.1,
+                        status_forcelist=[429])
+        s.mount('http://', HTTPAdapter(max_retries=retries))
         try:
-            r = requests.get(url)
+            r = s.get(url)
         except requests.exceptions.ConnectionError as e:
             raise ConnectionError(repr(e))
+
+        s.close()
 
         if r.status_code in [404, 422]:
             return None
@@ -546,10 +555,17 @@ class TVMaze(object):
 
     # Query TVMaze Premium endpoints
     def _endpoint_premium_get(self, url):
+        s = requests.Session()
+        retries = Retry(total=5,
+                        backoff_factor=0.1,
+                        status_forcelist=[429])
+        s.mount('http://', HTTPAdapter(max_retries=retries))
         try:
-            r = requests.get(url, auth=(self.username, self.api_key))
+            r = s.get(url, auth=(self.username, self.api_key))
         except requests.exceptions.ConnectionError as e:
             raise ConnectionError(repr(e))
+
+        s.close()
 
         if r.status_code in [404, 422]:
             return None
@@ -564,10 +580,17 @@ class TVMaze(object):
             return None
 
     def _endpoint_premium_delete(self, url):
+        s = requests.Session()
+        retries = Retry(total=5,
+                        backoff_factor=0.1,
+                        status_forcelist=[429])
+        s.mount('http://', HTTPAdapter(max_retries=retries))
         try:
-            r = requests.delete(url, auth=(self.username, self.api_key))
+            r = s.delete(url, auth=(self.username, self.api_key))
         except requests.exceptions.ConnectionError as e:
             raise ConnectionError(repr(e))
+
+        s.close()
 
         if r.status_code == 400:
             raise BadRequest('Bad Request for url {}'.format(url))
@@ -579,10 +602,17 @@ class TVMaze(object):
             return None
 
     def _endpoint_premium_put(self, url, payload=None):
+        s = requests.Session()
+        retries = Retry(total=5,
+                        backoff_factor=0.1,
+                        status_forcelist=[429])
+        s.mount('http://', HTTPAdapter(max_retries=retries))
         try:
-            r = requests.put(url, data=payload, auth=(self.username, self.api_key))
+            r = s.put(url, data=payload, auth=(self.username, self.api_key))
         except requests.exceptions.ConnectionError as e:
             raise ConnectionError(repr(e))
+
+        s.close()
 
         if r.status_code == 400:
             raise BadRequest('Bad Request for url {}'.format(url))
@@ -832,8 +862,12 @@ class TVMaze(object):
         if not q:
             raise WebChannelNotFollowed('Web Channel with ID {} was not followed'.format(webchannel_id))
 
-    def get_marked_episodes(self):
-        url = endpoints.marked_episodes.format('')
+    def get_marked_episodes(self, maze_id=None):
+        if not maze_id:
+            url = endpoints.marked_episodes.format('/')
+        else:
+            show_id = '?show_id={}'.format(maze_id)
+            url = endpoints.marked_episodes.format(show_id)
         q = self._endpoint_premium_get(url)
         if q:
             return [MarkedEpisode(episode) for episode in q]
@@ -841,12 +875,13 @@ class TVMaze(object):
             raise NoMarkedEpisodes('You have not marked any episodes yet')
 
     def get_marked_episode(self, episode_id):
-        url = endpoints.marked_episodes.format(episode_id)
+        path = '/{}'.format(episode_id)
+        url = endpoints.marked_episodes.format(path)
         q = self._endpoint_premium_get(url)
         if q:
             return MarkedEpisode(q)
         else:
-            raise EpisodeNotMarked('Episode with ID {} is not marked')
+            raise EpisodeNotMarked('Episode with ID {} is not marked'.format(episode_id))
 
     def mark_episode(self, episode_id, mark_type):
         types = {'watched': 0, 'acquired': 1, 'skipped': 2}
@@ -855,13 +890,15 @@ class TVMaze(object):
         except IndexError:
             raise InvalidMarkedEpisodeType('Episode must be marked as "watched", "acquired", or "skipped"')
         payload = {'type': str(status)}
-        url = endpoints.marked_episodes.format(episode_id)
+        path = '/{}'.format(episode_id)
+        url = endpoints.marked_episodes.format(path)
         q = self._endpoint_premium_put(url, payload=payload)
         if not q:
-            raise EpisodeNotFound('Episode with ID {} does not exist')
+            raise EpisodeNotFound('Episode with ID {} does not exist'.format(episode_id))
 
     def unmark_episode(self, episode_id):
-        url = endpoints.marked_episodes.format(episode_id)
+        path = '/{}'.format(episode_id)
+        url = endpoints.marked_episodes.format(path)
         q = self._endpoint_premium_delete(url)
         if not q:
             raise EpisodeNotMarked('Episode with ID {} was not marked'.format(episode_id))
@@ -902,7 +939,7 @@ class TVMaze(object):
             raise ShowNotFound('Show with ID {} does not exist'.format(maze_id))
 
     def get_voted_episodes(self):
-        url = endpoints.voted_episodes.format('')
+        url = endpoints.voted_episodes.format('/')
         q = self._endpoint_premium_get(url)
         if q:
             return [VotedEpisode(episode) for episode in q]
@@ -910,7 +947,8 @@ class TVMaze(object):
             raise NoVotedEpisodes('You have not voted for any episodes yet')
 
     def get_voted_episode(self, episode_id):
-        url = endpoints.voted_episodes.format(episode_id)
+        path = '/{}'.format(episode_id)
+        url = endpoints.voted_episodes.format(path)
         q = self._endpoint_premium_get(url)
         if q:
             return VotedEpisode(q)
@@ -918,7 +956,8 @@ class TVMaze(object):
             raise EpisodeNotVotedFor('Episode with ID {} not voted for'.format(episode_id))
 
     def remove_episode_vote(self, episode_id):
-        url = endpoints.voted_episodes.format(episode_id)
+        path = '/{}'.format(episode_id)
+        url = endpoints.voted_episodes.format(path)
         q = self._endpoint_premium_delete(url)
         if not q:
             raise EpisodeNotVotedFor('Episode with ID {} was not voted for'.format(episode_id))
@@ -927,7 +966,8 @@ class TVMaze(object):
         if not 1 <= vote <= 10:
             raise InvalidVoteValue('Vote must be an integer between 1 and 10')
         payload = {'vote': int(vote)}
-        url = endpoints.voted_episodes.format(episode_id)
+        path = '/{}'.format(episode_id)
+        url = endpoints.voted_episodes.format(path)
         q = self._endpoint_premium_put(url, payload=payload)
         if not q:
             raise EpisodeNotFound('Episode with ID {} does not exist'.format(episode_id))
