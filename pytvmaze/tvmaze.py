@@ -909,7 +909,7 @@ class TVMaze(object):
             raise ShowNotFound('Show with ID {} does not exist'.format(maze_id))
 
     def get_voted_episodes(self):
-        url = endpoints.voted_episodes.format('')
+        url = endpoints.voted_episodes.format('/')
         q = self._endpoint_premium_get(url)
         if q:
             return [VotedEpisode(episode) for episode in q]
@@ -917,7 +917,8 @@ class TVMaze(object):
             raise NoVotedEpisodes('You have not voted for any episodes yet')
 
     def get_voted_episode(self, episode_id):
-        url = endpoints.voted_episodes.format(episode_id)
+        path = '/{}'.format(episode_id)
+        url = endpoints.voted_episodes.format(path)
         q = self._endpoint_premium_get(url)
         if q:
             return VotedEpisode(q)
@@ -925,7 +926,8 @@ class TVMaze(object):
             raise EpisodeNotVotedFor('Episode with ID {} not voted for'.format(episode_id))
 
     def remove_episode_vote(self, episode_id):
-        url = endpoints.voted_episodes.format(episode_id)
+        path = '/{}'.format(episode_id)
+        url = endpoints.voted_episodes.format(path)
         q = self._endpoint_premium_delete(url)
         if not q:
             raise EpisodeNotVotedFor('Episode with ID {} was not voted for'.format(episode_id))
@@ -934,7 +936,8 @@ class TVMaze(object):
         if not 1 <= vote <= 10:
             raise InvalidVoteValue('Vote must be an integer between 1 and 10')
         payload = {'vote': int(vote)}
-        url = endpoints.voted_episodes.format(episode_id)
+        path = '/{}'.format(episode_id)
+        url = endpoints.voted_episodes.format(path)
         q = self._endpoint_premium_put(url, payload=payload)
         if not q:
             raise EpisodeNotFound('Episode with ID {} does not exist'.format(episode_id))
