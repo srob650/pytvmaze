@@ -550,7 +550,6 @@ class TVMaze(object):
         results = r.json()
         return results
 
-
     # Query TVMaze Premium endpoints
     def _endpoint_premium_get(self, url):
         s = requests.Session()
@@ -572,10 +571,7 @@ class TVMaze(object):
             raise BadRequest('Bad Request for url {}'.format(url))
 
         results = r.json()
-        if results:
-            return results
-        else:
-            return None
+        return results
 
     def _endpoint_premium_delete(self, url):
         s = requests.Session()
