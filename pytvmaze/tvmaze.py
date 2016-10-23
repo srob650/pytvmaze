@@ -1083,7 +1083,7 @@ def episode_list(maze_id, specials=None):
     else:
         url = endpoints.episode_list.format(maze_id)
     q = TVMaze._endpoint_standard_get(url)
-    if q:
+    if type(q) == list:
         return [Episode(episode) for episode in q]
     else:
         raise IDNotFound('Maze id {0} not found'.format(maze_id))
