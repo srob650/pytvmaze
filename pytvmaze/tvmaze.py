@@ -532,7 +532,7 @@ class TVMaze(object):
         self.api_key = api_key or TVMaze.api_key
 
     @staticmethod
-    def make_session(session=None):
+    def make_session(session=None, **kwargs):
         s = session or requests.Session()
         retries = Retry(
             total=5,
@@ -540,6 +540,9 @@ class TVMaze(object):
             status_forcelist=[429]
         )
         s.mount('http://', HTTPAdapter(max_retries=retries))
+        s.headers.update({
+            'User-Agent': kwargs.pop('user_agent', 'pytvmaze'),
+        })
         return s
 
     # Query TVMaze free endpoints
