@@ -1,4 +1,5 @@
 #!/usr/bin/python
+# coding=utf-8
 
 # TVMaze Free endpoints
 show_search = 'http://api.tvmaze.com/search/shows?q={0}'
