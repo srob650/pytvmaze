@@ -523,6 +523,19 @@ class TVMaze(object):
 
     """
 
+    @staticmethod
+    def make_session(session=None):
+        s = session or requests.Session()
+        retries = Retry(
+            total=5,
+            backoff_factor=0.1,
+            status_forcelist=[429]
+        )
+        TVMaze.session.mount('http://', HTTPAdapter(max_retries=retries))
+        return s
+
+    session = make_session()  # make class session
+
     def __init__(self, username=None, api_key=None):
         self.username = username
         self.api_key = api_key
@@ -530,17 +543,10 @@ class TVMaze(object):
     # Query TVMaze free endpoints
     @staticmethod
     def _endpoint_standard_get(url):
-        s = requests.Session()
-        retries = Retry(total=5,
-                        backoff_factor=0.1,
-                        status_forcelist=[429])
-        s.mount('http://', HTTPAdapter(max_retries=retries))
         try:
-            r = s.get(url)
+            r = TVMaze.session.get(url)
         except requests.exceptions.ConnectionError as e:
             raise ConnectionError(repr(e))
-
-        s.close()
 
         if r.status_code in [404, 422]:
             return None
@@ -553,17 +559,10 @@ class TVMaze(object):
 
     # Query TVMaze Premium endpoints
     def _endpoint_premium_get(self, url):
-        s = requests.Session()
-        retries = Retry(total=5,
-                        backoff_factor=0.1,
-                        status_forcelist=[429])
-        s.mount('http://', HTTPAdapter(max_retries=retries))
         try:
-            r = s.get(url, auth=(self.username, self.api_key))
+            r = TVMaze.session.get(url, auth=(self.username, self.api_key))
         except requests.exceptions.ConnectionError as e:
             raise ConnectionError(repr(e))
-
-        s.close()
 
         if r.status_code in [404, 422]:
             return None
@@ -575,17 +574,10 @@ class TVMaze(object):
         return results
 
     def _endpoint_premium_delete(self, url):
-        s = requests.Session()
-        retries = Retry(total=5,
-                        backoff_factor=0.1,
-                        status_forcelist=[429])
-        s.mount('http://', HTTPAdapter(max_retries=retries))
         try:
-            r = s.delete(url, auth=(self.username, self.api_key))
+            r = TVMaze.session.delete(url, auth=(self.username, self.api_key))
         except requests.exceptions.ConnectionError as e:
             raise ConnectionError(repr(e))
-
-        s.close()
 
         if r.status_code == 400:
             raise BadRequest('Bad Request for url {}'.format(url))
@@ -597,17 +589,10 @@ class TVMaze(object):
             return None
 
     def _endpoint_premium_put(self, url, payload=None):
-        s = requests.Session()
-        retries = Retry(total=5,
-                        backoff_factor=0.1,
-                        status_forcelist=[429])
-        s.mount('http://', HTTPAdapter(max_retries=retries))
         try:
-            r = s.put(url, data=payload, auth=(self.username, self.api_key))
+            r = TVMaze.session.put(url, data=payload, auth=(self.username, self.api_key))
         except requests.exceptions.ConnectionError as e:
             raise ConnectionError(repr(e))
-
-        s.close()
 
         if r.status_code == 400:
             raise BadRequest('Bad Request for url {}'.format(url))
@@ -731,7 +716,7 @@ class TVMaze(object):
     # TVMaze Premium Endpoints
     # NOT DONE OR TESTED
     def get_followed_shows(self, embed=None):
-        if embed not in[None, 'show']:
+        if embed not in [None, 'show']:
             raise InvalidEmbedValue('Value for embed must be "show" or None')
         url = endpoints.followed_shows.format('/')
         if embed == 'show':
@@ -763,7 +748,7 @@ class TVMaze(object):
             raise ShowNotFollowed('Show with ID {} was not followed'.format(maze_id))
 
     def get_followed_people(self, embed=None):
-        if embed not in[None, 'person']:
+        if embed not in [None, 'person']:
             raise InvalidEmbedValue('Value for embed must be "person" or None')
         url = endpoints.followed_people.format('/')
         if embed == 'person':
@@ -795,7 +780,7 @@ class TVMaze(object):
             raise PersonNotFollowed('Person with ID {} was not followed'.format(person_id))
 
     def get_followed_networks(self, embed=None):
-        if embed not in[None, 'network']:
+        if embed not in [None, 'network']:
             raise InvalidEmbedValue('Value for embed must be "network" or None')
         url = endpoints.followed_networks.format('/')
         if embed == 'network':
@@ -827,7 +812,7 @@ class TVMaze(object):
             raise NetworkNotFollowed('Network with ID {} was not followed'.format(network_id))
 
     def get_followed_web_channels(self, embed=None):
-        if embed not in[None, 'webchannel']:
+        if embed not in [None, 'webchannel']:
             raise InvalidEmbedValue('Value for embed must be "webchannel" or None')
         url = endpoints.followed_web_channels.format('/')
         if embed == 'webchannel':
@@ -900,7 +885,7 @@ class TVMaze(object):
             raise EpisodeNotMarked('Episode with ID {} was not marked'.format(episode_id))
 
     def get_voted_shows(self, embed=None):
-        if embed not in[None, 'show']:
+        if embed not in [None, 'show']:
             raise InvalidEmbedValue('Value for embed must be "show" or None')
         url = endpoints.voted_shows.format('/')
         if embed == 'show':
@@ -1011,7 +996,7 @@ def show_search(show):
 
 
 def show_single_search(show, embed=None):
-    if embed not in[None, 'episodes', 'cast', 'previousepisode', 'nextepisode']:
+    if embed not in [None, 'episodes', 'cast', 'previousepisode', 'nextepisode']:
         raise InvalidEmbedValue('Value for embed must be "episodes", "cast", "previousepisode", "nextepisode", or None')
     _show = _url_quote(show)
     if embed:
@@ -1072,7 +1057,7 @@ def get_full_schedule():
 
 
 def show_main_info(maze_id, embed=None):
-    if embed not in[None, 'episodes', 'cast', 'previousepisode', 'nextepisode']:
+    if embed not in [None, 'episodes', 'cast', 'previousepisode', 'nextepisode']:
         raise InvalidEmbedValue('Value for embed must be "episodes", "cast", "previousepisode", "nextepisode", or None')
     if embed:
         url = endpoints.show_main_info.format(maze_id) + '?embed=' + embed
@@ -1154,7 +1139,7 @@ def people_search(person):
 
 
 def person_main_info(person_id, embed=None):
-    if embed not in[None, 'castcredits', 'crewcredits']:
+    if embed not in [None, 'castcredits', 'crewcredits']:
         raise InvalidEmbedValue('Value for embed must be "castcredits" or None')
     if embed:
         url = endpoints.person_main_info.format(person_id) + '?embed=' + embed
@@ -1168,7 +1153,7 @@ def person_main_info(person_id, embed=None):
 
 
 def person_cast_credits(person_id, embed=None):
-    if embed not in[None, 'show', 'character']:
+    if embed not in [None, 'show', 'character']:
         raise InvalidEmbedValue('Value for embed must be "show", "character" or None')
     if embed:
         url = endpoints.person_cast_credits.format(person_id) + '?embed=' + embed
@@ -1182,7 +1167,7 @@ def person_cast_credits(person_id, embed=None):
 
 
 def person_crew_credits(person_id, embed=None):
-    if embed not in[None, 'show']:
+    if embed not in [None, 'show']:
         raise InvalidEmbedValue('Value for embed must be "show" or None')
     if embed:
         url = endpoints.person_crew_credits.format(person_id) + '?embed=' + embed
