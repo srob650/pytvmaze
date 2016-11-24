@@ -524,10 +524,12 @@ class TVMaze(object):
     """
 
     session = None  # make class session
+    username = None
+    api_key = None
 
     def __init__(self, username=None, api_key=None):
-        self.username = username
-        self.api_key = api_key
+        self.username = username or TVMaze.username
+        self.api_key = api_key or TVMaze.api_key
 
     @staticmethod
     def make_session(session=None):
@@ -546,7 +548,7 @@ class TVMaze(object):
         if not cls.session:
             cls.session = cls.make_session()
         try:
-            r = TVMaze.session.get(url)
+            r = cls.session.get(url)
         except requests.exceptions.ConnectionError as e:
             raise ConnectionError(repr(e))
 
@@ -560,9 +562,10 @@ class TVMaze(object):
         return results
 
     # Query TVMaze Premium endpoints
-    def _endpoint_premium_get(self, url):
+    @classmethod
+    def _endpoint_premium_get(cls, url):
         try:
-            r = TVMaze.session.get(url, auth=(self.username, self.api_key))
+            r = cls.session.get(url, auth=(cls.username, cls.api_key))
         except requests.exceptions.ConnectionError as e:
             raise ConnectionError(repr(e))
 
@@ -575,9 +578,10 @@ class TVMaze(object):
         results = r.json()
         return results
 
-    def _endpoint_premium_delete(self, url):
+    @classmethod
+    def _endpoint_premium_delete(cls, url):
         try:
-            r = TVMaze.session.delete(url, auth=(self.username, self.api_key))
+            r = cls.session.delete(url, auth=(cls.username, cls.api_key))
         except requests.exceptions.ConnectionError as e:
             raise ConnectionError(repr(e))
 
@@ -590,9 +594,10 @@ class TVMaze(object):
         if r.status_code == 404:
             return None
 
-    def _endpoint_premium_put(self, url, payload=None):
+    @classmethod
+    def _endpoint_premium_put(cls, url, payload=None):
         try:
-            r = TVMaze.session.put(url, data=payload, auth=(self.username, self.api_key))
+            r = cls.session.put(url, data=payload, auth=(cls.username, cls.api_key))
         except requests.exceptions.ConnectionError as e:
             raise ConnectionError(repr(e))
 
