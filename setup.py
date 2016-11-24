@@ -1,15 +1,17 @@
-from setuptools import setup, find_packages
+# coding=utf-8
+
+from setuptools import setup
 
 setup(
-    name = 'pytvmaze',
-    version = '2.0.7',
-    description = 'Python interface to the TV Maze API (www.tvmaze.com)',
-    url = 'https://github.com/srob650/pytvmaze',
-    author = 'Spencer Roberts',
-    author_email = 'pytvmaze@gmail.com',
+    name='pytvmaze',
+    version='2.0.7',
+    description='Python interface to the TV Maze API (www.tvmaze.com)',
+    url='https://github.com/srob650/pytvmaze',
+    author='Spencer Roberts',
+    author_email='pytvmaze@gmail.com',
     license='MIT',
 
-    classifiers = [
+    classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
@@ -18,8 +20,7 @@ setup(
         'Programming Language :: Python :: 3.5'
     ],
 
-    keywords = 'python tv television tvmaze',
+    keywords='python tv television tvmaze',
     packages=['pytvmaze'],
-    install_requires=['requests']
-
+    install_requires=['six', 'requests']
 )
