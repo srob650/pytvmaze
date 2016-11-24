@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import re
 from datetime import datetime
 import requests
+import requests.compat
 from requests.packages.urllib3.util.retry import Retry
 from requests.adapters import HTTPAdapter
 from pytvmaze import endpoints
