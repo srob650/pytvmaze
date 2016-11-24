@@ -514,14 +514,14 @@ def _remove_tags(text):
 
 
 class TVMaze(object):
-    '''This is the main class of the module enabling interaction with both free and Premium
+    """This is the main class of the module enabling interaction with both free and Premium
     TVMaze features.
 
     Attributes:
         username (str): Username for http://www.tvmaze.com
         api_key (str): TVMaze api key.  Find your key at http://www.tvmaze.com/dashboard
 
-    '''
+    """
 
     def __init__(self, username=None, api_key=None):
         self.username = username
