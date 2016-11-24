@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import unittest
-import datetime
+from datetime import datetime
 import sys
 
 from pytvmaze import exceptions
