@@ -7,7 +7,7 @@ from datetime import datetime
 from six import text_type
 import requests
 import requests.compat
-from requests.packages.urllib3.util.retry import Retry
+from requests.packages.urllib3 import util
 from requests.adapters import HTTPAdapter
 from pytvmaze import endpoints
 from pytvmaze.exceptions import *
@@ -506,6 +506,24 @@ def _remove_tags(text):
     return re.sub(r'<.*?>', '', text)
 
 
+# Requests >= 2.12.2 required for Retry
+def make_retry_adapter(**kwargs):
+    adapter = None
+    try:
+        adapter = HTTPAdapter(
+            max_retries=util.retry.Retry(**kwargs),
+        )
+    except AttributeError:
+        pass
+    return adapter
+
+retry_adapter = make_retry_adapter(
+    total=5,
+    backoff_factor=0.1,
+    status_forcelist=0.1,
+)
+
+
 class TVMaze(object):
     """This is the main class of the module enabling interaction with both free and Premium
     TVMaze features.
@@ -526,17 +544,13 @@ class TVMaze(object):
 
     @staticmethod
     def make_session(session=None, **kwargs):
-        s = session or requests.Session()
-        retries = Retry(
-            total=5,
-            backoff_factor=0.1,
-            status_forcelist=[429]
-        )
-        s.mount('http://', HTTPAdapter(max_retries=retries))
-        s.headers.update({
+        session = session or requests.Session()
+        if retry_adapter:
+            session.mount('http://', retry_adapter)
+        session.headers.update({
             'User-Agent': kwargs.pop('user_agent', 'pytvmaze'),
         })
-        return s
+        return session
 
     # Query TVMaze free endpoints
     @classmethod
