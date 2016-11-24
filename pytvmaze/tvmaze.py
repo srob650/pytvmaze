@@ -538,7 +538,7 @@ class TVMaze(object):
 
     """
 
-    session = None  # make class session
+    session = None
     username = None
     api_key = None
 
@@ -546,83 +546,73 @@ class TVMaze(object):
         self.username = username or TVMaze.username
         self.api_key = api_key or TVMaze.api_key
 
-    @staticmethod
-    def make_session(session=None, **kwargs):
-        session = session or requests.Session()
+    @classmethod
+    def make_session(cls, session=None, **kwargs):
+        # attach a session
+        cls.session = session or requests.Session()
+
+        # mount a retry adapter if available
+        # TODO: change this so it does not overwrite
+        # already mounted adapters
         if retry_adapter:
-            session.mount('http://', retry_adapter)
-        session.headers.update({
+            cls.session.mount('http://', retry_adapter)
+
+        cls.session.headers.update({
             'User-Agent': kwargs.pop('user_agent', 'pytvmaze'),
         })
-        return session
+        return cls.session
 
-    # Query TVMaze free endpoints
     @classmethod
-    def _endpoint_standard_get(cls, url):
+    def request(cls, *args, **kwargs):
+        kwargs.setdefault('method', 'GET')
         if not cls.session:
             cls.session = cls.make_session()
         try:
-            r = cls.session.get(url)
+            response = cls.session.request(*args, **kwargs)
         except requests.exceptions.ConnectionError as e:
             raise exceptions.ConnectionError(repr(e))
 
-        if r.status_code in [404, 422]:
+        if response.status_code in [404, 422]:
             return None
 
-        if r.status_code == 400:
-            raise exceptions.BadRequest('Bad Request for url {}'.format(url))
+        if response.status_code == 400:
+            raise exceptions.BadRequest('Bad Request for url: {request.url}'.format(request=response.request))
+        return response
 
-        results = r.json()
-        return results
+    @classmethod
+    def authorized_request(cls, *args, **kwargs):
+        if not cls.session.auth:
+            # add authentication to the session if it exists
+            if cls.username and cls.api_key:
+                cls.session.auth = cls.username, cls.api_key
+            else:
+                raise exceptions.NotAuthorized
+        return cls.request(*args, **kwargs)
+
+    # Query TVMaze free endpoints
+    @classmethod
+    def _endpoint_standard_get(cls, url, *args, **kwargs):
+        response = cls.request(url=url, *args, **kwargs)
+        return response.json() if response else None
 
     # Query TVMaze Premium endpoints
     @classmethod
-    def _endpoint_premium_get(cls, url):
-        try:
-            r = cls.session.get(url, auth=(cls.username, cls.api_key))
-        except requests.exceptions.ConnectionError as e:
-            raise exceptions.ConnectionError(repr(e))
-
-        if r.status_code in [404, 422]:
-            return None
-
-        if r.status_code == 400:
-            raise exceptions.BadRequest('Bad Request for url {}'.format(url))
-
-        results = r.json()
-        return results
+    def _endpoint_premium_get(cls, url, *args, **kwargs):
+        response = cls.authorized_request(url=url, *args, **kwargs)
+        return response.json() if response else None
 
     @classmethod
-    def _endpoint_premium_delete(cls, url):
-        try:
-            r = cls.session.delete(url, auth=(cls.username, cls.api_key))
-        except requests.exceptions.ConnectionError as e:
-            raise exceptions.ConnectionError(repr(e))
-
-        if r.status_code == 400:
-            raise exceptions.BadRequest('Bad Request for url {}'.format(url))
-
-        if r.status_code == 200:
-            return True
-
-        if r.status_code == 404:
-            return None
+    def _endpoint_premium_delete(cls, url, *args, **kwargs):
+        kwargs.setdefault('method', 'DELETE')
+        response = cls.authorized_request(url=url, *args, **kwargs)
+        return response.json() if response else None
 
     @classmethod
-    def _endpoint_premium_put(cls, url, payload=None):
-        try:
-            r = cls.session.put(url, data=payload, auth=(cls.username, cls.api_key))
-        except requests.exceptions.ConnectionError as e:
-            raise exceptions.ConnectionError(repr(e))
-
-        if r.status_code == 400:
-            raise exceptions.BadRequest('Bad Request for url {}'.format(url))
-
-        if r.status_code == 200:
-            return True
-
-        if r.status_code in [404, 422]:
-            return None
+    def _endpoint_premium_put(cls, url, payload=None, *args, **kwargs):
+        kwargs.setdefault('method', 'PUT')
+        kwargs.setdefault('data', payload)
+        response = cls.authorized_request(url=url, *args, **kwargs)
+        return response.json() if response else None
 
     # Get Show object
     def get_show(self, maze_id=None, tvdb_id=None, tvrage_id=None, imdb_id=None, show_name=None,
