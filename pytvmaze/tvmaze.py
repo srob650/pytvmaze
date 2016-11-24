@@ -993,9 +993,8 @@ def get_people(name):
 
 
 def show_search(show):
-    _show = _url_quote(show)
-    url = endpoints.show_search.format(_show)
-    q = TVMaze._endpoint_standard_get(url)
+    url = endpoints.show_search
+    q = TVMaze._endpoint_standard_get(url, params={'q': show})
     if q:
         shows = []
         for result in q:
@@ -1008,14 +1007,11 @@ def show_search(show):
 
 
 def show_single_search(show, embed=None):
-    if embed not in [None, 'episodes', 'cast', 'previousepisode', 'nextepisode']:
-        raise exceptions.InvalidEmbedValue('Value for embed must be "episodes", "cast", "previousepisode", "nextepisode", or None')
-    _show = _url_quote(show)
-    if embed:
-        url = endpoints.show_single_search.format(_show) + '&embed=' + embed
-    else:
-        url = endpoints.show_single_search.format(_show)
-    q = TVMaze._endpoint_standard_get(url)
+    embed_options = [None, 'episodes', 'cast', 'previousepisode', 'nextepisode']
+    if embed not in embed_options:
+        raise exceptions.InvalidEmbedValue('Value for embed must be one of the following: {0!r}'.format(embed_options))
+    url = endpoints.show_single_search
+    q = TVMaze._endpoint_standard_get(url, params={'q': show, 'embed': embed})
     if q:
         return Show(q)
     else:
@@ -1023,17 +1019,17 @@ def show_single_search(show, embed=None):
 
 
 def lookup_tvrage(tvrage_id):
-    url = endpoints.lookup_tvrage.format(tvrage_id)
-    q = TVMaze._endpoint_standard_get(url)
+    url = endpoints.lookup
+    q = TVMaze._endpoint_standard_get(url, params={'tvrage': tvrage_id})
     if q:
         return Show(q)
     else:
-        raise exceptions.IDNotFound('TVRage id {0} not found'.format(tvrage_id))
+        raise exceptions.IDNotFound('TVRage ID {0} not found'.format(tvrage_id))
 
 
 def lookup_tvdb(tvdb_id):
-    url = endpoints.lookup_tvdb.format(tvdb_id)
-    q = TVMaze._endpoint_standard_get(url)
+    url = endpoints.lookup
+    q = TVMaze._endpoint_standard_get(url, params={'thetvdb': tvdb_id})
     if q:
         return Show(q)
     else:
@@ -1041,17 +1037,17 @@ def lookup_tvdb(tvdb_id):
 
 
 def lookup_imdb(imdb_id):
-    url = endpoints.lookup_imdb.format(imdb_id)
-    q = TVMaze._endpoint_standard_get(url)
+    url = endpoints.lookup
+    q = TVMaze._endpoint_standard_get(url, params={'imdb': imdb_id})
     if q:
         return Show(q)
     else:
         raise exceptions.IDNotFound('IMDB ID {0} not found'.format(imdb_id))
 
 
-def get_schedule(country='US', date=str(datetime.today().date())):
-    url = endpoints.get_schedule.format(country, date)
-    q = TVMaze._endpoint_standard_get(url)
+def get_schedule(country=None, date=None):
+    url = endpoints.get_schedule
+    q = TVMaze._endpoint_standard_get(url, params={'country': country, 'date': date})
     if q:
         return [Episode(episode) for episode in q]
     else:
@@ -1069,13 +1065,11 @@ def get_full_schedule():
 
 
 def show_main_info(maze_id, embed=None):
-    if embed not in [None, 'episodes', 'cast', 'previousepisode', 'nextepisode']:
-        raise exceptions.InvalidEmbedValue('Value for embed must be "episodes", "cast", "previousepisode", "nextepisode", or None')
-    if embed:
-        url = endpoints.show_main_info.format(maze_id) + '?embed=' + embed
-    else:
-        url = endpoints.show_main_info.format(maze_id)
-    q = TVMaze._endpoint_standard_get(url)
+    embed_options = [None, 'episodes', 'cast', 'previousepisode', 'nextepisode']
+    if embed not in embed_options:
+        raise exceptions.InvalidEmbedValue('Value for embed must be one of the following: {0!r}'.format(embed_options))
+    url = endpoints.show_main_info.format(maze_id)
+    q = TVMaze._endpoint_standard_get(url, params={'embed': embed})
     if q:
         return Show(q)
     else:
@@ -1083,11 +1077,8 @@ def show_main_info(maze_id, embed=None):
 
 
 def episode_list(maze_id, specials=None):
-    if specials:
-        url = endpoints.episode_list.format(maze_id) + '&specials=1'
-    else:
-        url = endpoints.episode_list.format(maze_id)
-    q = TVMaze._endpoint_standard_get(url)
+    url = endpoints.episode_list.format(maze_id)
+    q = TVMaze._endpoint_standard_get(url, params={'specials': 1 if specials else None})
     if type(q) == list:
         return [Episode(episode) for episode in q]
     else:
@@ -1095,17 +1086,12 @@ def episode_list(maze_id, specials=None):
 
 
 def episode_by_number(maze_id, season_number, episode_number):
-    url = endpoints.episode_by_number.format(maze_id,
-                                             season_number,
-                                             episode_number)
-    q = TVMaze._endpoint_standard_get(url)
+    url = endpoints.episode_by_number.format(maze_id)
+    q = TVMaze._endpoint_standard_get(url, params={'season': season_number, 'number': episode_number})
     if q:
         return Episode(q)
     else:
-        raise exceptions.EpisodeNotFound(
-                'Couldn\'t find season {0} episode {1} for TVMaze ID {2}'.format(season_number,
-                                                                                 episode_number,
-                                                                                 maze_id))
+        raise exceptions.EpisodeNotFound('Couldn\'t find season {0} episode {1} for TVMaze ID {2}'.format(season_number, episode_number, maze_id))
 
 
 def episodes_by_date(maze_id, airdate):
@@ -1113,13 +1099,12 @@ def episodes_by_date(maze_id, airdate):
         datetime.strptime(airdate, '%Y-%m-%d')
     except ValueError:
         raise exceptions.IllegalAirDate('Airdate must be string formatted as \"YYYY-MM-DD\"')
-    url = endpoints.episodes_by_date.format(maze_id, airdate)
-    q = TVMaze._endpoint_standard_get(url)
+    url = endpoints.episodes_by_date.format(maze_id)
+    q = TVMaze._endpoint_standard_get(url, params={'date': airdate})
     if q:
         return [Episode(episode) for episode in q]
     else:
-        raise exceptions.NoEpisodesForAirdate(
-                'Couldn\'t find an episode airing {0} for TVMaze ID {1}'.format(airdate, maze_id))
+        raise exceptions.NoEpisodesForAirdate('Couldn\'t find an episode airing {0} for TVMaze ID {1}'.format(airdate, maze_id))
 
 
 def show_cast(maze_id):
@@ -1131,9 +1116,9 @@ def show_cast(maze_id):
         raise exceptions.CastNotFound('Couldn\'nt find show cast for TVMaze ID {0}'.format(maze_id))
 
 
-def show_index(page=1):
-    url = endpoints.show_index.format(page)
-    q = TVMaze._endpoint_standard_get(url)
+def show_index(page=0):
+    url = endpoints.show_index
+    q = TVMaze._endpoint_standard_get(url, params={'page': page})
     if q:
         return [Show(show) for show in q]
     else:
@@ -1141,9 +1126,8 @@ def show_index(page=1):
 
 
 def people_search(person):
-    person = _url_quote(person)
-    url = endpoints.people_search.format(person)
-    q = TVMaze._endpoint_standard_get(url)
+    url = endpoints.people_search
+    q = TVMaze._endpoint_standard_get(url, params={'q': person})
     if q:
         return [Person(person) for person in q]
     else:
