@@ -633,6 +633,7 @@ class TVMaze(object):
             maze_id: Show maze_id
             tvdb_id: Show tvdb_id
             tvrage_id: Show tvrage_id
+            imdb_id: Show imdb_id
             show_name: Show name to be searched
             show_year: Show premiere year
             show_network: Show TV Network (like ABC, NBC, etc.)
