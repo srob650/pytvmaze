@@ -531,10 +531,10 @@ class TVMaze(object):
             backoff_factor=0.1,
             status_forcelist=[429]
         )
-        TVMaze.session.mount('http://', HTTPAdapter(max_retries=retries))
+        s.mount('http://', HTTPAdapter(max_retries=retries))
         return s
 
-    session = make_session()  # make class session
+    session = make_session.__func__()  # make class session
 
     def __init__(self, username=None, api_key=None):
         self.username = username
