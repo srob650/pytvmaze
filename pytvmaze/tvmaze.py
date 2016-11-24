@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 import re
 from datetime import datetime
+from six import text_type
 import requests
 import requests.compat
 from requests.packages.urllib3.util.retry import Retry
@@ -62,7 +63,7 @@ class Show(object):
             platform = ''
             network = ''
 
-        return _valid_encoding('<Show(maze_id={id},name={name},year={year}{platform}{network})>'.format(
+        return text_type('<Show(maze_id={id},name={name},year={year}{platform}{network})>'.format(
                 id=self.maze_id,
                 name=self.name,
                 year=year,
@@ -71,7 +72,7 @@ class Show(object):
         )
 
     def __str__(self):
-        return _valid_encoding(self.name)
+        return text_type(self.name)
 
     def __unicode__(self):
         return self.name
@@ -159,7 +160,7 @@ class Season(object):
         self.links = data.get('_links')
 
     def __repr__(self):
-        return _valid_encoding('<Season(id={id},season_number={number})>'.format(
+        return text_type('<Season(id={id},season_number={number})>'.format(
                 id=self.id,
                 number=str(self.season_number).zfill(2)
         ))
@@ -225,7 +226,7 @@ class Episode(object):
             episode = ' Special'
         else:
             episode = 'E' + str(self.episode_number).zfill(2)
-        return _valid_encoding(season + episode + ' ' + self.title)
+        return text_type(season + episode + ' ' + self.title)
 
     def is_special(self):
         if self.episode_number:
@@ -258,13 +259,13 @@ class Person(object):
                                     for credit in data['_embedded']['crewcredits']]
 
     def __repr__(self):
-        return _valid_encoding('<Person(name={name},maze_id={id})>'.format(
+        return text_type('<Person(name={name},maze_id={id})>'.format(
                 name=self.name,
                 id=self.id
         ))
 
     def __str__(self):
-        return _valid_encoding(self.name)
+        return text_type(self.name)
 
 
 class Character(object):
@@ -277,13 +278,13 @@ class Character(object):
         self.person = None
 
     def __repr__(self):
-        return _valid_encoding('<Character(name={name},maze_id={id})>'.format(
+        return text_type('<Character(name={name},maze_id={id})>'.format(
                 name=self.name,
                 id=self.id
         ))
 
     def __str__(self):
-        return _valid_encoding(self.name)
+        return text_type(self.name)
 
     def __unicode__(self):
         return self.name
@@ -337,7 +338,7 @@ class Crew(object):
         self.type = data.get('type')
 
     def __repr__(self):
-        return _valid_encoding('<Crew(name={name},maze_id={id},type={type})>'.format(
+        return text_type('<Crew(name={name},maze_id={id},type={type})>'.format(
                 name=self.person.name,
                 id=self.person.id,
                 type=self.type
@@ -493,15 +494,6 @@ class VotedEpisode(object):
         return '<VotedEpisode(episode_id={id},voted_at={voted_at},vote={vote})>'.format(id=self.episode_id,
                                                                                         voted_at=self.voted_at,
                                                                                         vote=self.vote)
-
-
-def _valid_encoding(text):
-    if not text:
-        return
-    if sys.version_info > (3,):
-        return text
-    else:
-        return unicode(text).encode('utf-8')
 
 
 def _url_quote(show):
