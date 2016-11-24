@@ -523,6 +523,12 @@ class TVMaze(object):
 
     """
 
+    session = None  # make class session
+
+    def __init__(self, username=None, api_key=None):
+        self.username = username
+        self.api_key = api_key
+
     @staticmethod
     def make_session(session=None):
         s = session or requests.Session()
@@ -534,15 +540,11 @@ class TVMaze(object):
         s.mount('http://', HTTPAdapter(max_retries=retries))
         return s
 
-    session = make_session.__func__()  # make class session
-
-    def __init__(self, username=None, api_key=None):
-        self.username = username
-        self.api_key = api_key
-
     # Query TVMaze free endpoints
-    @staticmethod
-    def _endpoint_standard_get(url):
+    @classmethod
+    def _endpoint_standard_get(cls, url):
+        if not cls.session:
+            cls.session = cls.make_session()
         try:
             r = TVMaze.session.get(url)
         except requests.exceptions.ConnectionError as e:
