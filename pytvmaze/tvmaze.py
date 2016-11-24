@@ -681,7 +681,8 @@ class TVMaze(object):
                 errors.append(e.value)
         raise exceptions.ShowNotFound(' ,'.join(errors))
 
-    def _get_show_with_qualifiers(self, show_name, qualifiers):
+    @staticmethod
+    def _get_show_with_qualifiers(show_name, qualifiers):
         shows = get_show_list(show_name)
         best_match = -1  # Initialize match value score
         show_match = None
