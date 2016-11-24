@@ -114,6 +114,10 @@ class NetworkNotFound(BaseError):
     pass
 
 
+class WebChannelNotFound(BaseError):
+    pass
+
+
 class NetworkNotFollowed(BaseError):
     pass
 
