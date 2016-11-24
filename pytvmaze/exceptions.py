@@ -1,5 +1,6 @@
 # coding=utf-8
 from six import text_type
+import requests.exceptions
 
 
 class BaseError(Exception):
@@ -10,19 +11,12 @@ class BaseError(Exception):
         return self.value
 
 
-class ShowNotFound(BaseError):
+class GeneralError(BaseError):
     pass
 
 
-class IDNotFound(BaseError):
-    pass
-
-
-class ScheduleNotFound(BaseError):
-    pass
-
-
-class EpisodeNotFound(BaseError):
+# Request Exceptions
+class ConnectionError(BaseError, ):
     pass
 
 
@@ -30,35 +24,7 @@ class NoEpisodesForAirdate(BaseError):
     pass
 
 
-class CastNotFound(BaseError):
-    pass
-
-
 class ShowIndexError(BaseError):
-    pass
-
-
-class PersonNotFound(BaseError):
-    pass
-
-
-class CreditsNotFound(BaseError):
-    pass
-
-
-class UpdateNotFound(BaseError):
-    pass
-
-
-class AKASNotFound(BaseError):
-    pass
-
-
-class SeasonNotFound(BaseError):
-    pass
-
-
-class GeneralError(BaseError):
     pass
 
 
@@ -70,10 +36,6 @@ class IllegalAirDate(BaseError):
     pass
 
 
-class ConnectionError(BaseError):
-    pass
-
-
 class BadRequest(BaseError):
     pass
 
@@ -82,15 +44,7 @@ class NoFollowedShows(BaseError):
     pass
 
 
-class ShowNotFollowed(BaseError):
-    pass
-
-
 class NoFollowedPeople(BaseError):
-    pass
-
-
-class PersonNotFollowed(BaseError):
     pass
 
 
@@ -110,23 +64,7 @@ class InvalidEmbedValue(BaseError):
     pass
 
 
-class NetworkNotFound(BaseError):
-    pass
-
-
-class WebChannelNotFound(BaseError):
-    pass
-
-
-class NetworkNotFollowed(BaseError):
-    pass
-
-
 class NoFollowedNetworks(BaseError):
-    pass
-
-
-class WebChannelNotFollowed(BaseError):
     pass
 
 
@@ -154,5 +92,81 @@ class EpisodeNotVotedFor(BaseError):
     pass
 
 
-class CrewNotFound(BaseError):
+# Not Found Exceptions
+
+class NotFoundError(BaseError):
+    pass
+
+
+class ShowNotFound(NotFoundError):
+    pass
+
+
+class IDNotFound(NotFoundError):
+    pass
+
+
+class ScheduleNotFound(NotFoundError):
+    pass
+
+
+class EpisodeNotFound(NotFoundError):
+    pass
+
+
+class CastNotFound(NotFoundError):
+    pass
+
+
+class PersonNotFound(NotFoundError):
+    pass
+
+
+class CreditsNotFound(NotFoundError):
+    pass
+
+
+class UpdateNotFound(NotFoundError):
+    pass
+
+
+class AKASNotFound(NotFoundError):
+    pass
+
+
+class SeasonNotFound(NotFoundError):
+    pass
+
+
+class NetworkNotFound(NotFoundError):
+    pass
+
+
+class WebChannelNotFound(NotFoundError):
+    pass
+
+
+class CrewNotFound(NotFoundError):
+    pass
+
+
+# Not Followed Exceptions
+
+class NotFollowedError(BaseError):
+    pass
+
+
+class ShowNotFollowed(NotFollowedError):
+    pass
+
+
+class PersonNotFollowed(NotFollowedError):
+    pass
+
+
+class NetworkNotFollowed(NotFollowedError):
+    pass
+
+
+class WebChannelNotFollowed(NotFollowedError):
     pass
