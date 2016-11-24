@@ -98,7 +98,7 @@ class Show(object):
     @property
     def next_episode(self):
         if self.__nextepisode is None and 'nextepisode' in self.links and 'href' in self.links['nextepisode']:
-            episode_id = self.links['nextepisode']['href'].rsplit('/',1)[1]
+            episode_id = self.links['nextepisode']['href'].rsplit('/', 1)[1]
             if episode_id.isdigit():
                 self.__nextepisode = episode_by_id(episode_id)
         return self.__nextepisode
@@ -106,7 +106,7 @@ class Show(object):
     @property
     def previous_episode(self):
         if self.__previousepisode is None and 'previousepisode' in self.links and 'href' in self.links['previousepisode']:
-            episode_id = self.links['previousepisode']['href'].rsplit('/',1)[1]
+            episode_id = self.links['previousepisode']['href'].rsplit('/', 1)[1]
             if episode_id.isdigit():
                 self.__previousepisode = episode_by_id(episode_id)
         return self.__previousepisode
@@ -116,7 +116,6 @@ class Show(object):
         if not self.__episodes:
             self.__episodes = episode_list(self.maze_id, specials=True)
         return self.__episodes
-
 
     def populate(self, data):
         embedded = data.get('_embedded')
@@ -185,6 +184,7 @@ class Season(object):
     # Python 2 bool evaluation
     def __nonzero__(self):
         return bool(self.id)
+
 
 class Episode(object):
     def __init__(self, data):
@@ -982,6 +982,7 @@ def get_show_list(show_name):
     shows = show_search(show_name)
     return shows
 
+
 # Get list of Person objects
 def get_people(name):
     """
@@ -992,6 +993,7 @@ def get_people(name):
     people = people_search(name)
     if people:
         return people
+
 
 def show_search(show):
     _show = _url_quote(show)
@@ -1007,6 +1009,7 @@ def show_search(show):
     else:
         raise ShowNotFound('Show {0} not found'.format(show))
 
+
 def show_single_search(show, embed=None):
     if not embed in [None, 'episodes', 'cast', 'previousepisode', 'nextepisode']:
         raise InvalidEmbedValue('Value for embed must be "episodes", "cast", "previousepisode", "nextepisode", or None')
@@ -1021,6 +1024,7 @@ def show_single_search(show, embed=None):
     else:
         raise ShowNotFound('show name "{0}" not found'.format(show))
 
+
 def lookup_tvrage(tvrage_id):
     url = endpoints.lookup_tvrage.format(tvrage_id)
     q = TVMaze._endpoint_standard_get(url)
@@ -1028,6 +1032,7 @@ def lookup_tvrage(tvrage_id):
         return Show(q)
     else:
         raise IDNotFound('TVRage id {0} not found'.format(tvrage_id))
+
 
 def lookup_tvdb(tvdb_id):
     url = endpoints.lookup_tvdb.format(tvdb_id)
@@ -1037,6 +1042,7 @@ def lookup_tvdb(tvdb_id):
     else:
         raise IDNotFound('TVDB ID {0} not found'.format(tvdb_id))
 
+
 def lookup_imdb(imdb_id):
     url = endpoints.lookup_imdb.format(imdb_id)
     q = TVMaze._endpoint_standard_get(url)
@@ -1044,6 +1050,7 @@ def lookup_imdb(imdb_id):
         return Show(q)
     else:
         raise IDNotFound('IMDB ID {0} not found'.format(imdb_id))
+
 
 def get_schedule(country='US', date=str(datetime.today().date())):
     url = endpoints.get_schedule.format(country, date)
@@ -1053,6 +1060,7 @@ def get_schedule(country='US', date=str(datetime.today().date())):
     else:
         raise ScheduleNotFound('Schedule for country {0} at date {1} not found'.format(country, date))
 
+
 # ALL known future episodes, several MB large, cached for 24 hours
 def get_full_schedule():
     url = endpoints.get_full_schedule
@@ -1061,6 +1069,7 @@ def get_full_schedule():
         return [Episode(episode) for episode in q]
     else:
         raise GeneralError('Something went wrong, www.tvmaze.com may be down')
+
 
 def show_main_info(maze_id, embed=None):
     if not embed in [None, 'episodes', 'cast', 'previousepisode', 'nextepisode']:
@@ -1075,6 +1084,7 @@ def show_main_info(maze_id, embed=None):
     else:
         raise IDNotFound('Maze id {0} not found'.format(maze_id))
 
+
 def episode_list(maze_id, specials=None):
     if specials:
         url = endpoints.episode_list.format(maze_id) + '&specials=1'
@@ -1085,6 +1095,7 @@ def episode_list(maze_id, specials=None):
         return [Episode(episode) for episode in q]
     else:
         raise IDNotFound('Maze id {0} not found'.format(maze_id))
+
 
 def episode_by_number(maze_id, season_number, episode_number):
     url = endpoints.episode_by_number.format(maze_id,
@@ -1099,6 +1110,7 @@ def episode_by_number(maze_id, season_number, episode_number):
                                                                                  episode_number,
                                                                                  maze_id))
 
+
 def episodes_by_date(maze_id, airdate):
     try:
         datetime.strptime(airdate, '%Y-%m-%d')
@@ -1112,6 +1124,7 @@ def episodes_by_date(maze_id, airdate):
         raise NoEpisodesForAirdate(
                 'Couldn\'t find an episode airing {0} for TVMaze ID {1}'.format(airdate, maze_id))
 
+
 def show_cast(maze_id):
     url = endpoints.show_cast.format(maze_id)
     q = TVMaze._endpoint_standard_get(url)
@@ -1119,6 +1132,7 @@ def show_cast(maze_id):
         return Cast(q)
     else:
         raise CastNotFound('Couldn\'nt find show cast for TVMaze ID {0}'.format(maze_id))
+
 
 def show_index(page=1):
     url = endpoints.show_index.format(page)
@@ -1128,6 +1142,7 @@ def show_index(page=1):
     else:
         raise ShowIndexError('Error getting show index, www.tvmaze.com may be down')
 
+
 def people_search(person):
     person = _url_quote(person)
     url = endpoints.people_search.format(person)
@@ -1136,6 +1151,7 @@ def people_search(person):
         return [Person(person) for person in q]
     else:
         raise PersonNotFound('Couldn\'t find person {0}'.format(person))
+
 
 def person_main_info(person_id, embed=None):
     if not embed in [None, 'castcredits', 'crewcredits']:
@@ -1150,6 +1166,7 @@ def person_main_info(person_id, embed=None):
     else:
         raise PersonNotFound('Couldn\'t find person {0}'.format(person_id))
 
+
 def person_cast_credits(person_id, embed=None):
     if not embed in [None, 'show', 'character']:
         raise InvalidEmbedValue('Value for embed must be "show", "character" or None')
@@ -1162,6 +1179,7 @@ def person_cast_credits(person_id, embed=None):
         return [CastCredit(credit) for credit in q]
     else:
         raise CreditsNotFound('Couldn\'t find cast credits for person ID {0}'.format(person_id))
+
 
 def person_crew_credits(person_id, embed=None):
     if not embed in [None, 'show']:
@@ -1194,6 +1212,7 @@ def show_updates():
     else:
         raise ShowIndexError('Error getting show updates, www.tvmaze.com may be down')
 
+
 def show_akas(maze_id):
     url = endpoints.show_akas.format(maze_id)
     q = TVMaze._endpoint_standard_get(url)
@@ -1201,6 +1220,7 @@ def show_akas(maze_id):
         return [AKA(aka) for aka in q]
     else:
         raise AKASNotFound('Couldn\'t find AKA\'s for TVMaze ID {0}'.format(maze_id))
+
 
 def show_seasons(maze_id):
     url = endpoints.show_seasons.format(maze_id)
@@ -1213,6 +1233,7 @@ def show_seasons(maze_id):
     else:
         raise SeasonNotFound('Couldn\'t find Season\'s for TVMaze ID {0}'.format(maze_id))
 
+
 def season_by_id(season_id):
     url = endpoints.season_by_id.format(season_id)
     q = TVMaze._endpoint_standard_get(url)
@@ -1220,6 +1241,7 @@ def season_by_id(season_id):
         return Season(q)
     else:
         raise SeasonNotFound('Couldn\'t find Season with ID {0}'.format(season_id))
+
 
 def episode_by_id(episode_id):
     url = endpoints.episode_by_id.format(episode_id)
