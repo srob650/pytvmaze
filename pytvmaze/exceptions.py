@@ -1,16 +1,13 @@
 # coding=utf-8
-import sys
+from six import text_type
 
 
 class BaseError(Exception):
     def __init__(self, value):
-        self.value = value
+        self.value = text_type(value)
 
-    def __str__(self):
-        if sys.version_info > (3,):
-            return self.value
-        else:
-            return unicode(self.value).encode('utf-8')
+    def __repr__(self):
+        return self.value
 
 
 class ShowNotFound(BaseError):
