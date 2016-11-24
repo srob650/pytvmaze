@@ -92,6 +92,10 @@ class EpisodeNotVotedFor(BaseError):
     pass
 
 
+class NotAuthorized(BaseError):
+    """User authentication missing or invalid."""
+
+
 # Not Found Exceptions
 
 class NotFoundError(BaseError):
