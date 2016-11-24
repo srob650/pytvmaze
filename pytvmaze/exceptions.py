@@ -110,6 +110,10 @@ class InvalidEmbedValue(BaseError):
     pass
 
 
+class NetworkNotFound(BaseError):
+    pass
+
+
 class NetworkNotFollowed(BaseError):
     pass
 
