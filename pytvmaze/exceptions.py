@@ -122,6 +122,10 @@ class NetworkNotFollowed(BaseError):
     pass
 
 
+class WebChannelNotFollowed(BaseError):
+    pass
+
+
 class NoFollowedWebChannels(BaseError):
     pass
 
