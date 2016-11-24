@@ -2,35 +2,40 @@
 # coding=utf-8
 
 # TVMaze Free endpoints
-show_search = 'http://api.tvmaze.com/search/shows?q={0}'
-show_single_search = 'http://api.tvmaze.com/singlesearch/shows?q={0}'
-lookup_tvrage = 'http://api.tvmaze.com/lookup/shows?tvrage={0}'
-lookup_tvdb = 'http://api.tvmaze.com/lookup/shows?thetvdb={0}'
-lookup_imdb = 'http://api.tvmaze.com/lookup/shows?imdb={0}'
-get_schedule = 'http://api.tvmaze.com/schedule?country={0}&date={1}'
-get_full_schedule = 'http://api.tvmaze.com/schedule/full'
-show_main_info = 'http://api.tvmaze.com/shows/{0}'
-episode_list = 'http://api.tvmaze.com/shows/{0}/episodes?specials=1'
-episode_by_number = 'http://api.tvmaze.com/shows/{0}/episodebynumber?season={1}&number={2}'
-episodes_by_date = 'http://api.tvmaze.com/shows/{0}/episodesbydate?date={1}'
-show_cast = 'http://api.tvmaze.com/shows/{0}/cast'
-show_index = 'http://api.tvmaze.com/shows?page={0}'
-people_search = 'http://api.tvmaze.com/search/people?q={0}'
-person_main_info = 'http://api.tvmaze.com/people/{0}'
-person_cast_credits = 'http://api.tvmaze.com/people/{0}/castcredits'
-person_crew_credits = 'http://api.tvmaze.com/people/{0}/crewcredits'
-show_crew = 'http://api.tvmaze.com/shows/{}/crew'
-show_updates = 'http://api.tvmaze.com/updates/shows'
-show_akas = 'http://api.tvmaze.com/shows/{0}/akas'
-show_seasons = 'http://api.tvmaze.com/shows/{0}/seasons'
-season_by_id = 'http://api.tvmaze.com/seasons/{0}'
-episode_by_id = 'http://api.tvmaze.com/episodes/{0}'
+
+from requests.compat import urljoin
+
+base_url = 'http://api.tvmaze.com'
+
+episode_by_id = urljoin(base_url, '/episodes/{0}')
+lookup_tvrage = urljoin(base_url, '/lookup/shows?tvrage={0}')
+lookup_tvdb = urljoin(base_url, '/lookup/shows?thetvdb={0}')
+lookup_imdb = urljoin(base_url, '/lookup/shows?imdb={0}')
+person_main_info = urljoin(base_url, '/people/{0}')
+person_cast_credits = urljoin(base_url, '/people/{0}/castcredits')
+person_crew_credits = urljoin(base_url, '/people/{0}/crewcredits')
+get_schedule = urljoin(base_url, '/schedule?country={0}&date={1}')
+get_full_schedule = urljoin(base_url, '/schedule/full')
+show_search = urljoin(base_url, '/search/shows?q={0}')
+people_search = urljoin(base_url, '/search/people?q={0}')
+season_by_id = urljoin(base_url, '/seasons/{0}')
+show_single_search = urljoin(base_url, '/singlesearch/shows?q={0}')
+show_index = urljoin(base_url, '/shows?page={0}')
+show_main_info = urljoin(base_url, '/shows/{0}')
+show_akas = urljoin(base_url, '/shows/{0}/akas')
+show_cast = urljoin(base_url, '/shows/{0}/cast')
+show_crew = urljoin(base_url, '/shows/{0}/crew')
+episode_list = urljoin(base_url, '/shows/{0}/episodes?specials=1')
+episode_by_number = urljoin(base_url, '/shows/{0}/episodebynumber?season={1}&number={2}')
+episodes_by_date = urljoin(base_url, '/shows/{0}/episodesbydate?date={1}')
+show_seasons = urljoin(base_url, '/shows/{0}/seasons')
+show_updates = urljoin(base_url, '/updates/shows')
 
 # TVMaze Premium endpoints
-followed_shows = 'http://api.tvmaze.com/v1/user/follows/shows{0}'
-followed_people = 'http://api.tvmaze.com/v1/user/follows/people{0}'
-followed_networks = 'http://api.tvmaze.com/v1/user/follows/networks{0}'
-followed_web_channels = 'http://api.tvmaze.com/v1/user/follows/webchannels{0}'
-marked_episodes = 'http://api.tvmaze.com/v1/user/episodes{0}'
-voted_shows = 'http://api.tvmaze.com/v1/user/votes/shows{0}'
-voted_episodes = 'http://api.tvmaze.com/v1/user/votes/episodes{0}'
+marked_episodes = urljoin(base_url, '/v1/user/episodes{0}')
+followed_networks = urljoin(base_url, '/v1/user/follows/networks{0}')
+followed_people = urljoin(base_url, '/v1/user/follows/people{0}')
+followed_shows = urljoin(base_url, '/v1/user/follows/shows{0}')
+followed_web_channels = urljoin(base_url, '/v1/user/follows/webchannels{0}')
+voted_shows = urljoin(base_url, '/v1/user/votes/shows{0}')
+voted_episodes = urljoin(base_url, '/v1/user/votes/episodes{0}')
