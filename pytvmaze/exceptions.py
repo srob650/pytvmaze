@@ -1,6 +1,7 @@
 # coding=utf-8
 import sys
 
+
 class BaseError(Exception):
     def __init__(self, value):
         self.value = value
@@ -107,32 +108,42 @@ class NoMarkedEpisodes(BaseError):
 class EpisodeNotMarked(BaseError):
     pass
 
+
 class InvalidMarkedEpisodeType(BaseError):
     pass
+
 
 class InvalidEmbedValue(BaseError):
     pass
 
+
 class NetworkNotFollowed(BaseError):
     pass
+
 
 class NoFollowedWebChannels(BaseError):
     pass
 
+
 class NoVotedShows(BaseError):
     pass
+
 
 class ShowNotVotedFor(BaseError):
     pass
 
+
 class InvalidVoteValue(BaseError):
     pass
+
 
 class NoVotedEpisodes(BaseError):
     pass
 
+
 class EpisodeNotVotedFor(BaseError):
     pass
+
 
 class CrewNotFound(BaseError):
     pass
