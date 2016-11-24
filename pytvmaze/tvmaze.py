@@ -382,7 +382,7 @@ class AKA(object):
         self.country = data.get('country')
 
     def __repr__(self):
-        return '<AKA(name={name},country={country})>'.format(name=name, country=country)
+        return '<AKA(name={name},country={country})>'.format(name=self.name, country=self.country)
 
 
 class Network(object):
