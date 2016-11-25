@@ -550,10 +550,22 @@ class Cast(object):
             self.characters[-1].person = self.people[-1]  # add reference to cast member
 
 
-class CastCredit(object):
+class Crew(object):
+    def __init__(self, data):
+        self.person = Person(data.get('person'))
+        self.type = data.get('type')
+
+    def __repr__(self):
+        return text_type('<Crew(name={name},maze_id={id},type={type})>'.format(
+                name=self.person.name,
+                id=self.person.id,
+                type=self.type
+        ))
+
+
+class Credit(object):
     def __init__(self, data):
         self.links = data.get('_links')
-        self.character = None
         self.show = None
         self.populate(data)
 
@@ -563,6 +575,18 @@ class CastCredit(object):
                 self.character = Character(data['_embedded']['character'])
             elif data['_embedded'].get('show'):
                 self.show = Show(data['_embedded']['show'])
+
+
+class CastCredit(Credit):
+    def __init__(self, data):
+        super(CastCredit, self).__init__(data)
+        self.character = None
+
+
+class CrewCredit(Credit):
+    def __init__(self, data):
+        super(CrewCredit, self).__init__(data)
+        self.type = data.get('type')
 
 
 class Character(object):
@@ -585,32 +609,6 @@ class Character(object):
 
     def __unicode__(self):
         return self.name
-
-
-class Crew(object):
-    def __init__(self, data):
-        self.person = Person(data.get('person'))
-        self.type = data.get('type')
-
-    def __repr__(self):
-        return text_type('<Crew(name={name},maze_id={id},type={type})>'.format(
-                name=self.person.name,
-                id=self.person.id,
-                type=self.type
-        ))
-
-
-class CrewCredit(object):
-    def __init__(self, data):
-        self.links = data.get('_links')
-        self.type = data.get('type')
-        self.show = None
-        self.populate(data)
-
-    def populate(self, data):
-        if data.get('_embedded'):
-            if data['_embedded'].get('show'):
-                self.show = Show(data['_embedded']['show'])
 
 
 class Episode(object):
@@ -669,7 +667,11 @@ class Network(object):
             self.code = data['country'].get('code')
 
     def __repr__(self):
-        return '<Network(name={name},country={country})>'.format(name=self.name, country=self.country)
+        return '<{cls}(name={name},country={country})>'.format(
+            cls=self.__class__.__name__,
+            name=self.name,
+            country=self.country,
+        )
 
 
 class Person(object):
@@ -914,14 +916,5 @@ class Updates(object):
         return iter(self.updates.values())
 
 
-class WebChannel(object):
-    def __init__(self, data):
-        self.name = data.get('name')
-        self.maze_id = data.get('id')
-        if data.get('country'):
-            self.country = data['country'].get('name')
-            self.timezone = data['country'].get('timezone')
-            self.code = data['country'].get('code')
-
-    def __repr__(self):
-        return '<WebChannel(name={name},country={country})>'.format(name=self.name, country=self.country)
+class WebChannel(Network):
+    """A TVMaze Web Channel."""

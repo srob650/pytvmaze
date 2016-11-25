@@ -16,6 +16,9 @@ class TVMazePremium(TVMazeStandard):
 
     @classmethod
     def authorized_request(cls, *args, **kwargs):
+        # make sure we have a session
+        if not cls.session:
+            cls.session = cls.make_session()
         if not cls.session.auth:
             # add authentication to the session if it exists
             if cls.username and cls.api_key:
@@ -286,87 +289,3 @@ class TVMazePremium(TVMazeStandard):
         q = self._endpoint_premium_put(url, payload=payload)
         if not q:
             raise exceptions.ShowNotFound('Show with ID {} does not exist'.format(maze_id))
-
-
-class FollowedShow(object):
-    def __init__(self, data):
-        self.maze_id = data.get('show_id')
-        self.show = None
-        if data.get('_embedded'):
-            self.show = Show(data['_embedded'].get('show'))
-
-    def __repr__(self):
-        return '<FollowedShow(maze_id={})>'.format(self.maze_id)
-
-
-class FollowedPerson(object):
-    def __init__(self, data):
-        self.person_id = data.get('person_id')
-        self.person = None
-        if data.get('_embedded'):
-            self.person = Person(data['_embedded'].get('person'))
-
-    def __repr__(self):
-        return '<FollowedPerson(person_id={id})>'.format(id=self.person_id)
-
-
-class FollowedNetwork(object):
-    def __init__(self, data):
-        self.network_id = data.get('network_id')
-        self.network = None
-        if data.get('_embedded'):
-            self.network = Network(data['_embedded'].get('network'))
-
-    def __repr__(self):
-        return '<FollowedNetwork(network_id={id})>'.format(id=self.network_id)
-
-
-class FollowedWebChannel(object):
-    def __init__(self, data):
-        self.web_channel_id = data.get('webchannel_id')
-        self.web_channel = None
-        if data.get('_embedded'):
-            self.web_channel = WebChannel(data['_embedded'].get('webchannel'))
-
-    def __repr__(self):
-        return '<FollowedWebChannel(web_channel_id={id})>'.format(id=self.web_channel_id)
-
-
-class MarkedEpisode(object):
-    def __init__(self, data):
-        self.episode_id = data.get('episode_id')
-        self.marked_at = data.get('marked_at')
-        type_ = data.get('type')
-        types = {0: 'watched', 1: 'acquired', 2: 'skipped'}
-        self.type = types[type_]
-
-    def __repr__(self):
-        return '<MarkedEpisode(episode_id={id},marked_at={marked_at},type={type})>'.format(id=self.episode_id,
-                                                                                           marked_at=self.marked_at,
-                                                                                           type=self.type)
-
-
-class VotedShow(object):
-    def __init__(self, data):
-        self.maze_id = data.get('show_id')
-        self.voted_at = data.get('voted_at')
-        self.vote = data.get('vote')
-        if data.get('_embedded'):
-            self.show = Show(data['_embedded'].get('show'))
-
-    def __repr__(self):
-        return '<VotedShow(maze_id={id},voted_at={voted_at},vote={vote})>'.format(id=self.maze_id,
-                                                                                  voted_at=self.voted_at,
-                                                                                  vote=self.vote)
-
-
-class VotedEpisode(object):
-    def __init__(self, data):
-        self.episode_id = data.get('episode_id')
-        self.voted_at = data.get('voted_at')
-        self.vote = data.get('vote')
-
-    def __repr__(self):
-        return '<VotedEpisode(episode_id={id},voted_at={voted_at},vote={vote})>'.format(id=self.episode_id,
-                                                                                        voted_at=self.voted_at,
-                                                                                        vote=self.vote)
