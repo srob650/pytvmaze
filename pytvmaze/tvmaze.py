@@ -244,25 +244,19 @@ class TVMaze(object):
 
     # TVMaze Premium Endpoints
     # NOT DONE OR TESTED
-    def get_followed_shows(self, embed=None):
-        if embed not in [None, 'show']:
-            raise exceptions.InvalidEmbedValue('Value for embed must be "show" or None')
-        url = endpoints.followed_shows.format('/')
-        if embed == 'show':
-            url = endpoints.followed_shows.format('?embed=show')
-        q = self._endpoint_premium_get(url)
-        if q:
-            return [FollowedShow(show) for show in q]
-        else:
-            raise exceptions.NoFollowedShows('You have not followed any shows yet')
 
-    def get_followed_show(self, maze_id):
-        url = endpoints.followed_shows.format('/' + str(maze_id))
-        q = self._endpoint_premium_get(url)
-        if q:
-            return FollowedShow(q)
-        else:
-            raise exceptions.ShowNotFollowed('Show with ID {} is not followed'.format(maze_id))
+    # Follow / Unfollow items
+    def follow_network(self, network_id):
+        url = endpoints.followed_networks.format('/' + str(network_id))
+        q = self._endpoint_premium_put(url)
+        if not q:
+            raise exceptions.NetworkNotFound('Network with ID {} does not exist'.format(network_id))
+
+    def follow_person(self, person_id):
+        url = endpoints.followed_people.format('/' + str(person_id))
+        q = self._endpoint_premium_put(url)
+        if not q:
+            raise exceptions.PersonNotFound('Person with ID {} does not exist'.format(person_id))
 
     def follow_show(self, maze_id):
         url = endpoints.followed_shows.format('/' + str(maze_id))
@@ -270,11 +264,11 @@ class TVMaze(object):
         if not q:
             raise exceptions.ShowNotFound('Show with ID {} does not exist'.format(maze_id))
 
-    def unfollow_show(self, maze_id):
-        url = endpoints.followed_shows.format('/' + str(maze_id))
-        q = self._endpoint_premium_delete(url)
+    def follow_web_channel(self, webchannel_id):
+        url = endpoints.followed_web_channels.format('/' + str(webchannel_id))
+        q = self._endpoint_premium_put(url)
         if not q:
-            raise exceptions.ShowNotFollowed('Show with ID {} was not followed'.format(maze_id))
+            raise exceptions.WebChannelNotFound('Web Channel with ID {} does not exist'.format(webchannel_id))
 
     def get_followed_people(self, embed=None):
         if embed not in [None, 'person']:
@@ -296,17 +290,13 @@ class TVMaze(object):
         else:
             raise exceptions.PersonNotFound('Person with ID {} is not followed'.format(person_id))
 
-    def follow_person(self, person_id):
-        url = endpoints.followed_people.format('/' + str(person_id))
-        q = self._endpoint_premium_put(url)
-        if not q:
-            raise exceptions.PersonNotFound('Person with ID {} does not exist'.format(person_id))
-
-    def unfollow_person(self, person_id):
-        url = endpoints.followed_people.format('/' + str(person_id))
-        q = self._endpoint_premium_delete(url)
-        if not q:
-            raise exceptions.PersonNotFollowed('Person with ID {} was not followed'.format(person_id))
+    def get_followed_network(self, network_id):
+        url = endpoints.followed_networks.format('/' + str(network_id))
+        q = self._endpoint_premium_get(url)
+        if q:
+            return FollowedNetwork(q)
+        else:
+            raise exceptions.NetworkNotFound('Network with ID {} is not followed'.format(network_id))
 
     def get_followed_networks(self, embed=None):
         if embed not in [None, 'network']:
@@ -320,25 +310,33 @@ class TVMaze(object):
         else:
             raise exceptions.NoFollowedNetworks('You have not followed any networks yet')
 
-    def get_followed_network(self, network_id):
-        url = endpoints.followed_networks.format('/' + str(network_id))
+    def get_followed_show(self, maze_id):
+        url = endpoints.followed_shows.format('/' + str(maze_id))
         q = self._endpoint_premium_get(url)
         if q:
-            return FollowedNetwork(q)
+            return FollowedShow(q)
         else:
-            raise exceptions.NetworkNotFound('Network with ID {} is not followed'.format(network_id))
+            raise exceptions.ShowNotFollowed('Show with ID {} is not followed'.format(maze_id))
 
-    def follow_network(self, network_id):
-        url = endpoints.followed_networks.format('/' + str(network_id))
-        q = self._endpoint_premium_put(url)
-        if not q:
-            raise exceptions.NetworkNotFound('Network with ID {} does not exist'.format(network_id))
+    def get_followed_shows(self, embed=None):
+        if embed not in [None, 'show']:
+            raise exceptions.InvalidEmbedValue('Value for embed must be "show" or None')
+        url = endpoints.followed_shows.format('/')
+        if embed == 'show':
+            url = endpoints.followed_shows.format('?embed=show')
+        q = self._endpoint_premium_get(url)
+        if q:
+            return [FollowedShow(show) for show in q]
+        else:
+            raise exceptions.NoFollowedShows('You have not followed any shows yet')
 
-    def unfollow_network(self, network_id):
-        url = endpoints.followed_networks.format('/' + str(network_id))
-        q = self._endpoint_premium_delete(url)
-        if not q:
-            raise exceptions.NetworkNotFollowed('Network with ID {} was not followed'.format(network_id))
+    def get_followed_web_channel(self, webchannel_id):
+        url = endpoints.followed_web_channels.format('/' + str(webchannel_id))
+        q = self._endpoint_premium_get(url)
+        if q:
+            return FollowedWebChannel(q)
+        else:
+            raise exceptions.NetworkNotFound('Web Channel with ID {} is not followed'.format(webchannel_id))
 
     def get_followed_web_channels(self, embed=None):
         if embed not in [None, 'webchannel']:
@@ -352,25 +350,39 @@ class TVMaze(object):
         else:
             raise exceptions.NoFollowedWebChannels('You have not followed any Web Channels yet')
 
-    def get_followed_web_channel(self, webchannel_id):
-        url = endpoints.followed_web_channels.format('/' + str(webchannel_id))
-        q = self._endpoint_premium_get(url)
-        if q:
-            return FollowedWebChannel(q)
-        else:
-            raise exceptions.NetworkNotFound('Web Channel with ID {} is not followed'.format(webchannel_id))
-
-    def follow_web_channel(self, webchannel_id):
-        url = endpoints.followed_web_channels.format('/' + str(webchannel_id))
-        q = self._endpoint_premium_put(url)
+    def unfollow_network(self, network_id):
+        url = endpoints.followed_networks.format('/' + str(network_id))
+        q = self._endpoint_premium_delete(url)
         if not q:
-            raise exceptions.WebChannelNotFound('Web Channel with ID {} does not exist'.format(webchannel_id))
+            raise exceptions.NetworkNotFollowed('Network with ID {} was not followed'.format(network_id))
+
+    def unfollow_person(self, person_id):
+        url = endpoints.followed_people.format('/' + str(person_id))
+        q = self._endpoint_premium_delete(url)
+        if not q:
+            raise exceptions.PersonNotFollowed('Person with ID {} was not followed'.format(person_id))
+
+    def unfollow_show(self, maze_id):
+        url = endpoints.followed_shows.format('/' + str(maze_id))
+        q = self._endpoint_premium_delete(url)
+        if not q:
+            raise exceptions.ShowNotFollowed('Show with ID {} was not followed'.format(maze_id))
 
     def unfollow_web_channel(self, webchannel_id):
         url = endpoints.followed_web_channels.format('/' + str(webchannel_id))
         q = self._endpoint_premium_delete(url)
         if not q:
             raise exceptions.WebChannelNotFollowed('Web Channel with ID {} was not followed'.format(webchannel_id))
+
+    # Mark / Unmark items
+    def get_marked_episode(self, episode_id):
+        path = '/{}'.format(episode_id)
+        url = endpoints.marked_episodes.format(path)
+        q = self._endpoint_premium_get(url)
+        if q:
+            return MarkedEpisode(q)
+        else:
+            raise exceptions.EpisodeNotMarked('Episode with ID {} is not marked'.format(episode_id))
 
     def get_marked_episodes(self, maze_id=None):
         if not maze_id:
@@ -383,15 +395,6 @@ class TVMaze(object):
             return [MarkedEpisode(episode) for episode in q]
         else:
             raise exceptions.NoMarkedEpisodes('You have not marked any episodes yet')
-
-    def get_marked_episode(self, episode_id):
-        path = '/{}'.format(episode_id)
-        url = endpoints.marked_episodes.format(path)
-        q = self._endpoint_premium_get(url)
-        if q:
-            return MarkedEpisode(q)
-        else:
-            raise exceptions.EpisodeNotMarked('Episode with ID {} is not marked'.format(episode_id))
 
     def mark_episode(self, episode_id, mark_type):
         types = {'watched': 0, 'acquired': 1, 'skipped': 2}
@@ -413,6 +416,45 @@ class TVMaze(object):
         if not q:
             raise exceptions.EpisodeNotMarked('Episode with ID {} was not marked'.format(episode_id))
 
+    # Vote / Unvote items
+    def remove_episode_vote(self, episode_id):
+        path = '/{}'.format(episode_id)
+        url = endpoints.voted_episodes.format(path)
+        q = self._endpoint_premium_delete(url)
+        if not q:
+            raise exceptions.EpisodeNotVotedFor('Episode with ID {} was not voted for'.format(episode_id))
+
+    def remove_show_vote(self, maze_id):
+        url = endpoints.voted_shows.format('/' + str(maze_id))
+        q = self._endpoint_premium_delete(url)
+        if not q:
+            raise exceptions.ShowNotVotedFor('Show with ID {} was not voted for'.format(maze_id))
+
+    def get_voted_episode(self, episode_id):
+        path = '/{}'.format(episode_id)
+        url = endpoints.voted_episodes.format(path)
+        q = self._endpoint_premium_get(url)
+        if q:
+            return VotedEpisode(q)
+        else:
+            raise exceptions.EpisodeNotVotedFor('Episode with ID {} not voted for'.format(episode_id))
+
+    def get_voted_episodes(self):
+        url = endpoints.voted_episodes.format('/')
+        q = self._endpoint_premium_get(url)
+        if q:
+            return [VotedEpisode(episode) for episode in q]
+        else:
+            raise exceptions.NoVotedEpisodes('You have not voted for any episodes yet')
+
+    def get_voted_show(self, maze_id):
+        url = endpoints.voted_shows.format('/' + str(maze_id))
+        q = self._endpoint_premium_get(url)
+        if q:
+            return VotedShow(q)
+        else:
+            raise exceptions.ShowNotVotedFor('Show with ID {} not voted for'.format(maze_id))
+
     def get_voted_shows(self, embed=None):
         if embed not in [None, 'show']:
             raise exceptions.InvalidEmbedValue('Value for embed must be "show" or None')
@@ -425,53 +467,6 @@ class TVMaze(object):
         else:
             raise exceptions.NoVotedShows('You have not voted for any shows yet')
 
-    def get_voted_show(self, maze_id):
-        url = endpoints.voted_shows.format('/' + str(maze_id))
-        q = self._endpoint_premium_get(url)
-        if q:
-            return VotedShow(q)
-        else:
-            raise exceptions.ShowNotVotedFor('Show with ID {} not voted for'.format(maze_id))
-
-    def remove_show_vote(self, maze_id):
-        url = endpoints.voted_shows.format('/' + str(maze_id))
-        q = self._endpoint_premium_delete(url)
-        if not q:
-            raise exceptions.ShowNotVotedFor('Show with ID {} was not voted for'.format(maze_id))
-
-    def vote_show(self, maze_id, vote):
-        if not 1 <= vote <= 10:
-            raise exceptions.InvalidVoteValue('Vote must be an integer between 1 and 10')
-        payload = {'vote': int(vote)}
-        url = endpoints.voted_shows.format('/' + str(maze_id))
-        q = self._endpoint_premium_put(url, payload=payload)
-        if not q:
-            raise exceptions.ShowNotFound('Show with ID {} does not exist'.format(maze_id))
-
-    def get_voted_episodes(self):
-        url = endpoints.voted_episodes.format('/')
-        q = self._endpoint_premium_get(url)
-        if q:
-            return [VotedEpisode(episode) for episode in q]
-        else:
-            raise exceptions.NoVotedEpisodes('You have not voted for any episodes yet')
-
-    def get_voted_episode(self, episode_id):
-        path = '/{}'.format(episode_id)
-        url = endpoints.voted_episodes.format(path)
-        q = self._endpoint_premium_get(url)
-        if q:
-            return VotedEpisode(q)
-        else:
-            raise exceptions.EpisodeNotVotedFor('Episode with ID {} not voted for'.format(episode_id))
-
-    def remove_episode_vote(self, episode_id):
-        path = '/{}'.format(episode_id)
-        url = endpoints.voted_episodes.format(path)
-        q = self._endpoint_premium_delete(url)
-        if not q:
-            raise exceptions.EpisodeNotVotedFor('Episode with ID {} was not voted for'.format(episode_id))
-
     def vote_episode(self, episode_id, vote):
         if not 1 <= vote <= 10:
             raise exceptions.InvalidVoteValue('Vote must be an integer between 1 and 10')
@@ -481,6 +476,15 @@ class TVMaze(object):
         q = self._endpoint_premium_put(url, payload=payload)
         if not q:
             raise exceptions.EpisodeNotFound('Episode with ID {} does not exist'.format(episode_id))
+
+    def vote_show(self, maze_id, vote):
+        if not 1 <= vote <= 10:
+            raise exceptions.InvalidVoteValue('Vote must be an integer between 1 and 10')
+        payload = {'vote': int(vote)}
+        url = endpoints.voted_shows.format('/' + str(maze_id))
+        q = self._endpoint_premium_put(url, payload=payload)
+        if not q:
+            raise exceptions.ShowNotFound('Show with ID {} does not exist'.format(maze_id))
 
 
 class AKA(object):
