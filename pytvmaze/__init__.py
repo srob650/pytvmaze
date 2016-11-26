@@ -1,3 +1,1 @@
-#!/usr/bin/python
-
-from pytvmaze.tvmaze import *
+# coding=utf-8
