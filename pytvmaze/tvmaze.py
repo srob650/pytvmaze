@@ -24,7 +24,7 @@ class Show(object):
         self.image = data.get('image')
         self.externals = data.get('externals')
         self.premiered = data.get('premiered')
-        self.summary = _remove_tags(data.get('summary'))
+        self.summary = _remove_tags(data.get('summary', ''))
         self.links = data.get('_links')
         if data.get('webChannel'):
             self.web_channel = WebChannel(data.get('webChannel'))
