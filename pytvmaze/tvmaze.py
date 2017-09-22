@@ -137,7 +137,7 @@ class Show(object):
 class Season(object):
     def __init__(self, data):
         self.show = None
-        self.episodes = dict()
+        self.__episodes = dict()
         self.id = data.get('id')
         self.url = data.get('url')
         self.season_number = data.get('number')
@@ -184,6 +184,12 @@ class Season(object):
     # Python 2 bool evaluation
     def __nonzero__(self):
         return bool(self.id)
+
+    @property
+    def episodes(self):
+        if not self.__episodes:
+            self.__episodes = episode_list(self.maze_id, specials=True)
+        return self.__episodes
 
 class Episode(object):
     def __init__(self, data):
@@ -1211,8 +1217,16 @@ def show_seasons(maze_id):
     else:
         raise SeasonNotFound('Couldn\'t find Season\'s for TVMaze ID {0}'.format(maze_id))
 
-def season_by_id(season_id):
-    url = endpoints.season_by_id.format(season_id)
+def season_by_id(season_id, embed=None):
+    ##
+    if not embed in [None, 'episodes']:
+        raise InvalidEmbedValue('Value for embed must be "episodes" or None')
+    if embed:
+        url = endpoints.season_by_id.format(season_id) + '?embed=' + embed
+    else:
+        url = endpoints.season_by_id.format(season_id)
+    ##
+    # url = endpoints.season_by_id.format(season_id)
     q = TVMaze._endpoint_standard_get(url)
     if q:
         return Season(q)
